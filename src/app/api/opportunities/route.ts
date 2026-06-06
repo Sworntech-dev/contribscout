@@ -20,7 +20,7 @@ const SEARCH_KEYWORDS = [
 
 const FINAL_RESULT_LIMIT = 12;
 const SEARCH_RESULTS_PER_QUERY = 8;
-const ENRICHMENT_LIMIT = 24;
+const ENRICHMENT_LIMIT = 36;
 const MIN_LIVE_RESULTS = 3;
 
 const RELEVANCE_TERMS = [
@@ -156,6 +156,10 @@ function isQualityLiveRepository(repo: ScoutRepository) {
   return repo.openIssues > 0 || contributionSignalCount(repo) >= 2;
 }
 
+function isUsableLiveRepository(repo: ScoutRepository) {
+  return Boolean(repo.url && repo.description.trim());
+}
+
 function liveRankingScore(repo: Opportunity) {
   const signals = repo.signals;
   const readmePoints = signals.readmeQuality === "strong" ? 12 : signals.readmeQuality === "basic" ? 8 : 0;
@@ -279,7 +283,7 @@ function normalizeRepository(item: GitHubSearchItem, signals: RepositorySignals)
   };
 }
 
-async function fetchLiveOpportunities(): Promise<Opportunity[]> {
+async function fetchLiveOpportunities(): Promise<{ opportunities: Opportunity[]; notice?: string }> {
   if (!token) {
     throw new Error("GITHUB_TOKEN is not configured.");
   }
@@ -304,7 +308,7 @@ async function fetchLiveOpportunities(): Promise<Opportunity[]> {
   );
 
   if (!deduped.length) {
-    throw new Error("GitHub live scan returned no matches, showing sample fallback.");
+    throw new Error("GitHub live scan returned no usable repositories after relaxed scan, showing sample fallback.");
   }
 
   const candidates = deduped
@@ -321,26 +325,46 @@ async function fetchLiveOpportunities(): Promise<Opportunity[]> {
     candidates.map(async (item) => normalizeRepository(item, await getSignals(item))),
   );
 
-  const opportunities = normalized
+  const strictOpportunities = normalized
     .filter(isQualityLiveRepository)
     .map(scoreOpportunity)
     .sort((a, b) => liveRankingScore(b) - liveRankingScore(a))
     .slice(0, FINAL_RESULT_LIMIT);
 
-  if (opportunities.length < MIN_LIVE_RESULTS) {
-    throw new Error("GitHub live scan returned fewer than 3 quality matches, showing sample fallback.");
+  if (strictOpportunities.length >= MIN_LIVE_RESULTS) {
+    return {
+      opportunities: strictOpportunities,
+      notice:
+        strictOpportunities.length < FINAL_RESULT_LIMIT
+          ? "GitHub live scan returned limited matches."
+          : undefined,
+    };
   }
 
-  return opportunities;
+  const relaxedOpportunities = normalized
+    .filter(isUsableLiveRepository)
+    .map(scoreOpportunity)
+    .sort((a, b) => liveRankingScore(b) - liveRankingScore(a))
+    .slice(0, FINAL_RESULT_LIMIT);
+
+  if (!relaxedOpportunities.length) {
+    throw new Error("GitHub live scan returned no usable repositories after relaxed scan, showing sample fallback.");
+  }
+
+  return {
+    opportunities: relaxedOpportunities,
+    notice: "GitHub live scan returned limited matches.",
+  };
 }
 
 export async function GET() {
   try {
-    const opportunities = await fetchLiveOpportunities();
+    const { opportunities, notice } = await fetchLiveOpportunities();
     return NextResponse.json(
       {
         source: "github",
         updatedAt: new Date().toISOString(),
+        notice,
         opportunities,
       },
       {
