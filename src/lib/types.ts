@@ -1,0 +1,48 @@
+export type ReadmeQuality = "missing" | "thin" | "basic" | "strong";
+export type IssueActivity = "quiet" | "warming" | "active";
+
+export type RepositorySignals = {
+  goodFirstIssueCount: number;
+  helpWantedCount: number;
+  hasContributing: boolean;
+  hasDocsFolder: boolean;
+  readmeQuality: ReadmeQuality;
+  issueActivity: IssueActivity;
+  isFresh: boolean;
+  localizationOpportunity: boolean;
+};
+
+export type ScoutRepository = {
+  name: string;
+  owner: string;
+  fullName: string;
+  description: string;
+  url: string;
+  stars: number;
+  forks: number;
+  openIssues: number;
+  createdAt: string;
+  updatedAt: string;
+  topics: string[];
+  language: string | null;
+  license: string | null;
+  category: string;
+  signals: RepositorySignals;
+};
+
+export type Opportunity = ScoutRepository & {
+  roleOpportunityScore: number;
+  scoreReason: string;
+  suggestedAction: string;
+  signalBadges: string[];
+};
+
+export type ProofEntry = {
+  id: string;
+  projectName: string;
+  actionTaken: string;
+  proofLink: string;
+  status: "Planned" | "In progress" | "Submitted" | "Merged" | "Archived";
+  notes: string;
+  date: string;
+};
