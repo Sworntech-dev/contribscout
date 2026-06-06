@@ -28,28 +28,70 @@ function saturationPenalty(repo: ScoutRepository) {
 
 function actionFor(repo: ScoutRepository) {
   const signals = repo.signals;
+  const language = repo.language?.toLowerCase() ?? "";
+  const isTooling =
+    repo.topics.some((topic) => ["developer-tools", "sdk", "cli", "llm-tools"].includes(topic)) ||
+    ["typescript", "javascript", "python"].includes(language);
+  const hasIssueLabels = signals.goodFirstIssueCount + signals.helpWantedCount > 0;
+  const strongLocalizationFit =
+    signals.localizationOpportunity &&
+    signals.hasDocsFolder &&
+    (signals.readmeQuality === "basic" || signals.readmeQuality === "strong") &&
+    !hasIssueLabels;
+
+  if (signals.goodFirstIssueCount > 0 && !signals.hasContributing) {
+    return "Check whether the project has a CONTRIBUTING guide.";
+  }
 
   if (signals.goodFirstIssueCount > 0) {
-    return "Help with a good first issue and leave clear reproduction notes.";
+    if (signals.readmeQuality === "thin") {
+      return "Submit a first-run feedback issue.";
+    }
+
+    if (signals.helpWantedCount > 2 && isTooling) {
+      return "Test the quickstart and report friction.";
+    }
+
+    if (!signals.hasDocsFolder) {
+      return "Improve installation docs.";
+    }
+
+    return "Add reproduction notes to an open issue.";
   }
 
-  if (!signals.hasDocsFolder || signals.readmeQuality === "thin") {
-    return "Write a beginner setup guide that turns the first run into a short checklist.";
+  if (!signals.hasDocsFolder && isTooling) {
+    return "Create a small example workflow.";
   }
 
-  if (signals.localizationOpportunity) {
-    return "Create a Turkish onboarding note for new builders entering the project.";
+  if (!signals.hasDocsFolder) {
+    return "Improve installation docs.";
+  }
+
+  if (signals.readmeQuality === "missing" || signals.readmeQuality === "thin") {
+    return "Write a beginner setup checklist.";
   }
 
   if (!signals.hasContributing) {
-    return "Open a docs improvement issue proposing a lightweight contribution guide.";
+    return "Check whether the project has a CONTRIBUTING guide.";
+  }
+
+  if (signals.helpWantedCount > 0 && isTooling) {
+    return "Test the quickstart and report friction.";
   }
 
   if (signals.helpWantedCount > 0) {
-    return "Pick a help wanted issue and contribute a small, reviewable bugfix.";
+    return "Review docs for missing environment variables.";
   }
 
-  return "Review README clarity and suggest one concrete improvement.";
+  if (strongLocalizationFit) {
+    return "Create a Turkish onboarding note.";
+  }
+
+  if (signals.readmeQuality === "basic") {
+    return "Open a README clarity issue.";
+  }
+
+  return "Test the quickstart and report friction.";
 }
 
 function badgesFor(repo: ScoutRepository) {

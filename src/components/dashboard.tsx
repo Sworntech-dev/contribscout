@@ -23,7 +23,12 @@ export function Dashboard({ initialOpportunities }: { initialOpportunities: Oppo
 
     async function loadOpportunities() {
       try {
-        const response = await fetch("/api/opportunities", { cache: "no-store" });
+        const response = await fetch("/api/opportunities", {
+          cache: "no-store",
+          headers: {
+            "Cache-Control": "no-cache",
+          },
+        });
         const data = (await response.json()) as ApiResponse;
 
         if (!alive) return;

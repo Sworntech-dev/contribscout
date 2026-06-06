@@ -4,6 +4,7 @@ import { sampleRepositories } from "@/lib/sample-data";
 import type { Opportunity, RepositorySignals, ScoutRepository } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 const SEARCH_KEYWORDS = [
   "ai agent",
@@ -81,7 +82,7 @@ function githubHeaders() {
 async function githubJson<T>(url: string): Promise<T | null> {
   const response = await fetch(url, {
     headers: githubHeaders(),
-    next: { revalidate: 900 },
+    cache: "no-store",
   });
 
   if (!response.ok) {
@@ -336,21 +337,35 @@ async function fetchLiveOpportunities(): Promise<Opportunity[]> {
 export async function GET() {
   try {
     const opportunities = await fetchLiveOpportunities();
-    return NextResponse.json({
-      source: "github",
-      updatedAt: new Date().toISOString(),
-      opportunities,
-    });
+    return NextResponse.json(
+      {
+        source: "github",
+        updatedAt: new Date().toISOString(),
+        opportunities,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        },
+      },
+    );
   } catch (error) {
     const opportunities = sampleRepositories
       .map(scoreOpportunity)
       .sort((a, b) => b.roleOpportunityScore - a.roleOpportunityScore);
 
-    return NextResponse.json({
-      source: "sample",
-      updatedAt: new Date().toISOString(),
-      notice: error instanceof Error ? error.message : "Using sample opportunities.",
-      opportunities,
-    });
+    return NextResponse.json(
+      {
+        source: "sample",
+        updatedAt: new Date().toISOString(),
+        notice: error instanceof Error ? error.message : "Using sample opportunities.",
+        opportunities,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, must-revalidate",
+        },
+      },
+    );
   }
 }
