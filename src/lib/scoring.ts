@@ -14,9 +14,9 @@ function repoAgeDays(value: string) {
 
 function freshnessPoints(repo: ScoutRepository) {
   const updatedDays = daysSince(repo.updatedAt);
-  if (updatedDays <= 7) return 18;
-  if (updatedDays <= 21) return 14;
-  if (updatedDays <= 45) return 9;
+  if (updatedDays <= 7) return 12;
+  if (updatedDays <= 14) return 10;
+  if (updatedDays <= 45) return 6;
   return 3;
 }
 
@@ -82,29 +82,50 @@ function reasonFor(repo: ScoutRepository, score: number) {
   return `${score}/100 because it shows ${sentence || "a balanced mix of activity and contribution space"}.`;
 }
 
+function contributionSignalCount(repo: ScoutRepository) {
+  const signals = repo.signals;
+  return [
+    repo.openIssues > 0,
+    signals.goodFirstIssueCount > 0,
+    signals.helpWantedCount > 0,
+    signals.hasContributing,
+    signals.hasDocsFolder,
+    signals.readmeQuality === "basic" || signals.readmeQuality === "strong",
+  ].filter(Boolean).length;
+}
+
 export function scoreOpportunity(repo: ScoutRepository): Opportunity {
   const signals = repo.signals;
   const contributionPath =
-    clamp(signals.goodFirstIssueCount, 0, 5) * 4 +
-    clamp(signals.helpWantedCount, 0, 5) * 3 +
-    (signals.hasContributing ? 6 : 0);
+    clamp(signals.goodFirstIssueCount, 0, 4) * 3 +
+    clamp(signals.helpWantedCount, 0, 4) * 2 +
+    (signals.hasContributing ? 5 : 0);
   const issueQuality =
-    signals.issueActivity === "active" ? 14 : signals.issueActivity === "warming" ? 9 : 3;
+    signals.issueActivity === "active" ? 10 : signals.issueActivity === "warming" ? 7 : 2;
   const documentationGap =
     signals.readmeQuality === "missing"
-      ? 10
+      ? 6
       : signals.readmeQuality === "thin"
-        ? 14
+        ? 10
         : signals.readmeQuality === "basic"
-          ? 8
+          ? 6
           : 2;
-  const localization = signals.localizationOpportunity ? 10 : 0;
-  const earlyActivity = repoAgeDays(repo.createdAt) <= 365 ? 10 : 4;
+  const localization = signals.localizationOpportunity ? 6 : 0;
+  const earlyActivity = repoAgeDays(repo.createdAt) <= 365 ? 8 : 3;
   const freshness = freshnessPoints(repo);
   const saturation = saturationPenalty(repo);
+  const signalCount = contributionSignalCount(repo);
 
+  const rawScore = clamp(
+    18 + contributionPath + issueQuality + documentationGap + localization + earlyActivity + freshness - saturation,
+    1,
+    100,
+  );
   const score = clamp(
-    22 + contributionPath + issueQuality + documentationGap + localization + earlyActivity + freshness - saturation,
+    Math.min(
+      rawScore,
+      signalCount >= 5 ? 100 : signalCount >= 4 ? 89 : signalCount >= 3 ? 82 : signalCount >= 2 ? 74 : 66,
+    ),
     1,
     100,
   );

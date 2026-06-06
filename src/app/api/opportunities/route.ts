@@ -19,6 +19,35 @@ const SEARCH_KEYWORDS = [
 
 const FINAL_RESULT_LIMIT = 12;
 const SEARCH_RESULTS_PER_QUERY = 8;
+const ENRICHMENT_LIMIT = 24;
+const MIN_LIVE_RESULTS = 3;
+
+const RELEVANCE_TERMS = [
+  "agent",
+  "ai",
+  "llm",
+  "web3",
+  "crypto",
+  "onchain",
+  "defi",
+  "wallet",
+  "zk",
+  "developer",
+  "tool",
+  "sdk",
+  "protocol",
+];
+
+const NOISE_TERMS = [
+  "hello-world",
+  "scratch",
+  "tmp",
+  "personal-test",
+  "test-repo",
+  "practice",
+  "homework",
+  "coursework",
+];
 
 type GitHubSearchItem = {
   name: string;
@@ -34,6 +63,9 @@ type GitHubSearchItem = {
   topics?: string[];
   language: string | null;
   license: { name: string } | null;
+  archived?: boolean;
+  disabled?: boolean;
+  fork?: boolean;
 };
 
 const token = process.env.GITHUB_TOKEN;
@@ -68,6 +100,85 @@ function isoDateDaysAgo(days: number) {
 function keywordQuery(keyword: string, qualifier: string) {
   const term = keyword.includes(" ") ? `"${keyword}"` : keyword;
   return `${term} ${qualifier} archived:false fork:false`;
+}
+
+function daysSince(value: string) {
+  return Math.max(1, Math.round((Date.now() - new Date(value).getTime()) / 86_400_000));
+}
+
+function relevanceScore(item: GitHubSearchItem) {
+  const topics = item.topics ?? [];
+  const haystack = [
+    item.name,
+    item.full_name,
+    item.description ?? "",
+    item.language ?? "",
+    ...topics,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  return RELEVANCE_TERMS.reduce((score, term) => score + (haystack.includes(term) ? 1 : 0), 0);
+}
+
+function looksNoisy(item: GitHubSearchItem) {
+  const text = `${item.full_name} ${item.description ?? ""}`.toLowerCase();
+  const isTinyOneOff = item.stargazers_count === 0 && item.open_issues_count === 0 && item.forks_count === 0;
+
+  return NOISE_TERMS.some((term) => text.includes(term)) || (isTinyOneOff && text.includes("test"));
+}
+
+function isLiveCandidate(item: GitHubSearchItem) {
+  return (
+    !item.archived &&
+    !item.disabled &&
+    !item.fork &&
+    Boolean(item.description?.trim()) &&
+    relevanceScore(item) > 0 &&
+    !looksNoisy(item)
+  );
+}
+
+function contributionSignalCount(repo: ScoutRepository) {
+  const signals = repo.signals;
+  return [
+    repo.openIssues > 0,
+    signals.goodFirstIssueCount > 0,
+    signals.helpWantedCount > 0,
+    signals.hasContributing,
+    signals.hasDocsFolder,
+    signals.readmeQuality === "basic" || signals.readmeQuality === "strong",
+  ].filter(Boolean).length;
+}
+
+function isQualityLiveRepository(repo: ScoutRepository) {
+  return repo.openIssues > 0 || contributionSignalCount(repo) >= 2;
+}
+
+function liveRankingScore(repo: Opportunity) {
+  const signals = repo.signals;
+  const readmePoints = signals.readmeQuality === "strong" ? 12 : signals.readmeQuality === "basic" ? 8 : 0;
+  const labelPoints = Math.min(16, (signals.goodFirstIssueCount + signals.helpWantedCount) * 4);
+  const docsPoints = signals.hasDocsFolder ? 8 : 0;
+  const issuePoints = Math.min(12, repo.openIssues);
+  const freshnessPoints = daysSince(repo.updatedAt) <= 14 ? 12 : 4;
+  const relevancePoints = Math.min(14, relevanceScore({
+    name: repo.name,
+    full_name: repo.fullName,
+    owner: { login: repo.owner },
+    description: repo.description,
+    html_url: repo.url,
+    stargazers_count: repo.stars,
+    forks_count: repo.forks,
+    open_issues_count: repo.openIssues,
+    created_at: repo.createdAt,
+    updated_at: repo.updatedAt,
+    topics: repo.topics,
+    language: repo.language,
+    license: repo.license ? { name: repo.license } : null,
+  }) * 2);
+
+  return repo.roleOpportunityScore + readmePoints + labelPoints + docsPoints + issuePoints + freshnessPoints + relevancePoints;
 }
 
 async function searchRepositories(query: string, sort: "created" | "updated") {
@@ -181,6 +292,7 @@ async function fetchLiveOpportunities(): Promise<Opportunity[]> {
   const searchResults = (await Promise.all(searches)).flat();
   const deduped = Array.from(
     searchResults
+      .filter(isLiveCandidate)
       .reduce((repos, item) => {
         if (!repos.has(item.full_name)) {
           repos.set(item.full_name, item);
@@ -196,19 +308,29 @@ async function fetchLiveOpportunities(): Promise<Opportunity[]> {
 
   const candidates = deduped
     .sort((a, b) => {
+      const relevanceDifference = relevanceScore(b) - relevanceScore(a);
+      if (relevanceDifference !== 0) return relevanceDifference;
       const updatedDifference = new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
       if (updatedDifference !== 0) return updatedDifference;
       return b.stargazers_count - a.stargazers_count;
     })
-    .slice(0, FINAL_RESULT_LIMIT);
+    .slice(0, ENRICHMENT_LIMIT);
 
   const normalized = await Promise.all(
     candidates.map(async (item) => normalizeRepository(item, await getSignals(item))),
   );
 
-  return normalized
+  const opportunities = normalized
+    .filter(isQualityLiveRepository)
     .map(scoreOpportunity)
-    .sort((a, b) => b.roleOpportunityScore - a.roleOpportunityScore);
+    .sort((a, b) => liveRankingScore(b) - liveRankingScore(a))
+    .slice(0, FINAL_RESULT_LIMIT);
+
+  if (opportunities.length < MIN_LIVE_RESULTS) {
+    throw new Error("GitHub live scan returned fewer than 3 quality matches, showing sample fallback.");
+  }
+
+  return opportunities;
 }
 
 export async function GET() {
