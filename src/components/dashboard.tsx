@@ -12,9 +12,9 @@ type ApiResponse = {
   opportunities: Opportunity[];
 };
 
-export function Dashboard({ initialOpportunities }: { initialOpportunities: Opportunity[] }) {
-  const [opportunities, setOpportunities] = useState(initialOpportunities);
-  const [source, setSource] = useState<"github" | "sample">("sample");
+export function Dashboard() {
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [source, setSource] = useState<"github" | "sample" | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,7 +37,7 @@ export function Dashboard({ initialOpportunities }: { initialOpportunities: Oppo
         setError(data.notice ?? null);
       } catch {
         if (!alive) return;
-        setError("Live scan unavailable. Showing demo-ready sample opportunities.");
+        setError("Live scan unavailable. Try refreshing the scanner.");
       } finally {
         if (alive) setLoading(false);
       }
@@ -55,6 +55,7 @@ export function Dashboard({ initialOpportunities }: { initialOpportunities: Oppo
     return Math.round(total / Math.max(opportunities.length, 1));
   }, [opportunities]);
   const isSampleFallback = source === "sample";
+  const sourceLabel = loading && !source ? "scanning" : isSampleFallback ? "sample fallback" : "github";
 
   return (
     <main className="min-h-screen overflow-hidden">
@@ -106,18 +107,20 @@ export function Dashboard({ initialOpportunities }: { initialOpportunities: Oppo
             <p className="text-sm text-slate-400">Current scan</p>
             <div className="mt-4 grid grid-cols-3 gap-3">
               <Metric label="Projects" value={opportunities.length.toString()} />
-              <Metric label="Avg score" value={averageScore.toString()} />
-              <Metric label="Source" value={isSampleFallback ? "sample fallback" : "github"} />
+              <Metric label="Avg score" value={opportunities.length ? averageScore.toString() : "-"} />
+              <Metric label="Source" value={sourceLabel} />
             </div>
             <div className="mt-5 border-t border-white/10 pt-5">
               <p className="text-sm text-slate-400">Top lead</p>
-              <p className="mt-2 text-xl font-bold text-white">{topOpportunity?.name ?? "Loading"}</p>
+              <p className="mt-2 text-xl font-bold text-white">
+                {topOpportunity?.name ?? "Running live GitHub scan..."}
+              </p>
               <p className="mt-2 text-sm leading-6 text-slate-300">
-                {topOpportunity?.suggestedAction ?? "Scanning contribution paths..."}
+                {topOpportunity?.suggestedAction ?? "Fetching current repositories before showing fallback data."}
               </p>
             </div>
             <p className="mt-5 text-xs text-slate-500">
-              {loading ? "Refreshing scanner..." : error ?? "Live GitHub scanner returned normalized opportunities."}
+              {loading ? "Running live GitHub scan..." : error ?? "Live GitHub scanner returned normalized opportunities."}
             </p>
           </div>
         </section>
@@ -128,15 +131,19 @@ export function Dashboard({ initialOpportunities }: { initialOpportunities: Oppo
             title="Projects ranked by contributor leverage"
             body="The scanner favors useful entry points, fresh activity, documentation gaps, and room to be noticed."
           />
-          <div className="grid gap-4 lg:grid-cols-2">
-            {opportunities.map((opportunity) => (
-              <OpportunityCard
-                key={opportunity.fullName}
-                opportunity={opportunity}
-                isSampleFallback={isSampleFallback}
-              />
-            ))}
-          </div>
+          {loading && opportunities.length === 0 ? (
+            <LoadingOpportunities />
+          ) : (
+            <div className="grid gap-4 lg:grid-cols-2">
+              {opportunities.map((opportunity) => (
+                <OpportunityCard
+                  key={opportunity.fullName}
+                  opportunity={opportunity}
+                  isSampleFallback={isSampleFallback}
+                />
+              ))}
+            </div>
+          )}
         </section>
 
         <section className="grid gap-4 lg:grid-cols-3">
@@ -204,6 +211,30 @@ function InfoPanel({ title, body }: { title: string; body: string }) {
     <div className="rounded-md border border-white/10 bg-white/[0.035] p-5">
       <h3 className="text-lg font-bold text-white">{title}</h3>
       <p className="mt-3 text-sm leading-6 text-slate-400">{body}</p>
+    </div>
+  );
+}
+
+function LoadingOpportunities() {
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      {["scan-a", "scan-b", "scan-c", "scan-d"].map((item) => (
+        <div key={item} className="rounded-md border border-white/10 bg-panel/75 p-5">
+          <div className="h-4 w-28 rounded bg-white/10" />
+          <div className="mt-4 h-8 w-52 rounded bg-white/10" />
+          <div className="mt-4 space-y-2">
+            <div className="h-3 w-full rounded bg-white/10" />
+            <div className="h-3 w-4/5 rounded bg-white/10" />
+            <div className="h-3 w-2/3 rounded bg-white/10" />
+          </div>
+          <div className="mt-6 border-t border-white/10 pt-5">
+            <p className="text-sm font-semibold text-white">Running live GitHub scan...</p>
+            <p className="mt-2 text-sm leading-6 text-slate-400">
+              Checking current repositories before showing sample fallback.
+            </p>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
