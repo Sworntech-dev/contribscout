@@ -1,35 +1,47 @@
 # ContribScout Hermes Skill Layer
 
-`contribscout_skill.py` is a small Hermes skill layer for ContribScout v0.1. It is not a hosted Hermes runtime inside the Vercel app.
+ContribScout remains a standalone Vercel dashboard. The Hermes files in this folder provide a skill layer that consumes the ContribScout API and formats daily contribution reports. They do not host a Hermes runtime inside Vercel.
+
+The newer Hermes-compatible package lives at `hermes/skills/contribscout/`.
 
 ## What It Does
 
-The skill exposes two simple functions:
+There are two integration sketches:
 
-- `fetch_contribscout_opportunities()` reads top opportunities from a deployed ContribScout API when `CONTRIBSCOUT_APP_URL` is set, or falls back to local sample opportunities.
-- `daily_contribution_report()` formats those opportunities into a short Hermes-ready daily report.
+- `contribscout_skill.py` is the original small Python sketch.
+- `skills/contribscout/` follows Hermes Agent skill conventions with `SKILL.md` and `scripts/daily_report.py`.
+
+The skill package fetches top opportunities from `https://contribscout.vercel.app/api/opportunities` by default, then formats the top 5 opportunities into Markdown.
 
 ## How Hermes Would Use It
 
-A Hermes workflow could call `daily_contribution_report()` on a daily schedule, then deliver the report to a user workspace, inbox, or agent-assisted contributor workflow.
+A Hermes workflow could call the report script on a daily schedule, then deliver the report to a user workspace, inbox, or agent-assisted contributor workflow.
 
 For local testing:
 
 ```bash
-python hermes/contribscout_skill.py
+python hermes/skills/contribscout/scripts/daily_report.py
 ```
+
+To use another ContribScout deployment, set `CONTRIBSCOUT_API_URL`.
 
 Example output:
 
-```text
-ContribScout daily contribution report
+```markdown
+# ContribScout Daily Contribution Report
 
-1. chaincraft (wallet developer tools)
-   Role Opportunity Score: 91
-   Suggested action: Help with a good first issue and leave clear reproduction notes.
-   Repo: sample fallback
+- Source: github
+- Notice: GitHub live scan returned limited matches.
+
+## 1. project-name
+
+- Score: 74/100
+- Category: developer tools
+- Suggested action: Test the quickstart and report friction.
+- Reason: 74/100 because it shows fresh commits, docs can improve.
+- Repository: https://github.com/example/project
 ```
 
 ## Planned Next Step
 
-Wire this skill layer into a real Hermes cron or daily report flow after the dashboard API and scoring model settle.
+Wire `hermes/skills/contribscout/scripts/daily_report.py` into a real Hermes cron or daily report flow after the dashboard API and scoring model settle.

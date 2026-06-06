@@ -2,7 +2,7 @@
 
 ContribScout is a Hermes-ready contributor intelligence dashboard for discovering early Web3 and AI contribution opportunities.
 
-It helps builders find projects where they can become useful before the obvious contribution paths are crowded. ContribScout v0.1 is a Vercel-ready Next.js dashboard with a GitHub opportunity scanner, an original Role Opportunity Score, suggested contribution actions, a small local Proof Vault, and a Hermes skill layer for daily report formatting.
+It helps builders find projects where they can become useful before the obvious contribution paths are crowded. ContribScout is a Vercel-ready Next.js dashboard with a GitHub opportunity scanner, an original Role Opportunity Score, suggested contribution actions, a small local Proof Vault, and a Hermes-compatible skill package for daily report formatting.
 
 ## Why It Exists
 
@@ -154,13 +154,13 @@ The app is safe to deploy without `GITHUB_TOKEN`; it will use sample data.
 
 ## Hermes Skill Layer
 
-ContribScout v0.1 is a Vercel-ready dashboard. The Hermes integration currently lives in `hermes/contribscout_skill.py` as a small Hermes skill layer.
+ContribScout is a standalone Vercel dashboard. The v0.2 Hermes integration adds a Hermes-compatible skill package at `hermes/skills/contribscout/`, alongside the earlier `hermes/contribscout_skill.py` sketch.
 
-The skill can fetch top contribution opportunities from a deployed ContribScout API or format local sample opportunities as a Hermes-ready daily report. This supports an agent-assisted contributor workflow without claiming that Vercel hosts a Hermes runtime.
+The skill package can fetch top contribution opportunities from `https://contribscout.vercel.app/api/opportunities` and format them as a Hermes-ready daily report. This supports an agent-assisted contributor workflow without claiming that Vercel hosts a Hermes runtime.
 
 This is a Hermes skill layer, not a hosted Hermes runtime inside Vercel. A later version can wire the skill into a real Hermes cron or daily report flow.
 
-See `hermes/README.md` and `hermes/sample_daily_report.md` for the current integration notes and sample output.
+See `hermes/README.md`, `hermes/skills/contribscout/SKILL.md`, and `hermes/sample_daily_report.md` for the current integration notes and sample output.
 
 ## Roadmap
 
