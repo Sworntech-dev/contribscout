@@ -111,9 +111,11 @@ cp .env.example .env.local
 Optionally add a GitHub token:
 
 ```bash
-GITHUB_TOKEN=ghp_your_token_here
+GITHUB_TOKEN=<your_github_token>
 NEXT_PUBLIC_APP_NAME=ContribScout
 ```
+
+Never commit real tokens. Keep local secrets in `.env.local` and production secrets in Vercel Environment Variables.
 
 Run the development server:
 
@@ -136,7 +138,7 @@ npm run lint
 
 | Variable | Required | Description |
 | --- | --- | --- |
-| `GITHUB_TOKEN` | No | Optional GitHub token used by the server-side scanner. The app works without it using sample data. |
+| `GITHUB_TOKEN` | No | Optional GitHub token used by the server-side scanner. The app works without it by using sample fallback data. |
 | `NEXT_PUBLIC_APP_NAME` | No | Public app name shown in metadata and UI. Defaults to `ContribScout`. |
 
 ## Vercel Deployment
