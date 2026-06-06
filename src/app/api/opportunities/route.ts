@@ -45,6 +45,7 @@ const NOISE_TERMS = [
   "tmp",
   "personal-test",
   "test-repo",
+  "demo-only",
   "practice",
   "homework",
   "coursework",
@@ -129,15 +130,22 @@ function looksNoisy(item: GitHubSearchItem) {
   return NOISE_TERMS.some((term) => text.includes(term)) || (isTinyOneOff && text.includes("test"));
 }
 
-function isLiveCandidate(item: GitHubSearchItem) {
+function isMinimalLiveCandidate(item: GitHubSearchItem) {
   return (
     !item.archived &&
     !item.disabled &&
     !item.fork &&
     Boolean(item.description?.trim()) &&
-    relevanceScore(item) > 0 &&
     !looksNoisy(item)
   );
+}
+
+function isEmergencyLiveCandidate(item: GitHubSearchItem) {
+  return Boolean(item.description?.trim()) && !looksNoisy(item);
+}
+
+function isLiveCandidate(item: GitHubSearchItem) {
+  return isMinimalLiveCandidate(item) && relevanceScore(item) > 0;
 }
 
 function contributionSignalCount(repo: ScoutRepository) {
@@ -160,14 +168,8 @@ function isUsableLiveRepository(repo: ScoutRepository) {
   return Boolean(repo.url && repo.description.trim());
 }
 
-function liveRankingScore(repo: Opportunity) {
-  const signals = repo.signals;
-  const readmePoints = signals.readmeQuality === "strong" ? 12 : signals.readmeQuality === "basic" ? 8 : 0;
-  const labelPoints = Math.min(16, (signals.goodFirstIssueCount + signals.helpWantedCount) * 4);
-  const docsPoints = signals.hasDocsFolder ? 8 : 0;
-  const issuePoints = Math.min(12, repo.openIssues);
-  const freshnessPoints = daysSince(repo.updatedAt) <= 14 ? 12 : 4;
-  const relevancePoints = Math.min(14, relevanceScore({
+function toSearchItem(repo: ScoutRepository): GitHubSearchItem {
+  return {
     name: repo.name,
     full_name: repo.fullName,
     owner: { login: repo.owner },
@@ -181,17 +183,40 @@ function liveRankingScore(repo: Opportunity) {
     topics: repo.topics,
     language: repo.language,
     license: repo.license ? { name: repo.license } : null,
-  }) * 2);
+  };
+}
+
+function isRelevantRepository(repo: ScoutRepository) {
+  return relevanceScore(toSearchItem(repo)) > 0;
+}
+
+function liveRankingScore(repo: Opportunity) {
+  const signals = repo.signals;
+  const readmePoints = signals.readmeQuality === "strong" ? 12 : signals.readmeQuality === "basic" ? 8 : 0;
+  const labelPoints = Math.min(16, (signals.goodFirstIssueCount + signals.helpWantedCount) * 4);
+  const docsPoints = signals.hasDocsFolder ? 8 : 0;
+  const issuePoints = Math.min(12, repo.openIssues);
+  const freshnessPoints = daysSince(repo.updatedAt) <= 14 ? 12 : 4;
+  const relevancePoints = Math.min(14, relevanceScore(toSearchItem(repo)) * 2);
 
   return repo.roleOpportunityScore + readmePoints + labelPoints + docsPoints + issuePoints + freshnessPoints + relevancePoints;
 }
 
 async function searchRepositories(query: string, sort: "created" | "updated") {
-  const result = await githubJson<{ items: GitHubSearchItem[] }>(
+  const response = await fetch(
     `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=${sort}&order=desc&per_page=${SEARCH_RESULTS_PER_QUERY}`,
+    {
+      headers: githubHeaders(),
+      cache: "no-store",
+    },
   );
 
-  return result?.items ?? [];
+  if (!response.ok) {
+    return null;
+  }
+
+  const result = (await response.json()) as { items: GitHubSearchItem[] };
+  return result.items ?? [];
 }
 
 async function contentExists(owner: string, repo: string, path: string) {
@@ -288,16 +313,38 @@ async function fetchLiveOpportunities(): Promise<{ opportunities: Opportunity[];
     throw new Error("GITHUB_TOKEN is not configured.");
   }
 
-  const createdSince = isoDateDaysAgo(30);
-  const updatedSince = isoDateDaysAgo(14);
+  const createdSince = isoDateDaysAgo(60);
+  const updatedSince = isoDateDaysAgo(30);
   const searches = SEARCH_KEYWORDS.flatMap((keyword) => [
     searchRepositories(keywordQuery(keyword, `created:>=${createdSince}`), "created"),
     searchRepositories(keywordQuery(keyword, `pushed:>=${updatedSince}`), "updated"),
   ]);
-  const searchResults = (await Promise.all(searches)).flat();
-  const deduped = Array.from(
+  const searchResponses = await Promise.all(searches);
+
+  if (searchResponses.every((result) => result === null)) {
+    throw new Error("GitHub API request failed, showing sample fallback.");
+  }
+
+  const searchResults = searchResponses.flatMap((result) => result ?? []);
+
+  if (!searchResults.length) {
+    throw new Error("GitHub Search returned zero repository items, showing sample fallback.");
+  }
+
+  const minimalCandidates = Array.from(
     searchResults
-      .filter(isLiveCandidate)
+      .filter(isMinimalLiveCandidate)
+      .reduce((repos, item) => {
+        if (!repos.has(item.full_name)) {
+          repos.set(item.full_name, item);
+        }
+        return repos;
+      }, new Map<string, GitHubSearchItem>())
+      .values(),
+  );
+  const emergencyCandidates = Array.from(
+    searchResults
+      .filter(isEmergencyLiveCandidate)
       .reduce((repos, item) => {
         if (!repos.has(item.full_name)) {
           repos.set(item.full_name, item);
@@ -307,11 +354,7 @@ async function fetchLiveOpportunities(): Promise<{ opportunities: Opportunity[];
       .values(),
   );
 
-  if (!deduped.length) {
-    throw new Error("GitHub live scan returned no usable repositories after relaxed scan, showing sample fallback.");
-  }
-
-  const candidates = deduped
+  const candidates = (minimalCandidates.length ? minimalCandidates : emergencyCandidates)
     .sort((a, b) => {
       const relevanceDifference = relevanceScore(b) - relevanceScore(a);
       if (relevanceDifference !== 0) return relevanceDifference;
@@ -326,7 +369,7 @@ async function fetchLiveOpportunities(): Promise<{ opportunities: Opportunity[];
   );
 
   const strictOpportunities = normalized
-    .filter(isQualityLiveRepository)
+    .filter((repo) => isQualityLiveRepository(repo) && isRelevantRepository(repo))
     .map(scoreOpportunity)
     .sort((a, b) => liveRankingScore(b) - liveRankingScore(a))
     .slice(0, FINAL_RESULT_LIMIT);
@@ -342,17 +385,26 @@ async function fetchLiveOpportunities(): Promise<{ opportunities: Opportunity[];
   }
 
   const relaxedOpportunities = normalized
+    .filter((repo) => isUsableLiveRepository(repo) && (isQualityLiveRepository(repo) || isRelevantRepository(repo)))
+    .map(scoreOpportunity)
+    .sort((a, b) => liveRankingScore(b) - liveRankingScore(a))
+    .slice(0, FINAL_RESULT_LIMIT);
+
+  if (relaxedOpportunities.length >= MIN_LIVE_RESULTS) {
+    return {
+      opportunities: relaxedOpportunities,
+      notice: "GitHub live scan returned limited matches.",
+    };
+  }
+
+  const minimalOpportunities = normalized
     .filter(isUsableLiveRepository)
     .map(scoreOpportunity)
     .sort((a, b) => liveRankingScore(b) - liveRankingScore(a))
     .slice(0, FINAL_RESULT_LIMIT);
 
-  if (!relaxedOpportunities.length) {
-    throw new Error("GitHub live scan returned no usable repositories after relaxed scan, showing sample fallback.");
-  }
-
   return {
-    opportunities: relaxedOpportunities,
+    opportunities: minimalOpportunities,
     notice: "GitHub live scan returned limited matches.",
   };
 }
