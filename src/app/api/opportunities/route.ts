@@ -5,17 +5,20 @@ import type { Opportunity, RepositorySignals, ScoutRepository } from "@/lib/type
 
 export const dynamic = "force-dynamic";
 
-const SEARCH_TERMS = [
+const SEARCH_KEYWORDS = [
+  "ai agent",
+  "llm agent",
   "web3",
-  "ai agents",
-  "llm tools",
-  "crypto infrastructure",
-  "zk",
+  "crypto",
+  "onchain",
   "defi",
   "wallet",
+  "zk",
   "developer tools",
-  "onchain app",
 ];
+
+const FINAL_RESULT_LIMIT = 12;
+const SEARCH_RESULTS_PER_QUERY = 8;
 
 type GitHubSearchItem = {
   name: string;
@@ -54,6 +57,25 @@ async function githubJson<T>(url: string): Promise<T | null> {
   }
 
   return (await response.json()) as T;
+}
+
+function isoDateDaysAgo(days: number) {
+  const date = new Date();
+  date.setUTCDate(date.getUTCDate() - days);
+  return date.toISOString().slice(0, 10);
+}
+
+function keywordQuery(keyword: string, qualifier: string) {
+  const term = keyword.includes(" ") ? `"${keyword}"` : keyword;
+  return `${term} ${qualifier} archived:false fork:false`;
+}
+
+async function searchRepositories(query: string, sort: "created" | "updated") {
+  const result = await githubJson<{ items: GitHubSearchItem[] }>(
+    `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=${sort}&order=desc&per_page=${SEARCH_RESULTS_PER_QUERY}`,
+  );
+
+  return result?.items ?? [];
 }
 
 async function contentExists(owner: string, repo: string, path: string) {
@@ -150,19 +172,38 @@ async function fetchLiveOpportunities(): Promise<Opportunity[]> {
     throw new Error("GITHUB_TOKEN is not configured.");
   }
 
-  const query = encodeURIComponent(
-    `(${SEARCH_TERMS.map((term) => `"${term}"`).join(" OR ")}) stars:20..2500 pushed:>2025-01-01 archived:false`,
-  );
-  const result = await githubJson<{ items: GitHubSearchItem[] }>(
-    `https://api.github.com/search/repositories?q=${query}&sort=updated&order=desc&per_page=12`,
+  const createdSince = isoDateDaysAgo(30);
+  const updatedSince = isoDateDaysAgo(14);
+  const searches = SEARCH_KEYWORDS.flatMap((keyword) => [
+    searchRepositories(keywordQuery(keyword, `created:>=${createdSince}`), "created"),
+    searchRepositories(keywordQuery(keyword, `pushed:>=${updatedSince}`), "updated"),
+  ]);
+  const searchResults = (await Promise.all(searches)).flat();
+  const deduped = Array.from(
+    searchResults
+      .reduce((repos, item) => {
+        if (!repos.has(item.full_name)) {
+          repos.set(item.full_name, item);
+        }
+        return repos;
+      }, new Map<string, GitHubSearchItem>())
+      .values(),
   );
 
-  if (!result?.items?.length) {
-    throw new Error("GitHub returned no repositories.");
+  if (!deduped.length) {
+    throw new Error("GitHub live scan returned no matches, showing sample fallback.");
   }
 
+  const candidates = deduped
+    .sort((a, b) => {
+      const updatedDifference = new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+      if (updatedDifference !== 0) return updatedDifference;
+      return b.stargazers_count - a.stargazers_count;
+    })
+    .slice(0, FINAL_RESULT_LIMIT);
+
   const normalized = await Promise.all(
-    result.items.slice(0, 8).map(async (item) => normalizeRepository(item, await getSignals(item))),
+    candidates.map(async (item) => normalizeRepository(item, await getSignals(item))),
   );
 
   return normalized
