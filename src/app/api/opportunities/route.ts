@@ -22,6 +22,8 @@ const FINAL_RESULT_LIMIT = 12;
 const SEARCH_RESULTS_PER_QUERY = 8;
 const ENRICHMENT_LIMIT = 36;
 const MIN_LIVE_RESULTS = 3;
+const GITHUB_CACHE_TTL_MS = 10 * 60 * 1000;
+const GITHUB_REQUEST_TIMEOUT_MS = 8000;
 
 const RELEVANCE_TERMS = [
   "agent",
@@ -70,6 +72,15 @@ type GitHubSearchItem = {
   fork?: boolean;
 };
 
+type GitHubApiPayload = {
+  source: "github";
+  updatedAt: string;
+  notice?: string;
+  opportunities: Opportunity[];
+};
+
+let githubSuccessCache: GitHubApiPayload | null = null;
+
 const token = process.env.GITHUB_TOKEN;
 
 function githubHeaders() {
@@ -81,16 +92,26 @@ function githubHeaders() {
 }
 
 async function githubJson<T>(url: string): Promise<T | null> {
-  const response = await fetch(url, {
-    headers: githubHeaders(),
-    cache: "no-store",
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), GITHUB_REQUEST_TIMEOUT_MS);
 
-  if (!response.ok) {
+  try {
+    const response = await fetch(url, {
+      headers: githubHeaders(),
+      cache: "no-store",
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    return (await response.json()) as T;
+  } catch {
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  return (await response.json()) as T;
 }
 
 function isoDateDaysAgo(days: number) {
@@ -203,20 +224,30 @@ function liveRankingScore(repo: Opportunity) {
 }
 
 async function searchRepositories(query: string, sort: "created" | "updated") {
-  const response = await fetch(
-    `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=${sort}&order=desc&per_page=${SEARCH_RESULTS_PER_QUERY}`,
-    {
-      headers: githubHeaders(),
-      cache: "no-store",
-    },
-  );
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), GITHUB_REQUEST_TIMEOUT_MS);
 
-  if (!response.ok) {
+  try {
+    const response = await fetch(
+      `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=${sort}&order=desc&per_page=${SEARCH_RESULTS_PER_QUERY}`,
+      {
+        headers: githubHeaders(),
+        cache: "no-store",
+        signal: controller.signal,
+      },
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const result = (await response.json()) as { items: GitHubSearchItem[] };
+    return result.items ?? [];
+  } catch {
     return null;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  const result = (await response.json()) as { items: GitHubSearchItem[] };
-  return result.items ?? [];
 }
 
 async function contentExists(owner: string, repo: string, path: string) {
@@ -319,16 +350,20 @@ async function fetchLiveOpportunities(): Promise<{ opportunities: Opportunity[];
     searchRepositories(keywordQuery(keyword, `created:>=${createdSince}`), "created"),
     searchRepositories(keywordQuery(keyword, `pushed:>=${updatedSince}`), "updated"),
   ]);
-  const searchResponses = await Promise.all(searches);
+  const settledSearches = await Promise.allSettled(searches);
+  const searchResponses = settledSearches.map((result) =>
+    result.status === "fulfilled" ? result.value : null,
+  );
+  const partialFailures = searchResponses.some((result) => result === null);
 
   if (searchResponses.every((result) => result === null)) {
-    throw new Error("GitHub API request failed, showing sample fallback.");
+    throw new Error("GitHub API request failed.");
   }
 
   const searchResults = searchResponses.flatMap((result) => result ?? []);
 
   if (!searchResults.length) {
-    throw new Error("GitHub Search returned zero repository items, showing sample fallback.");
+    throw new Error("GitHub Search returned zero repository items.");
   }
 
   const minimalCandidates = Array.from(
@@ -354,7 +389,8 @@ async function fetchLiveOpportunities(): Promise<{ opportunities: Opportunity[];
       .values(),
   );
 
-  const candidates = (minimalCandidates.length ? minimalCandidates : emergencyCandidates)
+  const fallbackCandidates = searchResults.filter((item) => Boolean(item.description?.trim()));
+  const candidates = (minimalCandidates.length ? minimalCandidates : emergencyCandidates.length ? emergencyCandidates : fallbackCandidates)
     .sort((a, b) => {
       const relevanceDifference = relevanceScore(b) - relevanceScore(a);
       if (relevanceDifference !== 0) return relevanceDifference;
@@ -405,43 +441,75 @@ async function fetchLiveOpportunities(): Promise<{ opportunities: Opportunity[];
 
   return {
     opportunities: minimalOpportunities,
-    notice: "GitHub live scan returned limited matches.",
+    notice: partialFailures
+      ? "GitHub live scan returned limited matches after partial GitHub API issues."
+      : "GitHub live scan returned limited matches.",
   };
 }
 
+function isFreshGithubCache() {
+  return Boolean(
+    githubSuccessCache &&
+      Date.now() - new Date(githubSuccessCache.updatedAt).getTime() < GITHUB_CACHE_TTL_MS,
+  );
+}
+
+function githubJsonResponse(payload: GitHubApiPayload) {
+  return NextResponse.json(payload, {
+    headers: {
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+    },
+  });
+}
+
+function sampleJsonResponse(notice: string) {
+  const opportunities = sampleRepositories
+    .map(scoreOpportunity)
+    .sort((a, b) => b.roleOpportunityScore - a.roleOpportunityScore);
+
+  return NextResponse.json(
+    {
+      source: "sample",
+      updatedAt: new Date().toISOString(),
+      notice,
+      opportunities,
+    },
+    {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate",
+      },
+    },
+  );
+}
+
 export async function GET() {
+  if (!token) {
+    return sampleJsonResponse("GITHUB_TOKEN is not configured.");
+  }
+
+  if (isFreshGithubCache() && githubSuccessCache) {
+    return githubJsonResponse(githubSuccessCache);
+  }
+
   try {
     const { opportunities, notice } = await fetchLiveOpportunities();
-    return NextResponse.json(
-      {
-        source: "github",
-        updatedAt: new Date().toISOString(),
-        notice,
-        opportunities,
-      },
-      {
-        headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate",
-        },
-      },
-    );
-  } catch (error) {
-    const opportunities = sampleRepositories
-      .map(scoreOpportunity)
-      .sort((a, b) => b.roleOpportunityScore - a.roleOpportunityScore);
+    const payload: GitHubApiPayload = {
+      source: "github",
+      updatedAt: new Date().toISOString(),
+      notice,
+      opportunities,
+    };
 
-    return NextResponse.json(
-      {
-        source: "sample",
-        updatedAt: new Date().toISOString(),
-        notice: error instanceof Error ? error.message : "Using sample opportunities.",
-        opportunities,
-      },
-      {
-        headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate",
-        },
-      },
-    );
+    githubSuccessCache = payload;
+    return githubJsonResponse(payload);
+  } catch (error) {
+    if (githubSuccessCache) {
+      return githubJsonResponse({
+        ...githubSuccessCache,
+        notice: "Showing cached GitHub results after a temporary GitHub API issue.",
+      });
+    }
+
+    return sampleJsonResponse(error instanceof Error ? error.message : "Using sample opportunities.");
   }
 }
