@@ -72,7 +72,7 @@ def daily_contribution_report(app_url: str | None = None) -> str:
                 f"{index}. {opportunity['name']} ({opportunity.get('category', 'open source')})",
                 f"   Role Opportunity Score: {opportunity.get('roleOpportunityScore', 'n/a')}",
                 f"   Suggested action: {opportunity.get('suggestedAction', 'Review the repo and choose a small contribution.')}",
-                f"   Repo: {opportunity.get('url', 'n/a')}",
+                f"   Repo: {opportunity.get('url') or 'sample fallback'}",
                 "",
             ]
         )

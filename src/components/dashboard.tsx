@@ -155,17 +155,19 @@ export function Dashboard({ initialOpportunities }: { initialOpportunities: Oppo
           <SectionHeader
             kicker="Roadmap"
             title="Small first, useful next"
-            body="The first version stays GitHub-only. Future versions can add role preferences, richer issue detail, Proof Vault export, Hermes digests, and optional external community sources."
+            body="The first version stays GitHub-only. Future versions can add role preferences, richer issue detail, Hermes daily reports, Proof Vault export, and optional external community sources."
           />
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {["Role filters", "Issue drill-down", "Vault export", "Daily Hermes report"].map((item, index) => (
-              <div
-                key={`roadmap-${index}-${item}`}
-                className="rounded-md border border-white/10 bg-white/[0.03] p-4 text-sm text-slate-300"
-              >
-                {item}
-              </div>
-            ))}
+            {["Hermes daily report", "GitHub token live scan", "Proof Vault export", "Issue drill-down"].map(
+              (item, index) => (
+                <div
+                  key={`roadmap-${index}-${item}`}
+                  className="rounded-md border border-white/10 bg-white/[0.03] p-4 text-sm text-slate-300"
+                >
+                  {item}
+                </div>
+              ),
+            )}
           </div>
         </section>
       </section>

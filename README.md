@@ -1,8 +1,8 @@
 # ContribScout
 
-ContribScout is a Hermes-powered contributor intelligence agent for discovering early Web3 and AI contribution opportunities.
+ContribScout is a Hermes-ready contributor intelligence dashboard for discovering early Web3 and AI contribution opportunities.
 
-It helps builders find projects where they can become useful before the obvious contribution paths are crowded. The first MVP is a Vercel-ready Next.js dashboard with a GitHub opportunity scanner, an original Role Opportunity Score, suggested contribution actions, and a small local Proof Vault.
+It helps builders find projects where they can become useful before the obvious contribution paths are crowded. ContribScout v0.1 is a Vercel-ready Next.js dashboard with a GitHub opportunity scanner, an original Role Opportunity Score, suggested contribution actions, a small local Proof Vault, and a Hermes skill layer for daily report formatting.
 
 ## Why It Exists
 
@@ -92,7 +92,7 @@ It combines repository context, contribution paths, documentation and localizati
 - Vercel deployment target
 - GitHub REST API with sample fallback
 - localStorage Proof Vault
-- Hermes skill sketch in Python
+- Hermes skill layer in Python
 
 ## Setup
 
@@ -150,19 +150,24 @@ npm run lint
 
 The app is safe to deploy without `GITHUB_TOKEN`; it will use sample data.
 
-## Hermes Skill
+## Hermes Skill Layer
 
-The file `hermes/contribscout_skill.py` shows how Hermes could trigger a daily contribution report. The skill can read from a deployed ContribScout API endpoint or fall back to embedded sample-style opportunities.
+ContribScout v0.1 is a Vercel-ready dashboard. The Hermes integration currently lives in `hermes/contribscout_skill.py` as a small Hermes skill layer.
 
-In a production version, Hermes could run this once per day, summarize top opportunities, and route the report into the user's preferred workspace.
+The skill can fetch top contribution opportunities from a deployed ContribScout API or format local sample opportunities as a Hermes-ready daily report. This supports an agent-assisted contributor workflow without claiming that Vercel hosts a Hermes runtime.
+
+This is a Hermes skill layer, not a hosted Hermes runtime inside Vercel. A later version can wire the skill into a real Hermes cron or daily report flow.
+
+See `hermes/README.md` and `hermes/sample_daily_report.md` for the current integration notes and sample output.
 
 ## Roadmap
 
 - Add user role preferences such as docs, frontend, contracts, research, localization, and QA.
 - Add filters for ecosystem, repo age, language, and contribution type.
 - Add optional GitHub issue drill-down views.
+- Add Hermes daily report.
+- Add GitHub token live scan refinements.
 - Add Proof Vault export.
-- Add Hermes daily digest formatting.
 - Add authenticated saved vault sync.
 - Add richer evidence tracking for contribution history.
 - Add external community sources later, after the GitHub-only MVP is solid.
