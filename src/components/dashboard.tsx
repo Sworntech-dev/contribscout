@@ -67,7 +67,7 @@ export function Dashboard() {
             </div>
             <div>
               <p className="text-sm font-semibold text-white">ContribScout</p>
-              <p className="text-xs text-slate-400">Hermes contributor intelligence</p>
+              <p className="text-sm text-slate-400">Contribution intelligence</p>
             </div>
           </div>
           <a
@@ -84,7 +84,7 @@ export function Dashboard() {
               Early contribution radar
             </p>
             <h1 className="text-4xl font-black leading-tight text-white sm:text-6xl">
-              Find Web3 and AI projects where your contribution can matter early.
+              Find early open-source projects where your contribution can matter early.
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
               ContribScout scans GitHub signals, scores contribution leverage, and turns noisy repo discovery
@@ -153,7 +153,7 @@ export function Dashboard() {
           />
           <InfoPanel
             title="Suggested Actions"
-            body="Every card turns repo signals into a concrete first move, from setup guides and README reviews to good first issues and Turkish onboarding notes."
+            body="Every card turns repo signals into a concrete first move, from setup guides and README reviews to issue notes, docs fixes, and first-run feedback."
           />
           <InfoPanel
             title="Proof Loop"
@@ -167,10 +167,10 @@ export function Dashboard() {
           <SectionHeader
             kicker="Roadmap"
             title="Small first, useful next"
-            body="The first version stays GitHub-only. Future versions can add role preferences, richer issue detail, Hermes daily reports, Proof Vault export, and optional external community sources."
+            body="The first version stays GitHub-only. Future versions can add role preferences, richer issue detail, Hermes daily reports, proof templates, and optional external community sources."
           />
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {["Hermes daily report", "GitHub token live scan", "Proof Vault export", "Issue drill-down"].map(
+            {["Proof report templates", "Proof Vault import polish", "Hermes daily report automation", "Issue drill-down"].map(
               (item, index) => (
                 <div
                   key={`roadmap-${index}-${item}`}
