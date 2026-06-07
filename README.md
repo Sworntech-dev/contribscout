@@ -67,7 +67,7 @@ Each opportunity includes a short recommended action, such as:
 
 ## Proof Vault
 
-The Proof Vault is a localStorage-backed MVP feature for saving contribution evidence. Users can save:
+The Proof Vault is a localStorage-backed feature for saving contribution evidence. Users can save:
 
 - project name
 - action taken
@@ -76,7 +76,7 @@ The Proof Vault is a localStorage-backed MVP feature for saving contribution evi
 - notes
 - date
 
-This keeps the first version simple while showing how ContribScout can evolve into a contributor portfolio and reporting workflow.
+In v0.3, Proof Vault can export local proof entries as Markdown or JSON. Markdown export is useful for project updates, applications, or personal contribution logs. JSON export is useful for backup or later restore work. Data remains local to the browser; no account or database is used.
 
 ## What Makes It Different
 

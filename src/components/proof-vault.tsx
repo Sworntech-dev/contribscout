@@ -20,6 +20,7 @@ const emptyEntry: ProofForm = {
 export function ProofVault({ opportunities }: { opportunities: Opportunity[] }) {
   const [entries, setEntries] = useState<ProofEntry[]>([]);
   const [form, setForm] = useState(emptyEntry);
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
 
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
@@ -62,6 +63,33 @@ export function ProofVault({ opportunities }: { opportunities: Opportunity[] }) 
     setEntries((current) => current.filter((entry) => entry.id !== id));
   }
 
+  function exportMarkdown() {
+    if (!entries.length) return;
+    downloadText("contribscout-proof-vault.md", buildMarkdownReport(entries), "text/markdown");
+  }
+
+  function exportJson() {
+    if (!entries.length) return;
+    downloadText(
+      "contribscout-proof-vault.json",
+      JSON.stringify(buildJsonReport(entries), null, 2),
+      "application/json",
+    );
+  }
+
+  async function copyMarkdown() {
+    if (!entries.length) return;
+
+    try {
+      await navigator.clipboard.writeText(buildMarkdownReport(entries));
+      setCopyStatus("copied");
+      window.setTimeout(() => setCopyStatus("idle"), 1800);
+    } catch {
+      setCopyStatus("error");
+      window.setTimeout(() => setCopyStatus("idle"), 2200);
+    }
+  }
+
   return (
     <section id="proof-vault" className="space-y-4">
       <div className="max-w-3xl">
@@ -70,6 +98,30 @@ export function ProofVault({ opportunities }: { opportunities: Opportunity[] }) 
         <p className="mt-2 leading-7 text-slate-400">
           Store planned or completed actions in localStorage for the MVP demo. No account, database, or backend state required.
         </p>
+      </div>
+
+      <div className="rounded-md border border-white/10 bg-white/[0.03] p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-white">Export proof report</p>
+            <p className="mt-1 text-sm text-slate-400">
+              {entries.length
+                ? `${entries.length} saved ${entries.length === 1 ? "entry" : "entries"} ready to export.`
+                : "Nothing to export yet. Save a proof entry first."}
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <ExportButton disabled={!entries.length} onClick={exportMarkdown}>
+              Export as Markdown
+            </ExportButton>
+            <ExportButton disabled={!entries.length} onClick={exportJson}>
+              Export as JSON
+            </ExportButton>
+            <ExportButton disabled={!entries.length} onClick={copyMarkdown}>
+              {copyStatus === "copied" ? "Copied" : copyStatus === "error" ? "Copy failed" : "Copy Markdown Report"}
+            </ExportButton>
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
@@ -209,4 +261,89 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       {children}
     </label>
   );
+}
+
+function ExportButton({
+  children,
+  disabled,
+  onClick,
+}: {
+  children: React.ReactNode;
+  disabled: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-mint/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-white/10 disabled:hover:text-slate-200"
+    >
+      {children}
+    </button>
+  );
+}
+
+function buildStatusSummary(entries: ProofEntry[]) {
+  const summary = statuses.reduce(
+    (counts, status) => ({ ...counts, [status]: 0 }),
+    {} as Record<ProofEntry["status"], number>,
+  );
+
+  entries.forEach((entry) => {
+    summary[entry.status] += 1;
+  });
+
+  return summary;
+}
+
+function buildMarkdownReport(entries: ProofEntry[]) {
+  const generatedAt = new Date().toISOString();
+  const summary = buildStatusSummary(entries);
+  const statusLines = statuses.map((status) => `- ${status}: ${summary[status]}`);
+  const entryLines = entries.flatMap((entry, index) => [
+    `## ${index + 1}. ${entry.projectName || "Untitled project"}`,
+    "",
+    `- Action taken: ${entry.actionTaken || "n/a"}`,
+    `- Proof link: ${entry.proofLink || "n/a"}`,
+    `- Status: ${entry.status}`,
+    `- Date: ${entry.date || "n/a"}`,
+    `- Notes: ${entry.notes || "n/a"}`,
+    "",
+  ]);
+
+  return [
+    "# ContribScout Proof Vault Report",
+    "",
+    `Generated: ${generatedAt}`,
+    `Total entries: ${entries.length}`,
+    "",
+    "## Status Summary",
+    "",
+    ...statusLines,
+    "",
+    "## Proof Entries",
+    "",
+    ...entryLines,
+  ].join("\n").trim();
+}
+
+function buildJsonReport(entries: ProofEntry[]) {
+  return {
+    exportedAt: new Date().toISOString(),
+    app: "ContribScout",
+    version: "0.3",
+    entries,
+    summary: buildStatusSummary(entries),
+  };
+}
+
+function downloadText(filename: string, content: string, type: string) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
 }

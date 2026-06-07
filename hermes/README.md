@@ -13,6 +13,8 @@ There are two integration sketches:
 
 The skill package fetches top opportunities from `https://contribscout.vercel.app/api/opportunities` by default, then formats the top 5 opportunities into Markdown.
 
+Proof Vault export is separate from this Hermes skill package. Proof Vault reports are generated locally in the browser as Markdown or JSON and are not sent to Hermes automatically.
+
 ## How Hermes Would Use It
 
 A Hermes workflow could call the report script on a daily schedule, then deliver the report to a user workspace, inbox, or agent-assisted contributor workflow.
