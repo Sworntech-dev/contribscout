@@ -65,9 +65,11 @@ export function Dashboard() {
             <div className="grid h-10 w-10 place-items-center rounded-md border border-mint/40 bg-mint/10 text-sm font-black text-mint">
               CS
             </div>
-            <div>
+            <div className="flex flex-wrap items-center gap-2">
               <p className="text-sm font-semibold text-white">ContribScout</p>
-              <p className="text-sm text-slate-400">Contribution intelligence</p>
+              <span className="rounded-md border border-mint/25 bg-mint/10 px-2 py-1 text-xs font-semibold text-mint">
+                Hermes Skill Layer
+              </span>
             </div>
           </div>
           <a
