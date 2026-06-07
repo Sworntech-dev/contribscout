@@ -23,7 +23,18 @@ function freshnessPoints(repo: ScoutRepository) {
 function saturationPenalty(repo: ScoutRepository) {
   const starPressure = repo.stars > 2000 ? 14 : repo.stars > 1000 ? 9 : repo.stars > 500 ? 5 : 0;
   const forkPressure = repo.forks > 250 ? 8 : repo.forks > 100 ? 4 : 0;
-  return starPressure + forkPressure;
+  const suspiciousForkPressure = repo.forks > 20 && repo.forks > Math.max(3, repo.stars * 4) ? 16 : 0;
+  return starPressure + forkPressure + suspiciousForkPressure;
+}
+
+function hasVisibleContributionPath(repo: ScoutRepository) {
+  const signals = repo.signals;
+  return (
+    repo.openIssues > 0 ||
+    signals.goodFirstIssueCount > 0 ||
+    signals.helpWantedCount > 0 ||
+    signals.hasContributing
+  );
 }
 
 function actionFor(repo: ScoutRepository) {
@@ -36,7 +47,9 @@ function actionFor(repo: ScoutRepository) {
   const strongLocalizationFit =
     signals.localizationOpportunity &&
     signals.hasDocsFolder &&
-    (signals.readmeQuality === "basic" || signals.readmeQuality === "strong") &&
+    signals.hasContributing &&
+    signals.readmeQuality === "strong" &&
+    repo.openIssues > 0 &&
     !hasIssueLabels;
 
   if (signals.goodFirstIssueCount > 0 && !signals.hasContributing) {
@@ -57,6 +70,22 @@ function actionFor(repo: ScoutRepository) {
     }
 
     return "Add reproduction notes to an open issue.";
+  }
+
+  if (strongLocalizationFit) {
+    return "Create a Turkish onboarding note.";
+  }
+
+  if (!hasVisibleContributionPath(repo)) {
+    if (signals.readmeQuality === "missing" || signals.readmeQuality === "thin") {
+      return "Write a beginner setup checklist.";
+    }
+
+    if (!signals.hasDocsFolder) {
+      return "Improve installation docs.";
+    }
+
+    return "Open a README clarity issue.";
   }
 
   if (!signals.hasDocsFolder && isTooling) {
@@ -81,10 +110,6 @@ function actionFor(repo: ScoutRepository) {
 
   if (signals.helpWantedCount > 0) {
     return "Review docs for missing environment variables.";
-  }
-
-  if (strongLocalizationFit) {
-    return "Create a Turkish onboarding note.";
   }
 
   if (signals.readmeQuality === "basic") {
@@ -117,8 +142,9 @@ function reasonFor(repo: ScoutRepository, score: number) {
   if (repo.signals.helpWantedCount > 0) reasons.push("maintainers asking for help");
   if (!repo.signals.hasContributing) reasons.push("contribution guide gap");
   if (!repo.signals.hasDocsFolder || repo.signals.readmeQuality === "thin") reasons.push("docs can improve");
-  if (repo.signals.localizationOpportunity) reasons.push("localization space");
+  if (repo.signals.localizationOpportunity && repo.signals.hasDocsFolder) reasons.push("localized onboarding space");
   if (repo.stars < 500) reasons.push("not crowded yet");
+  if (!hasVisibleContributionPath(repo)) reasons.push("limited visible contribution path");
 
   const sentence = reasons.slice(0, 4).join(", ");
   return `${score}/100 because it shows ${sentence || "a balanced mix of activity and contribution space"}.`;
@@ -134,6 +160,18 @@ function contributionSignalCount(repo: ScoutRepository) {
     signals.hasDocsFolder,
     signals.readmeQuality === "basic" || signals.readmeQuality === "strong",
   ].filter(Boolean).length;
+}
+
+function keywordStuffingPenalty(repo: ScoutRepository) {
+  const words = repo.description
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .split(/\s+/)
+    .filter((word) => word.length > 3);
+  const counts = words.reduce((terms, word) => terms.set(word, (terms.get(word) ?? 0) + 1), new Map<string, number>());
+  const maxRepeats = Math.max(0, ...Array.from(counts.values()));
+
+  return Math.max(0, maxRepeats - 3) * 3;
 }
 
 export function scoreOpportunity(repo: ScoutRepository): Opportunity {
@@ -152,21 +190,45 @@ export function scoreOpportunity(repo: ScoutRepository): Opportunity {
         : signals.readmeQuality === "basic"
           ? 6
           : 2;
-  const localization = signals.localizationOpportunity ? 6 : 0;
+  const localization = signals.localizationOpportunity && signals.hasDocsFolder ? 2 : 0;
   const earlyActivity = repoAgeDays(repo.createdAt) <= 365 ? 8 : 3;
   const freshness = freshnessPoints(repo);
   const saturation = saturationPenalty(repo);
   const signalCount = contributionSignalCount(repo);
+  const noPathPenalty = hasVisibleContributionPath(repo) ? 0 : 18;
+  const quietNoIssuePenalty =
+    repo.openIssues === 0 && signals.goodFirstIssueCount === 0 && signals.helpWantedCount === 0 ? 10 : 0;
+  const noisePenalty = keywordStuffingPenalty(repo);
 
   const rawScore = clamp(
-    18 + contributionPath + issueQuality + documentationGap + localization + earlyActivity + freshness - saturation,
+    18 +
+      contributionPath +
+      issueQuality +
+      documentationGap +
+      localization +
+      earlyActivity +
+      freshness -
+      saturation -
+      noPathPenalty -
+      quietNoIssuePenalty -
+      noisePenalty,
     1,
     100,
   );
   const score = clamp(
     Math.min(
       rawScore,
-      signalCount >= 5 ? 100 : signalCount >= 4 ? 89 : signalCount >= 3 ? 82 : signalCount >= 2 ? 74 : 66,
+      !hasVisibleContributionPath(repo)
+        ? 58
+        : signalCount >= 5
+          ? 92
+          : signalCount >= 4
+            ? 84
+            : signalCount >= 3
+              ? 76
+              : signalCount >= 2
+                ? 68
+                : 60,
     ),
     1,
     100,

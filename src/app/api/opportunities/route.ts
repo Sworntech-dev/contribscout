@@ -53,6 +53,30 @@ const NOISE_TERMS = [
   "coursework",
 ];
 
+const LOCALIZATION_CONTEXT_TERMS = [
+  "docs",
+  "documentation",
+  "guide",
+  "tutorial",
+  "onboarding",
+  "education",
+  "learn",
+  "community",
+  "starter",
+  "quickstart",
+];
+
+const GENERIC_STUFFING_TERMS = [
+  "crypto",
+  "web3",
+  "ai",
+  "agent",
+  "defi",
+  "wallet",
+  "zk",
+  "blockchain",
+];
+
 type GitHubSearchItem = {
   name: string;
   full_name: string;
@@ -144,11 +168,46 @@ function relevanceScore(item: GitHubSearchItem) {
   return RELEVANCE_TERMS.reduce((score, term) => score + (haystack.includes(term) ? 1 : 0), 0);
 }
 
+function repeatedTermCount(text: string, term: string) {
+  const matches = text.match(new RegExp(`\\b${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "gi"));
+  return matches?.length ?? 0;
+}
+
+function maxRepeatedWordCount(text: string) {
+  const counts = text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .split(/\s+/)
+    .filter((word) => word.length > 3)
+    .reduce((words, word) => words.set(word, (words.get(word) ?? 0) + 1), new Map<string, number>());
+
+  return Math.max(0, ...Array.from(counts.values()));
+}
+
+function keywordStuffingPenalty(item: GitHubSearchItem) {
+  const description = (item.description ?? "").toLowerCase();
+  const genericRepeats = GENERIC_STUFFING_TERMS.reduce(
+    (total, term) => total + Math.max(0, repeatedTermCount(description, term) - 1),
+    0,
+  );
+  const wordRepeatPenalty = Math.max(0, maxRepeatedWordCount(description) - 3) * 3;
+  const relevancePenalty = Math.max(0, relevanceScore(item) - 5) * 2;
+
+  return genericRepeats * 4 + wordRepeatPenalty + relevancePenalty;
+}
+
 function looksNoisy(item: GitHubSearchItem) {
   const text = `${item.full_name} ${item.description ?? ""}`.toLowerCase();
   const isTinyOneOff = item.stargazers_count === 0 && item.open_issues_count === 0 && item.forks_count === 0;
+  const suspiciousForkRatio = item.forks_count > 20 && item.forks_count > Math.max(3, item.stargazers_count * 4);
+  const keywordStuffed = keywordStuffingPenalty(item) >= 14;
 
-  return NOISE_TERMS.some((term) => text.includes(term)) || (isTinyOneOff && text.includes("test"));
+  return (
+    NOISE_TERMS.some((term) => text.includes(term)) ||
+    (isTinyOneOff && text.includes("test")) ||
+    suspiciousForkRatio ||
+    keywordStuffed
+  );
 }
 
 function isMinimalLiveCandidate(item: GitHubSearchItem) {
@@ -219,8 +278,26 @@ function liveRankingScore(repo: Opportunity) {
   const issuePoints = Math.min(12, repo.openIssues);
   const freshnessPoints = daysSince(repo.updatedAt) <= 14 ? 12 : 4;
   const relevancePoints = Math.min(14, relevanceScore(toSearchItem(repo)) * 2);
+  const noPathPenalty =
+    repo.openIssues === 0 &&
+    repo.signals.goodFirstIssueCount === 0 &&
+    repo.signals.helpWantedCount === 0 &&
+    !repo.signals.hasContributing
+      ? 22
+      : 0;
+  const noisePenalty = keywordStuffingPenalty(toSearchItem(repo));
 
-  return repo.roleOpportunityScore + readmePoints + labelPoints + docsPoints + issuePoints + freshnessPoints + relevancePoints;
+  return (
+    repo.roleOpportunityScore +
+    readmePoints +
+    labelPoints +
+    docsPoints +
+    issuePoints +
+    freshnessPoints +
+    relevancePoints -
+    noPathPenalty -
+    noisePenalty
+  );
 }
 
 async function searchRepositories(query: string, sort: "created" | "updated") {
@@ -299,18 +376,34 @@ async function getSignals(item: GitHubSearchItem): Promise<RepositorySignals> {
     Math.round((Date.now() - new Date(item.created_at).getTime()) / 86_400_000),
   );
   const daysSinceUpdate = Math.round((Date.now() - updatedAt.getTime()) / 86_400_000);
+  const readmeQuality =
+    !readme.exists ? "missing" : readme.size > 3500 ? "strong" : readme.size > 1200 ? "basic" : "thin";
+  const context = [
+    item.description ?? "",
+    item.full_name,
+    ...(item.topics ?? []),
+  ]
+    .join(" ")
+    .toLowerCase();
+  const hasLocalizationContext = LOCALIZATION_CONTEXT_TERMS.some((term) => context.includes(term));
+  const alreadyLocalizationFocused = item.topics?.some((topic) =>
+    ["i18n", "l10n", "localization", "translation", "multilingual"].includes(topic),
+  );
 
   return {
     goodFirstIssueCount,
     helpWantedCount,
     hasContributing: contributing,
     hasDocsFolder: docs,
-    readmeQuality:
-      !readme.exists ? "missing" : readme.size > 3500 ? "strong" : readme.size > 1200 ? "basic" : "thin",
+    readmeQuality,
     issueActivity: item.open_issues_count > 12 ? "active" : item.open_issues_count > 3 ? "warming" : "quiet",
     isFresh: daysSinceUpdate <= 21 || ageInDays <= 180,
     localizationOpportunity:
-      readme.exists && readme.size > 800 && !item.topics?.some((topic) => topic.includes("i18n")),
+      readme.exists &&
+      (readmeQuality === "basic" || readmeQuality === "strong") &&
+      (docs || contributing) &&
+      hasLocalizationContext &&
+      !alreadyLocalizationFocused,
   };
 }
 
