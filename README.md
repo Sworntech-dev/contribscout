@@ -78,6 +78,8 @@ The Proof Vault is a localStorage-backed feature for saving contribution evidenc
 
 In v0.3, Proof Vault can export local proof entries as Markdown or JSON. Markdown export is useful for project updates, applications, or personal contribution logs. JSON export is useful for backup or later restore work. Data remains local to the browser; no account or database is used.
 
+In v0.4, project cards include Contribution Fit Details and GitHub issue drill-down links. These help builders move from "interesting repo" to "where do I start?" by exposing docs, issue, README, and contribution-guide signals directly on each card.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.
@@ -166,7 +168,7 @@ See `hermes/README.md`, `hermes/skills/contribscout/SKILL.md`, and `hermes/sampl
 
 - Add user role preferences such as docs, frontend, contracts, research, localization, and QA.
 - Add filters for ecosystem, repo age, language, and contribution type.
-- Add optional GitHub issue drill-down views.
+- Add issue drill-down refinements.
 - Add Hermes daily report.
 - Add GitHub token live scan refinements.
 - Add Proof Vault export.

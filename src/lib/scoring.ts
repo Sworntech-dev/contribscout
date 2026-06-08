@@ -136,13 +136,19 @@ function badgesFor(repo: ScoutRepository) {
 
 function reasonFor(repo: ScoutRepository, score: number) {
   const reasons = [];
+  const signals = repo.signals;
+  const hasIssueLabels = signals.goodFirstIssueCount + signals.helpWantedCount > 0;
 
-  if (repo.signals.isFresh) reasons.push("fresh commits");
-  if (repo.signals.goodFirstIssueCount > 0) reasons.push("open beginner path");
-  if (repo.signals.helpWantedCount > 0) reasons.push("maintainers asking for help");
-  if (!repo.signals.hasContributing) reasons.push("contribution guide gap");
-  if (!repo.signals.hasDocsFolder || repo.signals.readmeQuality === "thin") reasons.push("docs can improve");
-  if (repo.signals.localizationOpportunity && repo.signals.hasDocsFolder) reasons.push("localized onboarding space");
+  if (signals.goodFirstIssueCount > 0) reasons.push("beginner-friendly issue path");
+  if (signals.helpWantedCount > 0) reasons.push("maintainers asking for help");
+  if (repo.openIssues > 0 && !hasIssueLabels) reasons.push("open issues need triage or reproduction notes");
+  if (signals.readmeQuality === "thin" || signals.readmeQuality === "missing") {
+    reasons.push("setup and README clarity gap");
+  }
+  if (!signals.hasDocsFolder) reasons.push("docs folder gap");
+  if (!signals.hasContributing) reasons.push("contribution guide gap");
+  if (signals.isFresh) reasons.push("fresh commits");
+  if (signals.localizationOpportunity && signals.hasDocsFolder) reasons.push("localized onboarding space");
   if (repo.stars < 500) reasons.push("not crowded yet");
   if (!hasVisibleContributionPath(repo)) reasons.push("limited visible contribution path");
 
