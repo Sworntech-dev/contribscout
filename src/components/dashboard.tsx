@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { DailyOpportunityReport } from "@/components/daily-opportunity-report";
 import { OpportunityCard } from "@/components/opportunity-card";
 import { ProofVault } from "@/components/proof-vault";
 import type { Opportunity } from "@/lib/types";
@@ -164,6 +165,13 @@ export function Dashboard() {
         </section>
 
         <ProofVault opportunities={opportunities} />
+
+        <DailyOpportunityReport
+          opportunities={opportunities}
+          source={source}
+          notice={error}
+          loading={loading}
+        />
 
         <section className="mb-10 border-t border-white/10 pt-8">
           <SectionHeader

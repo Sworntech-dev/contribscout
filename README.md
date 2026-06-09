@@ -80,6 +80,8 @@ In v0.3, Proof Vault can export local proof entries as Markdown or JSON. Markdow
 
 In v0.4, project cards include Contribution Fit Details and GitHub issue drill-down links. These help builders move from "interesting repo" to "where do I start?" by exposing docs, issue, README, and contribution-guide signals directly on each card.
 
+In v0.5, the dashboard adds a Daily Opportunity Report that turns the current top opportunities into Markdown. The report can be copied or downloaded and mirrors the kind of daily opportunity summary the Hermes-compatible skill package is designed to consume.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.
@@ -159,6 +161,8 @@ The app is safe to deploy without `GITHUB_TOKEN`; it will use sample data.
 ContribScout is a standalone Vercel dashboard. The v0.2 Hermes integration adds a Hermes-compatible skill package at `hermes/skills/contribscout/`, alongside the earlier `hermes/contribscout_skill.py` sketch.
 
 The skill package can fetch top contribution opportunities from `https://contribscout.vercel.app/api/opportunities` and format them as a Hermes-ready daily report. This supports an agent-assisted contributor workflow without claiming that Vercel hosts a Hermes runtime.
+
+The v0.5 dashboard can also generate a Daily Opportunity Report from the currently loaded opportunities. This is a browser-side export from the standalone Vercel app, separate from running the Hermes skill package.
 
 This is a Hermes skill layer, not a hosted Hermes runtime inside Vercel. A later version can wire the skill into a real Hermes cron or daily report flow.
 
