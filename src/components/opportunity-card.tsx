@@ -3,9 +3,13 @@ import type { Opportunity } from "@/lib/types";
 export function OpportunityCard({
   opportunity,
   isSampleFallback,
+  isInWatchlist,
+  onSaveToWatchlist,
 }: {
   opportunity: Opportunity;
   isSampleFallback: boolean;
+  isInWatchlist: boolean;
+  onSaveToWatchlist: (opportunity: Opportunity) => void;
 }) {
   const issueLinks = getIssueLinks(opportunity);
   const showIssueLinks = !isSampleFallback && isGithubRepoUrl(opportunity.url);
@@ -77,20 +81,30 @@ export function OpportunityCard({
       </details>
 
       <div className="mt-auto pt-5">
-        {isSampleFallback || !opportunity.url ? (
-          <span className="inline-flex rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-sm font-semibold text-slate-400">
-            Sample project
-          </span>
-        ) : (
-          <a
-            href={opportunity.url}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-white transition hover:border-mint/50 hover:bg-mint/10"
+        <div className="flex flex-wrap gap-2">
+          {isSampleFallback || !opportunity.url ? (
+            <span className="inline-flex rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-sm font-semibold text-slate-400">
+              Sample project
+            </span>
+          ) : (
+            <a
+              href={opportunity.url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-white transition hover:border-mint/50 hover:bg-mint/10"
+            >
+              Open repository
+            </a>
+          )}
+          <button
+            type="button"
+            onClick={() => onSaveToWatchlist(opportunity)}
+            disabled={isInWatchlist}
+            className="inline-flex rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-mint/50 hover:text-white disabled:cursor-default disabled:border-mint/25 disabled:bg-mint/10 disabled:text-mint"
           >
-            Open repository
-          </a>
-        )}
+            {isInWatchlist ? "In Watchlist" : "Save to Watchlist"}
+          </button>
+        </div>
       </div>
     </article>
   );

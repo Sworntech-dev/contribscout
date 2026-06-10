@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { DailyOpportunityReport } from "@/components/daily-opportunity-report";
 import { OpportunityCard } from "@/components/opportunity-card";
 import { ProofVault } from "@/components/proof-vault";
-import type { Opportunity } from "@/lib/types";
+import { RepoWatchlist } from "@/components/repo-watchlist";
+import type { Opportunity, WatchlistItem } from "@/lib/types";
 
 type ApiResponse = {
   source: "github" | "sample";
@@ -13,11 +14,14 @@ type ApiResponse = {
   opportunities: Opportunity[];
 };
 
+const WATCHLIST_STORAGE_KEY = "contribscout.watchlist.v1";
+
 export function Dashboard() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [source, setSource] = useState<"github" | "sample" | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
 
   useEffect(() => {
     let alive = true;
@@ -50,6 +54,17 @@ export function Dashboard() {
     };
   }, []);
 
+  useEffect(() => {
+    const saved = window.localStorage.getItem(WATCHLIST_STORAGE_KEY);
+    if (saved) {
+      queueMicrotask(() => setWatchlist(JSON.parse(saved) as WatchlistItem[]));
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(watchlist));
+  }, [watchlist]);
+
   const topOpportunity = opportunities[0];
   const averageScore = useMemo(() => {
     const total = opportunities.reduce((sum, opportunity) => sum + opportunity.roleOpportunityScore, 0);
@@ -57,6 +72,49 @@ export function Dashboard() {
   }, [opportunities]);
   const isSampleFallback = source === "sample";
   const sourceLabel = loading && !source ? "scanning" : isSampleFallback ? "sample fallback" : "github";
+
+  function isInWatchlist(opportunity: Opportunity) {
+    const repoUrl = opportunity.url.toLowerCase();
+    const projectName = opportunity.name.toLowerCase();
+
+    return watchlist.some((item) => {
+      const savedUrl = item.repoUrl.toLowerCase();
+      const savedName = item.projectName.toLowerCase();
+      return (repoUrl && savedUrl === repoUrl) || savedName === projectName;
+    });
+  }
+
+  function saveToWatchlist(opportunity: Opportunity) {
+    if (isInWatchlist(opportunity)) return;
+
+    setWatchlist((current) => [
+      {
+        id: crypto.randomUUID(),
+        projectName: opportunity.name,
+        fullName: opportunity.fullName,
+        score: opportunity.roleOpportunityScore,
+        category: opportunity.category,
+        suggestedAction: opportunity.suggestedAction,
+        scoreReason: opportunity.scoreReason,
+        repoUrl: opportunity.url,
+        savedAt: new Date().toISOString(),
+        note: "",
+        status: "Watching",
+      },
+      ...current,
+    ]);
+  }
+
+  function updateWatchlistItem(
+    id: string,
+    updates: Partial<Pick<WatchlistItem, "note" | "status">>,
+  ) {
+    setWatchlist((current) => current.map((item) => (item.id === id ? { ...item, ...updates } : item)));
+  }
+
+  function removeWatchlistItem(id: string) {
+    setWatchlist((current) => current.filter((item) => item.id !== id));
+  }
 
   return (
     <main className="min-h-screen overflow-hidden">
@@ -143,6 +201,8 @@ export function Dashboard() {
                   key={opportunity.fullName}
                   opportunity={opportunity}
                   isSampleFallback={isSampleFallback}
+                  isInWatchlist={isInWatchlist(opportunity)}
+                  onSaveToWatchlist={saveToWatchlist}
                 />
               ))}
             </div>
@@ -163,6 +223,12 @@ export function Dashboard() {
             body="Save what you tried, where the proof lives, and whether it is planned, submitted, merged, or archived."
           />
         </section>
+
+        <RepoWatchlist
+          items={watchlist}
+          onUpdate={updateWatchlistItem}
+          onRemove={removeWatchlistItem}
+        />
 
         <ProofVault opportunities={opportunities} />
 

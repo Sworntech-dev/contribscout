@@ -82,6 +82,8 @@ In v0.4, project cards include Contribution Fit Details and GitHub issue drill-d
 
 In v0.5, the dashboard adds a Daily Opportunity Report that turns the current top opportunities into Markdown. The report can be copied or downloaded and mirrors the kind of daily opportunity summary the Hermes-compatible skill package is designed to consume.
 
+In v0.6, Repo Watchlist adds a local contribution pipeline for tracking interesting repositories before they become Proof Vault entries. Watchlist is for planned or in-progress opportunities; Proof Vault remains for completed or submitted contribution evidence.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.
@@ -175,7 +177,7 @@ See `hermes/README.md`, `hermes/skills/contribscout/SKILL.md`, and `hermes/sampl
 - Add issue drill-down refinements.
 - Add Hermes daily report.
 - Add GitHub token live scan refinements.
-- Add Proof Vault export.
+- Add watchlist import/export polish.
 - Add authenticated saved vault sync.
 - Add richer evidence tracking for contribution history.
 - Add external community sources later, after the GitHub-only MVP is solid.

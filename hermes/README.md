@@ -17,6 +17,8 @@ Proof Vault export is separate from this Hermes skill package. Proof Vault repor
 
 The v0.5 dashboard also includes a Daily Opportunity Report export. It produces a similar Markdown summary from the opportunities currently loaded in the browser, while this Hermes skill package remains the separate skill-layer path for scheduled or agent-assisted report generation.
 
+The v0.6 Repo Watchlist complements this Markdown-report workflow by letting users keep a local contribution pipeline before moving completed work into Proof Vault. Watchlist data stays in the browser and is not sent to Hermes automatically.
+
 ## How Hermes Would Use It
 
 A Hermes workflow could call the report script on a daily schedule, then deliver the report to a user workspace, inbox, or agent-assisted contributor workflow.

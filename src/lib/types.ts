@@ -46,3 +46,19 @@ export type ProofEntry = {
   notes: string;
   date: string;
 };
+
+export type WatchlistStatus = "Watching" | "Planned" | "In Progress" | "Submitted" | "Skipped";
+
+export type WatchlistItem = {
+  id: string;
+  projectName: string;
+  fullName: string;
+  score: number;
+  category: string;
+  suggestedAction: string;
+  scoreReason: string;
+  repoUrl: string;
+  savedAt: string;
+  note: string;
+  status: WatchlistStatus;
+};
