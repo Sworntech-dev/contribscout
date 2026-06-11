@@ -10,11 +10,13 @@ export function DailyOpportunityReport({
   source,
   notice,
   loading,
+  usesFilteredResults = false,
 }: {
   opportunities: Opportunity[];
   source: ReportSource;
   notice: string | null;
   loading: boolean;
+  usesFilteredResults?: boolean;
 }) {
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
   const generatedAt = new Date().toISOString();
@@ -74,6 +76,9 @@ export function DailyOpportunityReport({
         </div>
 
         {notice ? <p className="mt-4 text-sm leading-6 text-slate-400">{notice}</p> : null}
+        {usesFilteredResults ? (
+          <p className="mt-4 text-sm font-semibold text-mint">Report uses current filtered results.</p>
+        ) : null}
 
         <div className="mt-5 flex flex-col gap-2 border-t border-white/10 pt-5 sm:flex-row sm:flex-wrap">
           <ReportButton disabled={!hasReport} onClick={copyReport}>

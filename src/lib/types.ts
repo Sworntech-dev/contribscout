@@ -62,3 +62,30 @@ export type WatchlistItem = {
   note: string;
   status: WatchlistStatus;
 };
+
+export type OpportunitySort = "best-match" | "highest-score" | "good-first" | "open-issues" | "low-saturation";
+
+export type SmartFilterKey =
+  | "score70"
+  | "goodFirst"
+  | "helpWanted"
+  | "missingDocs"
+  | "missingContributing"
+  | "lowSaturation"
+  | "openIssues"
+  | "githubOnly";
+
+export type RolePreset =
+  | "first-pr"
+  | "docs-fix"
+  | "good-first"
+  | "low-competition"
+  | "high-score"
+  | "ai-agent-tools"
+  | "needs-contributing";
+
+export type SmartFilterState = {
+  activePreset: RolePreset | null;
+  filters: Record<SmartFilterKey, boolean>;
+  sort: OpportunitySort;
+};

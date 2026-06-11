@@ -84,6 +84,8 @@ In v0.5, the dashboard adds a Daily Opportunity Report that turns the current to
 
 In v0.6, Repo Watchlist adds a local contribution pipeline for tracking interesting repositories before they become Proof Vault entries. Watchlist is for planned or in-progress opportunities; Proof Vault remains for completed or submitted contribution evidence.
 
+In v0.7, Smart Filters and Role Presets help users narrow opportunities by contribution style, issue signals, score, and saturation. The Daily Opportunity Report uses the currently filtered results when filters are active.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.
@@ -178,6 +180,7 @@ See `hermes/README.md`, `hermes/skills/contribscout/SKILL.md`, and `hermes/sampl
 - Add Hermes daily report.
 - Add GitHub token live scan refinements.
 - Add watchlist import/export polish.
+- Add saved filter templates.
 - Add authenticated saved vault sync.
 - Add richer evidence tracking for contribution history.
 - Add external community sources later, after the GitHub-only MVP is solid.

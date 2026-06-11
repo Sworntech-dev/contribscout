@@ -19,6 +19,8 @@ The v0.5 dashboard also includes a Daily Opportunity Report export. It produces 
 
 The v0.6 Repo Watchlist complements this Markdown-report workflow by letting users keep a local contribution pipeline before moving completed work into Proof Vault. Watchlist data stays in the browser and is not sent to Hermes automatically.
 
+The v0.7 Smart Filters and Role Presets help users shape the browser-side Markdown report and watchlist workflow before exporting or copying results.
+
 ## How Hermes Would Use It
 
 A Hermes workflow could call the report script on a daily schedule, then deliver the report to a user workspace, inbox, or agent-assisted contributor workflow.
