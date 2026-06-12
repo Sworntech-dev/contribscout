@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { ContributionBriefModal } from "@/components/contribution-brief-modal";
 import { DailyOpportunityReport } from "@/components/daily-opportunity-report";
 import { OpportunityCard } from "@/components/opportunity-card";
 import { ProofVault } from "@/components/proof-vault";
 import { RepoWatchlist } from "@/components/repo-watchlist";
 import { SmartFilters } from "@/components/smart-filters";
 import type {
+  ContributionBriefTarget,
   Opportunity,
   OpportunitySort,
   RolePreset,
@@ -77,6 +79,7 @@ export function Dashboard() {
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [smartFilters, setSmartFilters] = useState<SmartFilterState>(defaultSmartFilters);
   const [filtersHydrated, setFiltersHydrated] = useState(false);
+  const [briefTarget, setBriefTarget] = useState<ContributionBriefTarget | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -227,6 +230,26 @@ export function Dashboard() {
     setWatchlist((current) => current.filter((item) => item.id !== id));
   }
 
+  function createBriefFromOpportunity(opportunity: Opportunity) {
+    const savedItem = findWatchlistItemForOpportunity(watchlist, opportunity);
+    setBriefTarget(opportunityToBriefTarget(opportunity, savedItem));
+  }
+
+  function createBriefFromWatchlist(item: WatchlistItem) {
+    setBriefTarget(watchlistItemToBriefTarget(item));
+  }
+
+  function saveBriefToWatchlist(target: ContributionBriefTarget, markdown: string) {
+    const savedItem = findWatchlistItemForBriefTarget(watchlist, target);
+    if (!savedItem) return;
+
+    setWatchlist((current) =>
+      current.map((item) =>
+        item.id === savedItem.id ? { ...item, briefMarkdown: markdown, briefSavedAt: new Date().toISOString() } : item,
+      ),
+    );
+  }
+
   return (
     <main className="min-h-screen overflow-hidden">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-6 sm:px-6 lg:px-8">
@@ -337,6 +360,7 @@ export function Dashboard() {
                   isSampleFallback={isSampleFallback}
                   isInWatchlist={isInWatchlist(opportunity)}
                   onSaveToWatchlist={saveToWatchlist}
+                  onCreateBrief={createBriefFromOpportunity}
                 />
               ))}
             </div>
@@ -362,6 +386,7 @@ export function Dashboard() {
           items={watchlist}
           onUpdate={updateWatchlistItem}
           onRemove={removeWatchlistItem}
+          onCreateBrief={createBriefFromWatchlist}
         />
 
         <ProofVault opportunities={opportunities} />
@@ -394,6 +419,12 @@ export function Dashboard() {
           </div>
         </section>
       </section>
+      <ContributionBriefModal
+        target={briefTarget}
+        canSaveToWatchlist={briefTarget ? Boolean(findWatchlistItemForBriefTarget(watchlist, briefTarget)) : false}
+        onClose={() => setBriefTarget(null)}
+        onSaveToWatchlist={saveBriefToWatchlist}
+      />
     </main>
   );
 }
@@ -632,4 +663,64 @@ function isAiOrDeveloperTool(opportunity: Opportunity) {
     .toLowerCase();
 
   return /\b(ai|agent|llm|tool|tools|automation|developer|devtool|sdk|cli)\b/.test(haystack);
+}
+
+function opportunityToBriefTarget(opportunity: Opportunity, savedItem?: WatchlistItem): ContributionBriefTarget {
+  return {
+    id: `opportunity:${opportunity.fullName}`,
+    projectName: opportunity.name,
+    fullName: opportunity.fullName,
+    repoUrl: opportunity.url,
+    score: opportunity.roleOpportunityScore,
+    category: opportunity.category,
+    suggestedAction: opportunity.suggestedAction,
+    scoreReason: opportunity.scoreReason,
+    signals: opportunity.signals,
+    openIssues: opportunity.openIssues,
+    stars: opportunity.stars,
+    watchlistStatus: savedItem?.status,
+    watchlistNote: savedItem?.note,
+  };
+}
+
+function watchlistItemToBriefTarget(item: WatchlistItem): ContributionBriefTarget {
+  return {
+    id: `watchlist:${item.id}`,
+    projectName: item.projectName,
+    fullName: item.fullName,
+    repoUrl: item.repoUrl,
+    score: item.score,
+    category: item.category,
+    suggestedAction: item.suggestedAction,
+    scoreReason: item.scoreReason,
+    watchlistStatus: item.status,
+    watchlistNote: item.note,
+  };
+}
+
+function findWatchlistItemForOpportunity(items: WatchlistItem[], opportunity: Opportunity) {
+  const repoUrl = opportunity.url.toLowerCase();
+  const projectName = opportunity.name.toLowerCase();
+
+  return items.find((item) => {
+    const savedUrl = item.repoUrl.toLowerCase();
+    const savedName = item.projectName.toLowerCase();
+    return (repoUrl && savedUrl === repoUrl) || savedName === projectName;
+  });
+}
+
+function findWatchlistItemForBriefTarget(items: WatchlistItem[], target: ContributionBriefTarget) {
+  if (target.id.startsWith("watchlist:")) {
+    const id = target.id.replace("watchlist:", "");
+    return items.find((item) => item.id === id);
+  }
+
+  const repoUrl = target.repoUrl?.toLowerCase() ?? "";
+  const projectName = target.projectName.toLowerCase();
+
+  return items.find((item) => {
+    const savedUrl = item.repoUrl.toLowerCase();
+    const savedName = item.projectName.toLowerCase();
+    return (repoUrl && savedUrl === repoUrl) || savedName === projectName;
+  });
 }

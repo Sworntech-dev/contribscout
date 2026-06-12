@@ -86,6 +86,8 @@ In v0.6, Repo Watchlist adds a local contribution pipeline for tracking interest
 
 In v0.7, Smart Filters and Role Presets help users narrow opportunities by contribution style, issue signals, score, and saturation. The Daily Opportunity Report uses the currently filtered results when filters are active.
 
+In v0.8, Contribution Brief Builder turns one selected opportunity into a copy-ready Markdown plan before starting a PR. Briefs include repo context, contribution fit signals, issue links, starter checks, suggested approach, and proof tracking reminders.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.

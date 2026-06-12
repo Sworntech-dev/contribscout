@@ -5,11 +5,13 @@ export function OpportunityCard({
   isSampleFallback,
   isInWatchlist,
   onSaveToWatchlist,
+  onCreateBrief,
 }: {
   opportunity: Opportunity;
   isSampleFallback: boolean;
   isInWatchlist: boolean;
   onSaveToWatchlist: (opportunity: Opportunity) => void;
+  onCreateBrief: (opportunity: Opportunity) => void;
 }) {
   const issueLinks = getIssueLinks(opportunity);
   const showIssueLinks = !isSampleFallback && isGithubRepoUrl(opportunity.url);
@@ -103,6 +105,13 @@ export function OpportunityCard({
             className="inline-flex rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-mint/50 hover:text-white disabled:cursor-default disabled:border-mint/25 disabled:bg-mint/10 disabled:text-mint"
           >
             {isInWatchlist ? "In Watchlist" : "Save to Watchlist"}
+          </button>
+          <button
+            type="button"
+            onClick={() => onCreateBrief(opportunity)}
+            className="inline-flex rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-skyglass/50 hover:text-white"
+          >
+            Brief
           </button>
         </div>
       </div>

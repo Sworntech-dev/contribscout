@@ -61,6 +61,24 @@ export type WatchlistItem = {
   savedAt: string;
   note: string;
   status: WatchlistStatus;
+  briefMarkdown?: string;
+  briefSavedAt?: string;
+};
+
+export type ContributionBriefTarget = {
+  id: string;
+  projectName: string;
+  fullName?: string;
+  repoUrl?: string;
+  score?: number;
+  category?: string;
+  suggestedAction?: string;
+  scoreReason?: string;
+  watchlistStatus?: WatchlistStatus;
+  watchlistNote?: string;
+  signals?: RepositorySignals;
+  openIssues?: number;
+  stars?: number;
 };
 
 export type OpportunitySort = "best-match" | "highest-score" | "good-first" | "open-issues" | "low-saturation";

@@ -8,10 +8,12 @@ export function RepoWatchlist({
   items,
   onUpdate,
   onRemove,
+  onCreateBrief,
 }: {
   items: WatchlistItem[];
   onUpdate: (id: string, updates: Partial<Pick<WatchlistItem, "note" | "status">>) => void;
   onRemove: (id: string) => void;
+  onCreateBrief: (item: WatchlistItem) => void;
 }) {
   const hasItems = items.length > 0;
 
@@ -149,6 +151,13 @@ export function RepoWatchlist({
                     </button>
                   </>
                 ) : null}
+                <button
+                  type="button"
+                  onClick={() => onCreateBrief(item)}
+                  className="rounded-md border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-xs font-semibold text-slate-300 transition hover:border-skyglass/50 hover:text-white"
+                >
+                  Brief
+                </button>
                 <button
                   type="button"
                   onClick={() => onRemove(item.id)}
