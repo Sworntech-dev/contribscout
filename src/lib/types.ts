@@ -76,6 +76,7 @@ export type ContributionBriefTarget = {
   scoreReason?: string;
   watchlistStatus?: WatchlistStatus;
   watchlistNote?: string;
+  isSample?: boolean;
   signals?: RepositorySignals;
   openIssues?: number;
   stars?: number;

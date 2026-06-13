@@ -88,6 +88,8 @@ In v0.7, Smart Filters and Role Presets help users narrow opportunities by contr
 
 In v0.8, Contribution Brief Builder turns one selected opportunity into a copy-ready Markdown plan before starting a PR. Briefs include repo context, contribution fit signals, issue links, starter checks, suggested approach, and proof tracking reminders.
 
+In v0.9, PR Readiness Kit helps users prepare a clean open-source PR from an opportunity. It generates duplicate checks, GitHub review links, branch and commit suggestions, PR description copy, validation steps, developer update text, and risk flags.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ContributionBriefModal } from "@/components/contribution-brief-modal";
 import { DailyOpportunityReport } from "@/components/daily-opportunity-report";
 import { OpportunityCard } from "@/components/opportunity-card";
+import { PrReadinessKitModal } from "@/components/pr-readiness-kit-modal";
 import { ProofVault } from "@/components/proof-vault";
 import { RepoWatchlist } from "@/components/repo-watchlist";
 import { SmartFilters } from "@/components/smart-filters";
@@ -80,6 +81,7 @@ export function Dashboard() {
   const [smartFilters, setSmartFilters] = useState<SmartFilterState>(defaultSmartFilters);
   const [filtersHydrated, setFiltersHydrated] = useState(false);
   const [briefTarget, setBriefTarget] = useState<ContributionBriefTarget | null>(null);
+  const [prKitTarget, setPrKitTarget] = useState<ContributionBriefTarget | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -232,11 +234,20 @@ export function Dashboard() {
 
   function createBriefFromOpportunity(opportunity: Opportunity) {
     const savedItem = findWatchlistItemForOpportunity(watchlist, opportunity);
-    setBriefTarget(opportunityToBriefTarget(opportunity, savedItem));
+    setBriefTarget(opportunityToBriefTarget(opportunity, isSampleFallback, savedItem));
   }
 
   function createBriefFromWatchlist(item: WatchlistItem) {
     setBriefTarget(watchlistItemToBriefTarget(item));
+  }
+
+  function createPrKitFromOpportunity(opportunity: Opportunity) {
+    const savedItem = findWatchlistItemForOpportunity(watchlist, opportunity);
+    setPrKitTarget(opportunityToBriefTarget(opportunity, isSampleFallback, savedItem));
+  }
+
+  function createPrKitFromWatchlist(item: WatchlistItem) {
+    setPrKitTarget(watchlistItemToBriefTarget(item));
   }
 
   function saveBriefToWatchlist(target: ContributionBriefTarget, markdown: string) {
@@ -361,6 +372,7 @@ export function Dashboard() {
                   isInWatchlist={isInWatchlist(opportunity)}
                   onSaveToWatchlist={saveToWatchlist}
                   onCreateBrief={createBriefFromOpportunity}
+                  onCreatePrKit={createPrKitFromOpportunity}
                 />
               ))}
             </div>
@@ -387,6 +399,7 @@ export function Dashboard() {
           onUpdate={updateWatchlistItem}
           onRemove={removeWatchlistItem}
           onCreateBrief={createBriefFromWatchlist}
+          onCreatePrKit={createPrKitFromWatchlist}
         />
 
         <ProofVault opportunities={opportunities} />
@@ -425,6 +438,7 @@ export function Dashboard() {
         onClose={() => setBriefTarget(null)}
         onSaveToWatchlist={saveBriefToWatchlist}
       />
+      <PrReadinessKitModal target={prKitTarget} onClose={() => setPrKitTarget(null)} />
     </main>
   );
 }
@@ -665,7 +679,11 @@ function isAiOrDeveloperTool(opportunity: Opportunity) {
   return /\b(ai|agent|llm|tool|tools|automation|developer|devtool|sdk|cli)\b/.test(haystack);
 }
 
-function opportunityToBriefTarget(opportunity: Opportunity, savedItem?: WatchlistItem): ContributionBriefTarget {
+function opportunityToBriefTarget(
+  opportunity: Opportunity,
+  isSampleFallback: boolean,
+  savedItem?: WatchlistItem,
+): ContributionBriefTarget {
   return {
     id: `opportunity:${opportunity.fullName}`,
     projectName: opportunity.name,
@@ -680,6 +698,7 @@ function opportunityToBriefTarget(opportunity: Opportunity, savedItem?: Watchlis
     stars: opportunity.stars,
     watchlistStatus: savedItem?.status,
     watchlistNote: savedItem?.note,
+    isSample: isSampleFallback,
   };
 }
 

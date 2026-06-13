@@ -23,6 +23,8 @@ The v0.7 Smart Filters and Role Presets help users shape the browser-side Markdo
 
 The v0.8 Contribution Brief Builder complements the same Markdown workflow by creating a focused plan for one selected repo before a user starts a PR.
 
+The v0.9 PR Readiness Kit extends the browser-side preparation flow with deterministic PR checklist and submission copy. Hermes can still consume reports separately through the skill package.
+
 ## How Hermes Would Use It
 
 A Hermes workflow could call the report script on a daily schedule, then deliver the report to a user workspace, inbox, or agent-assisted contributor workflow.
