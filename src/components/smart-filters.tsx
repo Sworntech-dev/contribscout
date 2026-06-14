@@ -53,7 +53,7 @@ export function SmartFilters({
   const hasActiveFilters = state.activePreset || Object.values(state.filters).some(Boolean) || state.sort !== "best-match";
 
   return (
-    <section className="rounded-md border border-white/10 bg-panel/75 p-4">
+    <section className="rounded-md border border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.78),rgba(8,9,15,0.78))] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-mint">Smart Filters</p>
@@ -68,7 +68,7 @@ export function SmartFilters({
             <select
               value={state.sort}
               onChange={(event) => onSortChange(event.target.value as OpportunitySort)}
-              className="w-full rounded-md border border-white/10 bg-ink px-3 py-2 text-sm font-semibold text-slate-200 outline-none transition focus:border-mint/60 sm:w-56"
+              className="w-full rounded-md border border-white/10 bg-ink/80 px-3 py-2 text-sm font-semibold text-slate-200 outline-none transition focus:border-mint/60 sm:w-56"
             >
               {sortOptions.map((option) => (
                 <option key={option.value} value={option.value}>

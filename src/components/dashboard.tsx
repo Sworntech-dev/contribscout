@@ -27,6 +27,7 @@ type ApiResponse = {
 
 const WATCHLIST_STORAGE_KEY = "contribscout.watchlist.v1";
 const FILTER_STORAGE_KEY = "contribscout.filters.v1";
+const PROOF_STORAGE_KEY = "contribscout-proof-vault";
 
 const defaultSmartFilters: SmartFilterState = {
   activePreset: null,
@@ -82,6 +83,7 @@ export function Dashboard() {
   const [filtersHydrated, setFiltersHydrated] = useState(false);
   const [briefTarget, setBriefTarget] = useState<ContributionBriefTarget | null>(null);
   const [prKitTarget, setPrKitTarget] = useState<ContributionBriefTarget | null>(null);
+  const [proofCount, setProofCount] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -126,6 +128,17 @@ export function Dashboard() {
   }, [watchlist]);
 
   useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(PROOF_STORAGE_KEY);
+      if (saved) {
+        queueMicrotask(() => setProofCount(JSON.parse(saved).length ?? 0));
+      }
+    } catch {
+      queueMicrotask(() => setProofCount(0));
+    }
+  }, []);
+
+  useEffect(() => {
     let nextFilters = defaultSmartFilters;
 
     try {
@@ -154,6 +167,7 @@ export function Dashboard() {
   );
   const filtersActive = isSmartFilterActive(smartFilters);
   const activeFilterSummary = getActiveFilterSummary(smartFilters);
+  const activeFilterCount = getActiveFilterCount(smartFilters);
   const topOpportunity = filteredOpportunities[0];
   const averageScore = useMemo(() => {
     const total = filteredOpportunities.reduce((sum, opportunity) => sum + opportunity.roleOpportunityScore, 0);
@@ -263,14 +277,14 @@ export function Dashboard() {
 
   return (
     <main className="min-h-screen overflow-hidden">
-      <section className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-6 sm:px-6 lg:px-8">
-        <nav className="flex items-center justify-between border-b border-white/10 pb-5">
+      <section className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
+        <nav className="flex items-center justify-between rounded-md border border-white/10 bg-white/[0.035] px-4 py-3 backdrop-blur">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-md border border-mint/40 bg-mint/10 text-sm font-black text-mint">
+            <div className="grid h-10 w-10 place-items-center rounded-md border border-mint/40 bg-mint/10 text-sm font-black text-mint shadow-[0_0_30px_rgba(83,242,184,0.18)]">
               CS
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-sm font-semibold text-white">ContribScout</p>
+              <p className="text-base font-black text-white">ContribScout</p>
               <span className="rounded-md border border-mint/25 bg-mint/10 px-2 py-1 text-xs font-semibold text-mint">
                 Hermes Skill Layer
               </span>
@@ -284,62 +298,87 @@ export function Dashboard() {
           </a>
         </nav>
 
-        <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
-          <div className="max-w-3xl py-8 sm:py-14">
-            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.28em] text-mint">
-              Early contribution radar
-            </p>
-            <h1 className="text-4xl font-black leading-tight text-white sm:text-6xl">
-              Find early open-source projects where your contribution can matter early.
-            </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
-              ContribScout scans GitHub signals, scores contribution leverage, and turns noisy repo discovery
-              into a short list of useful next actions.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3 text-sm text-slate-300">
-              <span className="rounded-md border border-mint/30 bg-mint/10 px-3 py-2 text-mint">
-                Role Opportunity Score
-              </span>
-              <span className="rounded-md border border-white/10 bg-white/5 px-3 py-2">
-                Sample fallback ready
-              </span>
-              <span className="rounded-md border border-white/10 bg-white/5 px-3 py-2">
-                Vercel deployable
-              </span>
+        <section className="relative overflow-hidden rounded-md border border-white/10 bg-[linear-gradient(135deg,rgba(15,23,42,0.94),rgba(8,9,15,0.88))] p-5 shadow-glow sm:p-7 lg:p-8">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-mint/60 to-transparent" />
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+            <div className="max-w-3xl py-4">
+              <p className="mb-4 text-sm font-semibold uppercase tracking-[0.28em] text-mint">
+                Open-source contribution mission control
+              </p>
+              <h1 className="text-4xl font-black leading-tight text-white sm:text-6xl">
+                ContribScout
+              </h1>
+              <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
+                Discover high-leverage open-source contribution opportunities and turn them into clean PR workflows.
+              </p>
+              <div className="mt-7 flex flex-wrap gap-3">
+                {["Live GitHub Scanner", "Hermes Skill Layer", "PR Workflow Kit", "Local Proof Vault"].map((badge) => (
+                  <span
+                    key={`hero-badge-${badge}`}
+                    className="rounded-md border border-white/10 bg-white/[0.06] px-3 py-2 text-sm font-semibold text-slate-200"
+                  >
+                    {badge}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <a
+                  href="#top-opportunities"
+                  className="rounded-md bg-mint px-4 py-3 text-center text-sm font-black text-ink transition hover:bg-white"
+                >
+                  Review opportunities
+                </a>
+                <a
+                  href="#daily-report"
+                  className="rounded-md border border-white/10 bg-white/[0.05] px-4 py-3 text-center text-sm font-semibold text-slate-200 transition hover:border-mint/50 hover:text-white"
+                >
+                  Generate report
+                </a>
+              </div>
             </div>
-          </div>
 
-          <div className="rounded-md border border-white/10 bg-panel/80 p-5 shadow-glow">
-            <p className="text-sm text-slate-400">Current scan</p>
-            <div className="mt-4 grid grid-cols-3 gap-3">
-              <Metric
-                label="Projects"
-                value={
-                  opportunities.length
-                    ? `${filteredOpportunities.length}/${opportunities.length}`
-                    : opportunities.length.toString()
-                }
-              />
-              <Metric label="Avg score" value={filteredOpportunities.length ? averageScore.toString() : "-"} />
-              <Metric label="Source" value={sourceLabel} />
-            </div>
-            <div className="mt-5 border-t border-white/10 pt-5">
-              <p className="text-sm text-slate-400">Top lead</p>
-              <p className="mt-2 text-xl font-bold text-white">
-                {topOpportunity?.name ?? (opportunities.length ? "No matching opportunities" : "Running live GitHub scan...")}
+            <div className="rounded-md border border-white/10 bg-ink/55 p-5">
+              <p className="text-sm font-semibold text-slate-300">Current operation</p>
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                <Metric
+                  label="Visible"
+                  value={
+                    opportunities.length
+                      ? `${filteredOpportunities.length}/${opportunities.length}`
+                      : opportunities.length.toString()
+                  }
+                />
+                <Metric label="Avg score" value={filteredOpportunities.length ? averageScore.toString() : "-"} />
+                <Metric label="Source" value={sourceLabel} />
+              </div>
+              <div className="mt-5 border-t border-white/10 pt-5">
+                <p className="text-sm text-slate-400">Top lead</p>
+                <p className="mt-2 text-xl font-bold text-white">
+                  {topOpportunity?.name ?? (opportunities.length ? "No matching opportunities" : "Running live GitHub scan...")}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-300">
+                  {topOpportunity?.suggestedAction ??
+                    (opportunities.length
+                      ? "Clear filters or choose a broader preset to see more projects."
+                      : "Fetching current repositories before showing fallback data.")}
+                </p>
+              </div>
+              <p className="mt-5 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs leading-5 text-slate-400">
+                {loading ? "Running live GitHub scan..." : error ?? "Live GitHub scanner returned normalized opportunities."}
               </p>
-              <p className="mt-2 text-sm leading-6 text-slate-300">
-                {topOpportunity?.suggestedAction ??
-                  (opportunities.length
-                    ? "Clear filters or choose a broader preset to see more projects."
-                    : "Fetching current repositories before showing fallback data.")}
-              </p>
             </div>
-            <p className="mt-5 text-xs text-slate-500">
-              {loading ? "Running live GitHub scan..." : error ?? "Live GitHub scanner returned normalized opportunities."}
-            </p>
           </div>
         </section>
+
+        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <StatusCard label="Visible opportunities" value={filteredOpportunities.length.toString()} detail={`${opportunities.length} scanned`} />
+          <StatusCard label="Watchlist" value={watchlist.length.toString()} detail="local pipeline" />
+          <StatusCard label="Proof Vault" value={proofCount.toString()} detail="local entries" />
+          <StatusCard label="Source" value={sourceLabel} detail={isSampleFallback ? "sample fallback" : "live preference"} />
+          <StatusCard label="Active filters" value={activeFilterCount.toString()} detail={activeFilterCount ? "mission narrowed" : "all signals"} />
+        </section>
+
+        <WorkflowStrip />
 
         <SmartFilters
           state={smartFilters}
@@ -354,12 +393,14 @@ export function Dashboard() {
 
         <section id="top-opportunities" className="space-y-4">
           <SectionHeader
-            kicker="Top Opportunities"
-            title="Projects ranked by contributor leverage"
-            body="The scanner favors useful entry points, fresh activity, documentation gaps, and room to be noticed."
+            kicker="Opportunities"
+            title="Ranked contribution targets"
+            body="Filter the live scan, inspect contribution fit, and move promising repos into a PR-ready workflow."
           />
           {loading && opportunities.length === 0 ? (
             <LoadingOpportunities />
+          ) : opportunities.length === 0 ? (
+            <EmptyOpportunitiesState />
           ) : filteredOpportunities.length === 0 ? (
             <EmptyFilteredState onClear={clearFilters} />
           ) : (
@@ -379,20 +420,13 @@ export function Dashboard() {
           )}
         </section>
 
-        <section className="grid gap-4 lg:grid-cols-3">
-          <InfoPanel
-            title="Role Opportunity Score"
-            body="A 1-100 estimate of where a contributor can become useful early. It balances contribution paths, freshness, issue quality, documentation gaps, localization space, and saturation risk."
-          />
-          <InfoPanel
-            title="Suggested Actions"
-            body="Every card turns repo signals into a concrete first move, from setup guides and README reviews to issue notes, docs fixes, and first-run feedback."
-          />
-          <InfoPanel
-            title="Proof Loop"
-            body="Save what you tried, where the proof lives, and whether it is planned, submitted, merged, or archived."
-          />
-        </section>
+        <DailyOpportunityReport
+          opportunities={filteredOpportunities}
+          source={source}
+          notice={error}
+          loading={loading}
+          usesFilteredResults={filtersActive}
+        />
 
         <RepoWatchlist
           items={watchlist}
@@ -402,28 +436,20 @@ export function Dashboard() {
           onCreatePrKit={createPrKitFromWatchlist}
         />
 
-        <ProofVault opportunities={opportunities} />
-
-        <DailyOpportunityReport
-          opportunities={filteredOpportunities}
-          source={source}
-          notice={error}
-          loading={loading}
-          usesFilteredResults={filtersActive}
-        />
+        <ProofVault opportunities={opportunities} onEntryCountChange={setProofCount} />
 
         <section className="mb-10 border-t border-white/10 pt-8">
           <SectionHeader
             kicker="Roadmap"
             title="Small first, useful next"
-            body="The first version stays GitHub-only. Future versions can add role preferences, richer issue detail, Hermes daily reports, proof templates, and optional external community sources."
+            body="ContribScout remains a standalone Vercel dashboard with a Hermes-compatible skill package. Future work can deepen templates, automation, and optional sync without changing the local-first core."
           />
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {["Proof report templates", "Proof Vault import polish", "Hermes daily report automation", "Issue drill-down"].map(
               (item, index) => (
                 <div
                   key={`roadmap-${index}-${item}`}
-                  className="rounded-md border border-white/10 bg-white/[0.03] p-4 text-sm text-slate-300"
+                  className="rounded-md border border-white/10 bg-white/[0.035] p-4 text-sm text-slate-300"
                 >
                   {item}
                 </div>
@@ -445,10 +471,45 @@ export function Dashboard() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-white/10 bg-white/[0.04] p-3">
+    <div className="rounded-md border border-white/10 bg-white/[0.045] p-3">
       <p className="text-xs text-slate-500">{label}</p>
       <p className="mt-1 truncate text-lg font-bold capitalize text-white">{value}</p>
     </div>
+  );
+}
+
+function StatusCard({ label, value, detail }: { label: string; value: string; detail: string }) {
+  return (
+    <div className="rounded-md border border-white/10 bg-white/[0.035] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</p>
+      <p className="mt-3 text-3xl font-black text-white">{value}</p>
+      <p className="mt-1 text-sm capitalize text-slate-400">{detail}</p>
+    </div>
+  );
+}
+
+function WorkflowStrip() {
+  const steps = ["Discover", "Filter", "Save", "Brief", "PR Kit", "Proof Vault"];
+
+  return (
+    <section className="rounded-md border border-white/10 bg-white/[0.03] p-4">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-skyglass">Workflow</p>
+          <h2 className="mt-2 text-xl font-bold text-white">From signal to proof</h2>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {steps.map((step, index) => (
+            <div key={`workflow-${step}`} className="flex items-center gap-2">
+              <span className="rounded-md border border-white/10 bg-ink/60 px-3 py-2 text-sm font-semibold text-slate-200">
+                {step}
+              </span>
+              {index < steps.length - 1 ? <span className="hidden text-slate-600 sm:inline">/</span> : null}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -462,22 +523,16 @@ function SectionHeader({ kicker, title, body }: { kicker: string; title: string;
   );
 }
 
-function InfoPanel({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="rounded-md border border-white/10 bg-white/[0.035] p-5">
-      <h3 className="text-lg font-bold text-white">{title}</h3>
-      <p className="mt-3 text-sm leading-6 text-slate-400">{body}</p>
-    </div>
-  );
-}
-
 function LoadingOpportunities() {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       {["scan-a", "scan-b", "scan-c", "scan-d"].map((item) => (
-        <div key={item} className="rounded-md border border-white/10 bg-panel/75 p-5">
-          <div className="h-4 w-28 rounded bg-white/10" />
-          <div className="mt-4 h-8 w-52 rounded bg-white/10" />
+        <div key={item} className="rounded-md border border-white/10 bg-panel/75 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.16)]">
+          <div className="flex items-center justify-between gap-4">
+            <div className="h-5 w-32 rounded bg-white/10" />
+            <div className="h-14 w-20 rounded-md border border-mint/20 bg-mint/10" />
+          </div>
+          <div className="mt-4 h-8 w-56 rounded bg-white/10" />
           <div className="mt-4 space-y-2">
             <div className="h-3 w-full rounded bg-white/10" />
             <div className="h-3 w-4/5 rounded bg-white/10" />
@@ -486,11 +541,24 @@ function LoadingOpportunities() {
           <div className="mt-6 border-t border-white/10 pt-5">
             <p className="text-sm font-semibold text-white">Running live GitHub scan...</p>
             <p className="mt-2 text-sm leading-6 text-slate-400">
-              Checking current repositories before showing sample fallback.
+              Normalizing repository signals before the cockpit opens.
             </p>
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+function EmptyOpportunitiesState() {
+  return (
+    <div className="grid min-h-72 place-items-center rounded-md border border-white/10 bg-panel/75 p-5 text-center">
+      <div>
+        <p className="text-lg font-bold text-white">No opportunities loaded yet</p>
+        <p className="mt-2 max-w-md text-sm leading-6 text-slate-400">
+          The scanner did not return projects for this view. If GitHub is temporarily unavailable, sample fallback will keep the cockpit usable.
+        </p>
+      </div>
     </div>
   );
 }
@@ -615,6 +683,10 @@ function getActiveFilterSummary(state: SmartFilterState) {
 
 function isSmartFilterActive(state: SmartFilterState) {
   return state.activePreset !== null || state.sort !== "best-match" || Object.values(state.filters).some(Boolean);
+}
+
+function getActiveFilterCount(state: SmartFilterState) {
+  return (state.activePreset ? 1 : 0) + (state.sort !== "best-match" ? 1 : 0) + Object.values(state.filters).filter(Boolean).length;
 }
 
 function normalizeFilterState(value: unknown): SmartFilterState {

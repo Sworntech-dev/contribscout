@@ -42,13 +42,13 @@ export function RepoWatchlist({
     <section className="space-y-4">
       <div className="max-w-3xl">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-mint">Repo Watchlist</p>
-        <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">Track repos before proof</h2>
+        <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">Contribution pipeline</h2>
         <p className="mt-2 leading-7 text-slate-400">
-          Save interesting opportunities, plan a next step, and move completed work into Proof Vault later.
+          Save promising repos, track intent, write notes, and move completed work into Proof Vault later.
         </p>
       </div>
 
-      <div className="rounded-md border border-white/10 bg-white/[0.03] p-4">
+      <div className="rounded-md border border-white/10 bg-white/[0.035] p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <p className="text-sm text-slate-400">
             {hasItems
@@ -70,18 +70,18 @@ export function RepoWatchlist({
       </div>
 
       {!hasItems ? (
-        <div className="grid min-h-56 place-items-center rounded-md border border-white/10 bg-panel/75 p-5 text-center">
+        <div className="grid min-h-56 place-items-center rounded-md border border-white/10 bg-panel/75 p-5 text-center shadow-[0_20px_60px_rgba(0,0,0,0.16)]">
           <div>
-            <p className="text-lg font-bold text-white">No repos saved yet</p>
+            <p className="text-lg font-bold text-white">Watchlist is ready</p>
             <p className="mt-2 max-w-md text-sm leading-6 text-slate-400">
-              Use Save to Watchlist on a project card when a repo looks worth tracking.
+              Save a project card when it looks worth tracking, then add status, notes, briefs, and PR prep.
             </p>
           </div>
         </div>
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">
           {items.map((item) => (
-            <article key={item.id} className="rounded-md border border-white/10 bg-panel/75 p-4">
+            <article key={item.id} className="rounded-md border border-white/10 bg-panel/75 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.16)]">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <p className="text-xs capitalize text-skyglass">{item.category || "open source"}</p>

@@ -59,16 +59,16 @@ export function DailyOpportunityReport({
   }
 
   return (
-    <section className="space-y-4">
+    <section id="daily-report" className="space-y-4">
       <div className="max-w-3xl">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber">Daily Opportunity Report</p>
-        <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">Turn today&apos;s top repos into a report</h2>
+        <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">Export the current mission brief</h2>
         <p className="mt-2 leading-7 text-slate-400">
-          Export the current top opportunities as Markdown for updates, planning, or a Hermes-ready daily workflow.
+          Convert the visible opportunity list into Markdown for planning, updates, or a Hermes-ready daily workflow.
         </p>
       </div>
 
-      <div className="rounded-md border border-white/10 bg-panel/75 p-5">
+      <div className="rounded-md border border-white/10 bg-panel/75 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
         <div className="grid gap-3 sm:grid-cols-3">
           <ReportMetric label="Generated" value={new Date(generatedAt).toLocaleString()} />
           <ReportMetric label="Source" value={sourceLabel} />
@@ -91,7 +91,7 @@ export function DailyOpportunityReport({
 
         {!hasReport ? (
           <p className="mt-4 text-sm text-slate-500">
-            {loading ? "Running live GitHub scan..." : "No opportunities available for a report yet."}
+            {loading ? "Running live GitHub scan..." : "No visible opportunities are available for a report yet."}
           </p>
         ) : (
           <details className="mt-5 rounded-md border border-white/10 bg-ink/60 p-4">

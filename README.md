@@ -90,6 +90,8 @@ In v0.8, Contribution Brief Builder turns one selected opportunity into a copy-r
 
 In v0.9, PR Readiness Kit helps users prepare a clean open-source PR from an opportunity. It generates duplicate checks, GitHub review links, branch and commit suggestions, PR description copy, validation steps, developer update text, and risk flags.
 
+In v1.0, Mission Control redesign upgrades the dashboard into a polished contribution cockpit. The update focuses on UI/UX clarity, workflow ordering, status visibility, premium dark styling, and making the contribution path from discovery to proof easier to understand.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.

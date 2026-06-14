@@ -25,6 +25,8 @@ The v0.8 Contribution Brief Builder complements the same Markdown workflow by cr
 
 The v0.9 PR Readiness Kit extends the browser-side preparation flow with deterministic PR checklist and submission copy. Hermes can still consume reports separately through the skill package.
 
+The v1.0 Mission Control redesign improves the standalone dashboard experience while keeping Hermes as a compatible skill layer, not a runtime hosted by the Vercel app.
+
 ## How Hermes Would Use It
 
 A Hermes workflow could call the report script on a daily schedule, then deliver the report to a user workspace, inbox, or agent-assisted contributor workflow.

@@ -48,8 +48,9 @@ export function PrReadinessKitModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-ink/80 px-4 py-6 backdrop-blur-sm">
-      <div className="mx-auto max-w-3xl rounded-md border border-white/10 bg-panel p-5 shadow-glow">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-ink/85 px-4 py-6 backdrop-blur-md">
+      <div className="relative mx-auto max-w-3xl overflow-hidden rounded-md border border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.96),rgba(8,9,15,0.96))] p-5 shadow-glow">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber/60 to-transparent" />
         <div className="flex flex-col gap-4 border-b border-white/10 pb-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber">PR Readiness Kit</p>
@@ -100,7 +101,7 @@ export function PrReadinessKitModal({
           </KitButton>
         </div>
 
-        <details className="mt-5 rounded-md border border-white/10 bg-ink/70 p-4" open>
+        <details className="mt-5 rounded-md border border-white/10 bg-ink/75 p-4" open>
           <summary className="cursor-pointer text-sm font-semibold text-white marker:text-mint">
             Markdown preview
           </summary>

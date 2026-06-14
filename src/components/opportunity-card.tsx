@@ -17,18 +17,26 @@ export function OpportunityCard({
 }) {
   const issueLinks = getIssueLinks(opportunity);
   const showIssueLinks = !isSampleFallback && isGithubRepoUrl(opportunity.url);
+  const saturationLabel = opportunity.stars < 500 ? "Low saturation" : "Moderate saturation";
 
   return (
-    <article className="flex h-full flex-col rounded-md border border-white/10 bg-panel/75 p-5 transition hover:border-mint/40">
+    <article className="flex h-full flex-col overflow-hidden rounded-md border border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.82),rgba(10,13,22,0.9))] p-5 shadow-[0_22px_70px_rgba(0,0,0,0.22)] transition hover:border-mint/40">
       <div className="flex min-h-40 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <p className="text-sm capitalize text-skyglass">{opportunity.category}</p>
-          <h3 className="mt-1 break-words text-2xl font-black text-white">{opportunity.name}</h3>
+          <div className="flex flex-wrap gap-2">
+            <span className="rounded-md border border-skyglass/25 bg-skyglass/10 px-2.5 py-1 text-xs font-semibold capitalize text-skyglass">
+              {opportunity.category}
+            </span>
+            <span className="rounded-md border border-white/10 bg-white/[0.04] px-2.5 py-1 text-xs font-semibold text-slate-300">
+              {isSampleFallback ? "Sample fallback" : "GitHub live"}
+            </span>
+          </div>
+          <h3 className="mt-3 break-words text-2xl font-black text-white">{opportunity.name}</h3>
           <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-400">{opportunity.description}</p>
         </div>
-        <div className="min-w-24 rounded-md border border-mint/30 bg-mint/10 p-3 text-center">
-          <p className="text-xs text-mint">Score</p>
-          <p className="text-3xl font-black text-white">{opportunity.roleOpportunityScore}</p>
+        <div className="min-w-28 rounded-md border border-mint/35 bg-mint/10 p-3 text-center shadow-[0_0_34px_rgba(83,242,184,0.1)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-mint">Role Score</p>
+          <p className="mt-1 text-4xl font-black text-white">{opportunity.roleOpportunityScore}</p>
         </div>
       </div>
 
@@ -61,7 +69,7 @@ export function OpportunityCard({
         <Stat label="Lang" value={opportunity.language ?? "Mixed"} />
       </div>
 
-      <details className="mt-5 rounded-md border border-white/10 bg-white/[0.03] p-4">
+      <details className="mt-5 rounded-md border border-white/10 bg-white/[0.035] p-4">
         <summary className="cursor-pointer text-sm font-semibold text-white marker:text-mint">
           Contribution Fit
         </summary>
@@ -73,7 +81,7 @@ export function OpportunityCard({
           <FitItem label="Docs folder" value={opportunity.signals.hasDocsFolder ? "Present" : "Missing"} />
           <FitItem label="CONTRIBUTING" value={opportunity.signals.hasContributing ? "Present" : "Missing"} />
           <FitItem label="Issue activity" value={labelForActivity(opportunity.signals.issueActivity)} />
-          <FitItem label="Saturation" value={opportunity.stars < 500 ? "Low" : "Moderate"} />
+          <FitItem label="Saturation" value={saturationLabel} />
         </div>
         {showIssueLinks ? (
           <div className="mt-4 flex flex-wrap gap-2 border-t border-white/10 pt-4">
@@ -85,7 +93,9 @@ export function OpportunityCard({
       </details>
 
       <div className="mt-auto pt-5">
-        <div className="flex flex-wrap gap-2">
+        <div className="rounded-md border border-white/10 bg-white/[0.025] p-3">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Actions</p>
+          <div className="flex flex-wrap gap-2">
           {isSampleFallback || !opportunity.url ? (
             <span className="inline-flex rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 text-sm font-semibold text-slate-400">
               Sample project
@@ -122,6 +132,7 @@ export function OpportunityCard({
           >
             PR Kit
           </button>
+          </div>
         </div>
       </div>
     </article>

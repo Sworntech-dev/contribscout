@@ -17,7 +17,13 @@ const emptyEntry: ProofForm = {
   date: new Date().toISOString().slice(0, 10),
 };
 
-export function ProofVault({ opportunities }: { opportunities: Opportunity[] }) {
+export function ProofVault({
+  opportunities,
+  onEntryCountChange,
+}: {
+  opportunities: Opportunity[];
+  onEntryCountChange?: (count: number) => void;
+}) {
   const [entries, setEntries] = useState<ProofEntry[]>([]);
   const [form, setForm] = useState(emptyEntry);
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
@@ -31,7 +37,8 @@ export function ProofVault({ opportunities }: { opportunities: Opportunity[] }) 
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-  }, [entries]);
+    onEntryCountChange?.(entries.length);
+  }, [entries, onEntryCountChange]);
 
   const suggestedActions = useMemo(
     () =>
@@ -94,13 +101,13 @@ export function ProofVault({ opportunities }: { opportunities: Opportunity[] }) 
     <section id="proof-vault" className="space-y-4">
       <div className="max-w-3xl">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-rose">Proof Vault</p>
-        <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">Save contribution evidence locally</h2>
+        <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">Archive contribution proof</h2>
         <p className="mt-2 leading-7 text-slate-400">
-          Store planned or completed actions in localStorage for the MVP demo. No account, database, or backend state required.
+          Keep submitted work, links, notes, and outcomes in a local vault. No account, database, or backend state required.
         </p>
       </div>
 
-      <div className="rounded-md border border-white/10 bg-white/[0.03] p-4">
+      <div className="rounded-md border border-white/10 bg-white/[0.035] p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-semibold text-white">Export proof report</p>
@@ -125,7 +132,7 @@ export function ProofVault({ opportunities }: { opportunities: Opportunity[] }) 
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-        <form onSubmit={submitEntry} className="rounded-md border border-white/10 bg-panel/75 p-5">
+        <form onSubmit={submitEntry} className="rounded-md border border-white/10 bg-panel/75 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.16)]">
           <div className="grid gap-4">
             <Field label="Project name">
               <input
@@ -203,13 +210,13 @@ export function ProofVault({ opportunities }: { opportunities: Opportunity[] }) 
           </div>
         </form>
 
-        <div className="rounded-md border border-white/10 bg-white/[0.03] p-5">
+        <div className="rounded-md border border-white/10 bg-white/[0.035] p-5">
           {entries.length === 0 ? (
             <div className="grid min-h-80 place-items-center text-center">
               <div>
-                <p className="text-lg font-bold text-white">No saved proof yet</p>
+                <p className="text-lg font-bold text-white">Proof vault is empty</p>
                 <p className="mt-2 max-w-sm text-sm leading-6 text-slate-400">
-                  Add your first planned contribution or submitted proof when you pick an opportunity.
+                  When a PR, issue, or discussion is submitted, store the evidence link here so the contribution trail stays tidy.
                 </p>
               </div>
             </div>
