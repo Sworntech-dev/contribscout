@@ -61,23 +61,23 @@ export function DailyOpportunityReport({
   return (
     <section id="daily-report" className="space-y-4">
       <div className="max-w-3xl">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber">Daily Opportunity Report</p>
-        <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">Export the current mission brief</h2>
-        <p className="mt-2 leading-7 text-slate-400">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-warm">Daily Opportunity Report</p>
+        <h2 className="mt-2 text-2xl font-bold text-cream sm:text-3xl">Export the current mission brief</h2>
+        <p className="mt-2 leading-7 text-cream/58">
           Convert the visible opportunity list into Markdown for planning, updates, or a Hermes-ready daily workflow.
         </p>
       </div>
 
-      <div className="rounded-md border border-white/10 bg-panel/75 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
+      <div className="rounded-md border border-cream/10 bg-[linear-gradient(180deg,rgba(243,234,215,0.06),rgba(8,12,11,0.82))] p-5 shadow-[0_24px_80px_rgba(0,0,0,0.22)]">
         <div className="grid gap-3 sm:grid-cols-3">
           <ReportMetric label="Generated" value={new Date(generatedAt).toLocaleString()} />
           <ReportMetric label="Source" value={sourceLabel} />
           <ReportMetric label="Top projects" value={Math.min(opportunities.length, 5).toString()} />
         </div>
 
-        {notice ? <p className="mt-4 text-sm leading-6 text-slate-400">{notice}</p> : null}
+        {notice ? <p className="mt-4 text-sm leading-6 text-cream/58">{notice}</p> : null}
         {usesFilteredResults ? (
-          <p className="mt-4 text-sm font-semibold text-mint">Report uses current filtered results.</p>
+          <p className="mt-4 text-sm font-semibold text-moss">Report uses current filtered results.</p>
         ) : null}
 
         <div className="mt-5 flex flex-col gap-2 border-t border-white/10 pt-5 sm:flex-row sm:flex-wrap">
@@ -90,15 +90,15 @@ export function DailyOpportunityReport({
         </div>
 
         {!hasReport ? (
-          <p className="mt-4 text-sm text-slate-500">
+          <p className="mt-4 text-sm text-cream/42">
             {loading ? "Running live GitHub scan..." : "No visible opportunities are available for a report yet."}
           </p>
         ) : (
-          <details className="mt-5 rounded-md border border-white/10 bg-ink/60 p-4">
-            <summary className="cursor-pointer text-sm font-semibold text-white marker:text-mint">
+          <details className="mt-5 rounded-md border border-cream/10 bg-ink/70 p-4">
+            <summary className="cursor-pointer text-sm font-semibold text-cream marker:text-moss">
               Markdown preview
             </summary>
-            <pre className="mt-4 max-h-80 overflow-auto whitespace-pre-wrap break-words text-xs leading-5 text-slate-300">
+            <pre className="mt-4 max-h-80 overflow-auto whitespace-pre-wrap break-words text-xs leading-5 text-cream/70">
               {markdownReport}
             </pre>
           </details>
@@ -110,9 +110,9 @@ export function DailyOpportunityReport({
 
 function ReportMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-white/10 bg-white/[0.04] p-3">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-1 truncate text-sm font-semibold capitalize text-white">{value}</p>
+    <div className="rounded-md border border-cream/10 bg-cream/[0.045] p-3">
+      <p className="text-xs text-cream/42">{label}</p>
+      <p className="mt-1 truncate text-sm font-semibold capitalize text-cream">{value}</p>
     </div>
   );
 }
@@ -131,7 +131,7 @@ function ReportButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-mint/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-white/10 disabled:hover:text-slate-200"
+      className="rounded-md border border-cream/10 bg-cream/[0.045] px-3 py-2 text-sm font-semibold text-cream/78 transition hover:border-moss/50 hover:text-cream disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-cream/10 disabled:hover:text-cream/78"
     >
       {children}
     </button>

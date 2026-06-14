@@ -61,20 +61,20 @@ export function ContributionBriefModal({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-ink/85 px-4 py-6 backdrop-blur-md">
-      <div className="relative mx-auto max-w-3xl overflow-hidden rounded-md border border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.96),rgba(8,9,15,0.96))] p-5 shadow-glow">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-mint/60 to-transparent" />
+      <div className="relative mx-auto max-w-3xl overflow-hidden rounded-md border border-cream/10 bg-[linear-gradient(180deg,rgba(243,234,215,0.08),rgba(8,12,11,0.96))] p-5 shadow-[0_40px_130px_rgba(0,0,0,0.5)]">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-moss/60 to-transparent" />
         <div className="flex flex-col gap-4 border-b border-white/10 pb-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-mint">Contribution Brief</p>
-            <h2 className="mt-2 break-words text-2xl font-black text-white">{activeTarget.projectName}</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-400">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-moss">Contribution Brief</p>
+            <h2 className="mt-2 break-words text-2xl font-black text-cream">{activeTarget.projectName}</h2>
+            <p className="mt-2 text-sm leading-6 text-cream/58">
               A copy-ready Markdown plan for starting a focused contribution.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="self-start rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-slate-300 transition hover:border-mint/50 hover:text-white"
+            className="self-start rounded-md border border-cream/10 bg-cream/[0.045] px-3 py-2 text-sm font-semibold text-cream/70 transition hover:border-moss/50 hover:text-cream"
           >
             Close
           </button>
@@ -87,14 +87,14 @@ export function ContributionBriefModal({
         </div>
 
         {activeTarget.watchlistStatus || activeTarget.watchlistNote ? (
-          <div className="mt-4 rounded-md border border-white/10 bg-white/[0.03] p-3 text-sm leading-6 text-slate-300">
+          <div className="mt-4 rounded-md border border-cream/10 bg-cream/[0.04] p-3 text-sm leading-6 text-cream/70">
             <p>
-              <span className="font-semibold text-white">Watchlist status:</span>{" "}
+              <span className="font-semibold text-cream">Watchlist status:</span>{" "}
               {activeTarget.watchlistStatus || "n/a"}
             </p>
             {activeTarget.watchlistNote ? (
               <p className="mt-1">
-                <span className="font-semibold text-white">Note:</span> {activeTarget.watchlistNote}
+                <span className="font-semibold text-cream">Note:</span> {activeTarget.watchlistNote}
               </p>
             ) : null}
           </div>
@@ -118,11 +118,11 @@ export function ContributionBriefModal({
           </p>
         ) : null}
 
-        <details className="mt-5 rounded-md border border-white/10 bg-ink/75 p-4" open>
-          <summary className="cursor-pointer text-sm font-semibold text-white marker:text-mint">
+        <details className="mt-5 rounded-md border border-cream/10 bg-ink/75 p-4" open>
+          <summary className="cursor-pointer text-sm font-semibold text-cream marker:text-moss">
             Markdown preview
           </summary>
-          <pre className="mt-4 max-h-96 overflow-auto whitespace-pre-wrap break-words text-xs leading-5 text-slate-300">
+          <pre className="mt-4 max-h-96 overflow-auto whitespace-pre-wrap break-words text-xs leading-5 text-cream/70">
             {markdown}
           </pre>
         </details>
@@ -133,9 +133,9 @@ export function ContributionBriefModal({
 
 function BriefMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-white/10 bg-white/[0.04] p-3">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-1 truncate text-sm font-semibold capitalize text-white">{value}</p>
+    <div className="rounded-md border border-cream/10 bg-cream/[0.045] p-3">
+      <p className="text-xs text-cream/42">{label}</p>
+      <p className="mt-1 truncate text-sm font-semibold capitalize text-cream">{value}</p>
     </div>
   );
 }
@@ -145,7 +145,7 @@ function BriefButton({ children, onClick }: { children: React.ReactNode; onClick
     <button
       type="button"
       onClick={onClick}
-      className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-mint/50 hover:text-white"
+      className="rounded-md border border-cream/10 bg-cream/[0.045] px-3 py-2 text-sm font-semibold text-cream/78 transition hover:border-moss/50 hover:text-cream"
     >
       {children}
     </button>

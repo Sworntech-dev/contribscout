@@ -92,6 +92,8 @@ In v0.9, PR Readiness Kit helps users prepare a clean open-source PR from an opp
 
 In v1.0, Mission Control redesign upgrades the dashboard into a polished contribution cockpit. The update focuses on UI/UX clarity, workflow ordering, status visibility, premium dark styling, and making the contribution path from discovery to proof easier to understand.
 
+In v1.0.1, the visual polish pass adds a more premium landing-page feel inspired by high-end agency design patterns without copying any brand or layout. The focus is first impression, editorial spacing, richer dark surfaces, muted green accents, warm CTAs, and clearer open-source workflow presentation.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.

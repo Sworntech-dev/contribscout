@@ -276,46 +276,48 @@ export function Dashboard() {
   }
 
   return (
-    <main className="min-h-screen overflow-hidden">
-      <section className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
-        <nav className="flex items-center justify-between rounded-md border border-white/10 bg-white/[0.035] px-4 py-3 backdrop-blur">
+    <main className="relative min-h-screen overflow-hidden">
+      <section className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
+        <nav className="flex items-center justify-between rounded-md border border-cream/10 bg-cream/[0.045] px-4 py-3 shadow-[0_20px_80px_rgba(0,0,0,0.22)] backdrop-blur">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-md border border-mint/40 bg-mint/10 text-sm font-black text-mint shadow-[0_0_30px_rgba(83,242,184,0.18)]">
+            <div className="grid h-10 w-10 place-items-center rounded-md border border-moss/40 bg-moss/10 text-sm font-black text-cream shadow-[0_0_30px_rgba(157,191,154,0.18)]">
               CS
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <p className="text-base font-black text-white">ContribScout</p>
-              <span className="rounded-md border border-mint/25 bg-mint/10 px-2 py-1 text-xs font-semibold text-mint">
+              <p className="text-base font-black text-cream">ContribScout</p>
+              <span className="rounded-md border border-moss/25 bg-moss/10 px-2 py-1 text-xs font-semibold text-moss">
                 Hermes Skill Layer
               </span>
             </div>
           </div>
           <a
             href="#proof-vault"
-            className="rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200 transition hover:border-mint/50 hover:text-white"
+            className="rounded-md border border-cream/10 bg-cream/[0.06] px-3 py-2 text-sm text-cream/85 transition hover:border-moss/50 hover:text-cream"
           >
             Proof Vault
           </a>
         </nav>
 
-        <section className="relative overflow-hidden rounded-md border border-white/10 bg-[linear-gradient(135deg,rgba(15,23,42,0.94),rgba(8,9,15,0.88))] p-5 shadow-glow sm:p-7 lg:p-8">
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-mint/60 to-transparent" />
-          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
-            <div className="max-w-3xl py-4">
-              <p className="mb-4 text-sm font-semibold uppercase tracking-[0.28em] text-mint">
-                Open-source contribution mission control
+        <section className="relative overflow-hidden rounded-md border border-cream/10 bg-[linear-gradient(135deg,rgba(243,234,215,0.105),rgba(13,23,19,0.82)_42%,rgba(5,7,9,0.94))] p-5 shadow-[0_42px_130px_rgba(0,0,0,0.42)] sm:p-8 lg:p-10">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-moss/70 to-transparent" />
+          <div className="absolute right-0 top-0 h-full w-1/2 bg-[linear-gradient(135deg,transparent,rgba(157,191,154,0.08),transparent)]" />
+          <div className="absolute bottom-0 left-0 h-1/2 w-full bg-[linear-gradient(90deg,rgba(217,168,95,0.055),transparent_45%)]" />
+          <div className="relative grid gap-10 lg:grid-cols-[1.06fr_0.94fr] lg:items-end">
+            <div className="max-w-4xl py-6 sm:py-10">
+              <p className="mb-5 text-sm font-semibold uppercase tracking-[0.28em] text-moss">
+                ContribScout / Open-source mission control
               </p>
-              <h1 className="text-4xl font-black leading-tight text-white sm:text-6xl">
-                ContribScout
+              <h1 className="max-w-4xl text-5xl font-black leading-[0.98] text-cream sm:text-7xl">
+                Find the right open-source contribution before you open the PR.
               </h1>
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-300">
-                Discover high-leverage open-source contribution opportunities and turn them into clean PR workflows.
+              <p className="mt-6 max-w-2xl text-lg leading-8 text-cream/72">
+                ContribScout scans GitHub signals, scores contribution leverage, and turns repo discovery into a clean PR workflow.
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 {["Live GitHub Scanner", "Hermes Skill Layer", "PR Workflow Kit", "Local Proof Vault"].map((badge) => (
                   <span
                     key={`hero-badge-${badge}`}
-                    className="rounded-md border border-white/10 bg-white/[0.06] px-3 py-2 text-sm font-semibold text-slate-200"
+                    className="rounded-md border border-cream/10 bg-cream/[0.075] px-3 py-2 text-sm font-semibold text-cream/80"
                   >
                     {badge}
                   </span>
@@ -324,21 +326,21 @@ export function Dashboard() {
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <a
                   href="#top-opportunities"
-                  className="rounded-md bg-mint px-4 py-3 text-center text-sm font-black text-ink transition hover:bg-white"
+                  className="rounded-md bg-warm px-4 py-3 text-center text-sm font-black text-ink shadow-[0_18px_60px_rgba(217,168,95,0.22)] transition hover:bg-cream"
                 >
                   Review opportunities
                 </a>
                 <a
                   href="#daily-report"
-                  className="rounded-md border border-white/10 bg-white/[0.05] px-4 py-3 text-center text-sm font-semibold text-slate-200 transition hover:border-mint/50 hover:text-white"
+                  className="rounded-md border border-cream/10 bg-cream/[0.065] px-4 py-3 text-center text-sm font-semibold text-cream/85 transition hover:border-moss/50 hover:text-cream"
                 >
                   Generate report
                 </a>
               </div>
             </div>
 
-            <div className="rounded-md border border-white/10 bg-ink/55 p-5">
-              <p className="text-sm font-semibold text-slate-300">Current operation</p>
+            <div className="relative rounded-md border border-cream/12 bg-[#f3ead7]/[0.075] p-5 shadow-[0_24px_90px_rgba(0,0,0,0.35)] backdrop-blur">
+              <p className="text-sm font-semibold text-cream/80">Current operation</p>
               <div className="mt-4 grid grid-cols-3 gap-3">
                 <Metric
                   label="Visible"
@@ -352,18 +354,18 @@ export function Dashboard() {
                 <Metric label="Source" value={sourceLabel} />
               </div>
               <div className="mt-5 border-t border-white/10 pt-5">
-                <p className="text-sm text-slate-400">Top lead</p>
-                <p className="mt-2 text-xl font-bold text-white">
+                <p className="text-sm text-cream/55">Top lead</p>
+                <p className="mt-2 text-xl font-bold text-cream">
                   {topOpportunity?.name ?? (opportunities.length ? "No matching opportunities" : "Running live GitHub scan...")}
                 </p>
-                <p className="mt-2 text-sm leading-6 text-slate-300">
+                <p className="mt-2 text-sm leading-6 text-cream/70">
                   {topOpportunity?.suggestedAction ??
                     (opportunities.length
                       ? "Clear filters or choose a broader preset to see more projects."
                       : "Fetching current repositories before showing fallback data.")}
                 </p>
               </div>
-              <p className="mt-5 rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-xs leading-5 text-slate-400">
+              <p className="mt-5 rounded-md border border-cream/10 bg-black/20 px-3 py-2 text-xs leading-5 text-cream/55">
                 {loading ? "Running live GitHub scan..." : error ?? "Live GitHub scanner returned normalized opportunities."}
               </p>
             </div>
@@ -471,19 +473,19 @@ export function Dashboard() {
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-white/10 bg-white/[0.045] p-3">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-1 truncate text-lg font-bold capitalize text-white">{value}</p>
+    <div className="rounded-md border border-cream/10 bg-cream/[0.055] p-3">
+      <p className="text-xs text-cream/45">{label}</p>
+      <p className="mt-1 truncate text-lg font-bold capitalize text-cream">{value}</p>
     </div>
   );
 }
 
 function StatusCard({ label, value, detail }: { label: string; value: string; detail: string }) {
   return (
-    <div className="rounded-md border border-white/10 bg-white/[0.035] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{label}</p>
-      <p className="mt-3 text-3xl font-black text-white">{value}</p>
-      <p className="mt-1 text-sm capitalize text-slate-400">{detail}</p>
+    <div className="rounded-md border border-cream/10 bg-cream/[0.045] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.22)]">
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cream/42">{label}</p>
+      <p className="mt-3 text-3xl font-black text-cream">{value}</p>
+      <p className="mt-1 text-sm capitalize text-cream/58">{detail}</p>
     </div>
   );
 }
@@ -492,19 +494,19 @@ function WorkflowStrip() {
   const steps = ["Discover", "Filter", "Save", "Brief", "PR Kit", "Proof Vault"];
 
   return (
-    <section className="rounded-md border border-white/10 bg-white/[0.03] p-4">
+    <section className="rounded-md border border-cream/10 bg-cream/[0.035] p-4 shadow-[0_18px_70px_rgba(0,0,0,0.2)]">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-skyglass">Workflow</p>
-          <h2 className="mt-2 text-xl font-bold text-white">From signal to proof</h2>
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-moss">Workflow</p>
+          <h2 className="mt-2 text-xl font-bold text-cream">From signal to proof</h2>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {steps.map((step, index) => (
             <div key={`workflow-${step}`} className="flex items-center gap-2">
-              <span className="rounded-md border border-white/10 bg-ink/60 px-3 py-2 text-sm font-semibold text-slate-200">
+              <span className="rounded-md border border-cream/10 bg-ink/60 px-3 py-2 text-sm font-semibold text-cream/78">
                 {step}
               </span>
-              {index < steps.length - 1 ? <span className="hidden text-slate-600 sm:inline">/</span> : null}
+              {index < steps.length - 1 ? <span className="hidden text-warm/45 sm:inline">/</span> : null}
             </div>
           ))}
         </div>
@@ -516,9 +518,9 @@ function WorkflowStrip() {
 function SectionHeader({ kicker, title, body }: { kicker: string; title: string; body: string }) {
   return (
     <div className="max-w-3xl">
-      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber">{kicker}</p>
-      <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">{title}</h2>
-      <p className="mt-2 leading-7 text-slate-400">{body}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-warm">{kicker}</p>
+      <h2 className="mt-2 text-2xl font-bold text-cream sm:text-3xl">{title}</h2>
+      <p className="mt-2 leading-7 text-cream/58">{body}</p>
     </div>
   );
 }
@@ -552,10 +554,10 @@ function LoadingOpportunities() {
 
 function EmptyOpportunitiesState() {
   return (
-    <div className="grid min-h-72 place-items-center rounded-md border border-white/10 bg-panel/75 p-5 text-center">
+    <div className="grid min-h-72 place-items-center rounded-md border border-cream/10 bg-cream/[0.045] p-5 text-center">
       <div>
-        <p className="text-lg font-bold text-white">No opportunities loaded yet</p>
-        <p className="mt-2 max-w-md text-sm leading-6 text-slate-400">
+        <p className="text-lg font-bold text-cream">No opportunities loaded yet</p>
+        <p className="mt-2 max-w-md text-sm leading-6 text-cream/58">
           The scanner did not return projects for this view. If GitHub is temporarily unavailable, sample fallback will keep the cockpit usable.
         </p>
       </div>
@@ -565,16 +567,16 @@ function EmptyOpportunitiesState() {
 
 function EmptyFilteredState({ onClear }: { onClear: () => void }) {
   return (
-    <div className="grid min-h-72 place-items-center rounded-md border border-white/10 bg-panel/75 p-5 text-center">
+    <div className="grid min-h-72 place-items-center rounded-md border border-cream/10 bg-cream/[0.045] p-5 text-center">
       <div>
-        <p className="text-lg font-bold text-white">No opportunities match these filters</p>
-        <p className="mt-2 max-w-md text-sm leading-6 text-slate-400">
+        <p className="text-lg font-bold text-cream">No opportunities match these filters</p>
+        <p className="mt-2 max-w-md text-sm leading-6 text-cream/58">
           Try a broader preset, switch sort back to best match, or clear filters to return to the full scan.
         </p>
         <button
           type="button"
           onClick={onClear}
-          className="mt-5 rounded-md border border-mint/40 bg-mint/10 px-3 py-2 text-sm font-semibold text-mint transition hover:border-mint/70 hover:text-white"
+          className="mt-5 rounded-md border border-moss/40 bg-moss/10 px-3 py-2 text-sm font-semibold text-moss transition hover:border-moss/70 hover:text-cream"
         >
           Clear filters
         </button>

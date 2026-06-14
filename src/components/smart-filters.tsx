@@ -53,12 +53,12 @@ export function SmartFilters({
   const hasActiveFilters = state.activePreset || Object.values(state.filters).some(Boolean) || state.sort !== "best-match";
 
   return (
-    <section className="rounded-md border border-white/10 bg-[linear-gradient(180deg,rgba(17,24,39,0.78),rgba(8,9,15,0.78))] p-4 shadow-[0_20px_60px_rgba(0,0,0,0.18)]">
+    <section className="rounded-md border border-cream/10 bg-[linear-gradient(180deg,rgba(243,234,215,0.065),rgba(8,12,11,0.8))] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.22)]">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-mint">Smart Filters</p>
-          <h2 className="mt-2 text-xl font-bold text-white">Narrow by role and repo signal</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-moss">Smart Filters</p>
+          <h2 className="mt-2 text-xl font-bold text-cream">Narrow by role and repo signal</h2>
+          <p className="mt-2 text-sm leading-6 text-cream/58">
             {filteredCount} of {totalCount} opportunities shown. {activeSummary}
           </p>
         </div>
@@ -68,7 +68,7 @@ export function SmartFilters({
             <select
               value={state.sort}
               onChange={(event) => onSortChange(event.target.value as OpportunitySort)}
-              className="w-full rounded-md border border-white/10 bg-ink/80 px-3 py-2 text-sm font-semibold text-slate-200 outline-none transition focus:border-mint/60 sm:w-56"
+              className="w-full rounded-md border border-cream/10 bg-ink/80 px-3 py-2 text-sm font-semibold text-cream/82 outline-none transition focus:border-moss/60 sm:w-56"
             >
               {sortOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -81,7 +81,7 @@ export function SmartFilters({
             type="button"
             disabled={!hasActiveFilters}
             onClick={onClear}
-            className="rounded-md border border-white/10 bg-white/[0.04] px-3 py-2 text-sm font-semibold text-slate-200 transition hover:border-mint/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-white/10 disabled:hover:text-slate-200"
+            className="rounded-md border border-cream/10 bg-cream/[0.045] px-3 py-2 text-sm font-semibold text-cream/78 transition hover:border-moss/50 hover:text-cream disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-cream/10 disabled:hover:text-cream/78"
           >
             Clear filters
           </button>
@@ -89,7 +89,7 @@ export function SmartFilters({
       </div>
 
       <div className="mt-4 border-t border-white/10 pt-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Role presets</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cream/42">Role presets</p>
         <div className="mt-3 flex flex-wrap gap-2">
           {presetOptions.map((preset) => {
             const active = state.activePreset === preset.key;
@@ -100,8 +100,8 @@ export function SmartFilters({
                 onClick={() => onSelectPreset(preset.key)}
                 className={`rounded-md border px-3 py-2 text-sm font-semibold transition ${
                   active
-                    ? "border-mint/50 bg-mint/10 text-mint"
-                    : "border-white/10 bg-white/[0.04] text-slate-300 hover:border-mint/40 hover:text-white"
+                    ? "border-moss/50 bg-moss/10 text-moss"
+                    : "border-cream/10 bg-cream/[0.04] text-cream/68 hover:border-moss/40 hover:text-cream"
                 }`}
               >
                 {preset.label}
@@ -112,7 +112,7 @@ export function SmartFilters({
       </div>
 
       <div className="mt-4">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Signals</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cream/42">Signals</p>
         <div className="mt-3 flex flex-wrap gap-2">
           {filterOptions.map((filter) => {
             const active = state.filters[filter.key];
@@ -123,8 +123,8 @@ export function SmartFilters({
                 onClick={() => onToggleFilter(filter.key)}
                 className={`rounded-md border px-3 py-2 text-sm font-semibold transition ${
                   active
-                    ? "border-skyglass/50 bg-skyglass/10 text-skyglass"
-                    : "border-white/10 bg-white/[0.04] text-slate-300 hover:border-skyglass/40 hover:text-white"
+                    ? "border-warm/50 bg-warm/10 text-warm"
+                    : "border-cream/10 bg-cream/[0.04] text-cream/68 hover:border-warm/40 hover:text-cream"
                 }`}
               >
                 {filter.label}
