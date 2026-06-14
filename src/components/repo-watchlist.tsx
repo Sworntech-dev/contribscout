@@ -48,7 +48,7 @@ export function RepoWatchlist({
         </p>
       </div>
 
-      <div className="rounded-md border border-white/10 bg-white/[0.035] p-4">
+      <div className="premium-panel rounded-md p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <p className="text-sm text-slate-400">
             {hasItems
@@ -70,7 +70,7 @@ export function RepoWatchlist({
       </div>
 
       {!hasItems ? (
-        <div className="grid min-h-56 place-items-center rounded-md border border-white/10 bg-panel/75 p-5 text-center shadow-[0_20px_60px_rgba(0,0,0,0.16)]">
+        <div className="premium-panel grid min-h-56 place-items-center rounded-md p-5 text-center">
           <div>
             <p className="text-lg font-bold text-white">Watchlist is ready</p>
             <p className="mt-2 max-w-md text-sm leading-6 text-slate-400">
@@ -81,7 +81,7 @@ export function RepoWatchlist({
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">
           {items.map((item) => (
-            <article key={item.id} className="rounded-md border border-white/10 bg-panel/75 p-4 shadow-[0_18px_50px_rgba(0,0,0,0.16)]">
+            <article key={item.id} className="premium-panel premium-lift rounded-md p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <p className="text-xs capitalize text-skyglass">{item.category || "open source"}</p>

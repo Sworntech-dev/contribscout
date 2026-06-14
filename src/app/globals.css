@@ -61,3 +61,88 @@ textarea {
 ::selection {
   background: rgba(83, 242, 184, 0.28);
 }
+
+.scroll-scene {
+  position: relative;
+  isolation: isolate;
+}
+
+.scroll-scene::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.scene-hero::before {
+  background:
+    radial-gradient(75% 90% at 84% 12%, rgba(157, 191, 154, 0.16), transparent 62%),
+    radial-gradient(65% 80% at 8% 88%, rgba(217, 168, 95, 0.12), transparent 66%),
+    linear-gradient(135deg, rgba(243, 234, 215, 0.11), rgba(13, 23, 19, 0.82) 42%, rgba(5, 7, 9, 0.94));
+}
+
+.scene-workflow::before {
+  background:
+    radial-gradient(70% 90% at 18% 18%, rgba(157, 191, 154, 0.11), transparent 64%),
+    linear-gradient(180deg, rgba(243, 234, 215, 0.045), rgba(5, 7, 9, 0.2));
+}
+
+.scene-opportunities::before {
+  background:
+    radial-gradient(80% 80% at 94% 18%, rgba(217, 168, 95, 0.105), transparent 62%),
+    radial-gradient(75% 95% at 0% 72%, rgba(157, 191, 154, 0.09), transparent 68%);
+}
+
+.scene-pipeline::before {
+  background:
+    radial-gradient(70% 90% at 12% 16%, rgba(243, 234, 215, 0.07), transparent 62%),
+    radial-gradient(80% 80% at 88% 84%, rgba(157, 191, 154, 0.105), transparent 66%);
+}
+
+.scene-proof::before {
+  background:
+    radial-gradient(75% 90% at 50% 0%, rgba(217, 168, 95, 0.09), transparent 62%),
+    linear-gradient(180deg, rgba(243, 234, 215, 0.035), transparent);
+}
+
+.premium-panel {
+  border: 1px solid rgba(243, 234, 215, 0.1);
+  background:
+    linear-gradient(180deg, rgba(243, 234, 215, 0.07), rgba(8, 12, 11, 0.82));
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.26);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease,
+    background 180ms ease;
+}
+
+.premium-panel:hover {
+  border-color: rgba(157, 191, 154, 0.34);
+  box-shadow: 0 34px 110px rgba(0, 0, 0, 0.34);
+}
+
+.premium-lift:hover {
+  transform: translateY(-2px);
+}
+
+.premium-action {
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.premium-action:hover {
+  box-shadow: 0 14px 42px rgba(157, 191, 154, 0.1);
+  transform: translateY(-1px);
+}
+
+.premium-action:focus-visible {
+  outline: 2px solid rgba(217, 168, 95, 0.7);
+  outline-offset: 2px;
+}

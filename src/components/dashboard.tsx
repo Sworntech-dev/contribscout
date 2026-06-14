@@ -298,7 +298,7 @@ export function Dashboard() {
           </a>
         </nav>
 
-        <section className="relative overflow-hidden rounded-md border border-cream/10 bg-[linear-gradient(135deg,rgba(243,234,215,0.105),rgba(13,23,19,0.82)_42%,rgba(5,7,9,0.94))] p-5 shadow-[0_42px_130px_rgba(0,0,0,0.42)] sm:p-8 lg:p-10">
+        <section className="scroll-scene scene-hero relative overflow-hidden rounded-md border border-cream/10 p-5 shadow-[0_42px_130px_rgba(0,0,0,0.42)] sm:p-8 lg:min-h-[680px] lg:p-10">
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-moss/70 to-transparent" />
           <div className="absolute right-0 top-0 h-full w-1/2 bg-[linear-gradient(135deg,transparent,rgba(157,191,154,0.08),transparent)]" />
           <div className="absolute bottom-0 left-0 h-1/2 w-full bg-[linear-gradient(90deg,rgba(217,168,95,0.055),transparent_45%)]" />
@@ -307,7 +307,7 @@ export function Dashboard() {
               <p className="mb-5 text-sm font-semibold uppercase tracking-[0.28em] text-moss">
                 ContribScout / Open-source mission control
               </p>
-              <h1 className="max-w-4xl text-5xl font-black leading-[0.98] text-cream sm:text-7xl">
+              <h1 className="max-w-4xl text-5xl font-black leading-[0.94] text-cream sm:text-7xl lg:text-8xl">
                 Find the right open-source contribution before you open the PR.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-cream/72">
@@ -326,20 +326,20 @@ export function Dashboard() {
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <a
                   href="#top-opportunities"
-                  className="rounded-md bg-warm px-4 py-3 text-center text-sm font-black text-ink shadow-[0_18px_60px_rgba(217,168,95,0.22)] transition hover:bg-cream"
+                  className="premium-action rounded-md bg-warm px-4 py-3 text-center text-sm font-black text-ink shadow-[0_18px_60px_rgba(217,168,95,0.22)] transition hover:bg-cream"
                 >
                   Review opportunities
                 </a>
                 <a
                   href="#daily-report"
-                  className="rounded-md border border-cream/10 bg-cream/[0.065] px-4 py-3 text-center text-sm font-semibold text-cream/85 transition hover:border-moss/50 hover:text-cream"
+                  className="premium-action rounded-md border border-cream/10 bg-cream/[0.065] px-4 py-3 text-center text-sm font-semibold text-cream/85 transition hover:border-moss/50 hover:text-cream"
                 >
                   Generate report
                 </a>
               </div>
             </div>
 
-            <div className="relative rounded-md border border-cream/12 bg-[#f3ead7]/[0.075] p-5 shadow-[0_24px_90px_rgba(0,0,0,0.35)] backdrop-blur">
+            <div className="premium-panel sticky top-6 rounded-md p-5 backdrop-blur">
               <p className="text-sm font-semibold text-cream/80">Current operation</p>
               <div className="mt-4 grid grid-cols-3 gap-3">
                 <Metric
@@ -370,6 +370,10 @@ export function Dashboard() {
               </p>
             </div>
           </div>
+
+          <div className="relative mt-8 border-t border-cream/10 pt-5">
+            <WorkflowStrip />
+          </div>
         </section>
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -380,20 +384,20 @@ export function Dashboard() {
           <StatusCard label="Active filters" value={activeFilterCount.toString()} detail={activeFilterCount ? "mission narrowed" : "all signals"} />
         </section>
 
-        <WorkflowStrip />
+        <section className="scroll-scene scene-workflow rounded-md p-1">
+          <SmartFilters
+            state={smartFilters}
+            totalCount={opportunities.length}
+            filteredCount={filteredOpportunities.length}
+            activeSummary={activeFilterSummary}
+            onToggleFilter={toggleFilter}
+            onSelectPreset={selectPreset}
+            onSortChange={changeSort}
+            onClear={clearFilters}
+          />
+        </section>
 
-        <SmartFilters
-          state={smartFilters}
-          totalCount={opportunities.length}
-          filteredCount={filteredOpportunities.length}
-          activeSummary={activeFilterSummary}
-          onToggleFilter={toggleFilter}
-          onSelectPreset={selectPreset}
-          onSortChange={changeSort}
-          onClear={clearFilters}
-        />
-
-        <section id="top-opportunities" className="space-y-4">
+        <section id="top-opportunities" className="scroll-scene scene-opportunities space-y-4 rounded-md p-1">
           <SectionHeader
             kicker="Opportunities"
             title="Ranked contribution targets"
@@ -422,23 +426,27 @@ export function Dashboard() {
           )}
         </section>
 
-        <DailyOpportunityReport
-          opportunities={filteredOpportunities}
-          source={source}
-          notice={error}
-          loading={loading}
-          usesFilteredResults={filtersActive}
-        />
+        <section className="scroll-scene scene-pipeline grid gap-8 rounded-md p-1">
+          <DailyOpportunityReport
+            opportunities={filteredOpportunities}
+            source={source}
+            notice={error}
+            loading={loading}
+            usesFilteredResults={filtersActive}
+          />
 
-        <RepoWatchlist
-          items={watchlist}
-          onUpdate={updateWatchlistItem}
-          onRemove={removeWatchlistItem}
-          onCreateBrief={createBriefFromWatchlist}
-          onCreatePrKit={createPrKitFromWatchlist}
-        />
+          <RepoWatchlist
+            items={watchlist}
+            onUpdate={updateWatchlistItem}
+            onRemove={removeWatchlistItem}
+            onCreateBrief={createBriefFromWatchlist}
+            onCreatePrKit={createPrKitFromWatchlist}
+          />
+        </section>
 
-        <ProofVault opportunities={opportunities} onEntryCountChange={setProofCount} />
+        <section className="scroll-scene scene-proof rounded-md p-1">
+          <ProofVault opportunities={opportunities} onEntryCountChange={setProofCount} />
+        </section>
 
         <section className="mb-10 border-t border-white/10 pt-8">
           <SectionHeader
@@ -494,11 +502,11 @@ function WorkflowStrip() {
   const steps = ["Discover", "Filter", "Save", "Brief", "PR Kit", "Proof Vault"];
 
   return (
-    <section className="rounded-md border border-cream/10 bg-cream/[0.035] p-4 shadow-[0_18px_70px_rgba(0,0,0,0.2)]">
+    <section className="rounded-md border border-cream/10 bg-black/20 p-4 shadow-[0_18px_70px_rgba(0,0,0,0.2)] backdrop-blur">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-moss">Workflow</p>
-          <h2 className="mt-2 text-xl font-bold text-cream">From signal to proof</h2>
+          <h2 className="mt-2 text-xl font-bold text-cream">Discover to proof, without losing the thread</h2>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {steps.map((step, index) => (

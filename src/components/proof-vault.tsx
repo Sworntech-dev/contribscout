@@ -107,7 +107,7 @@ export function ProofVault({
         </p>
       </div>
 
-      <div className="rounded-md border border-white/10 bg-white/[0.035] p-4">
+      <div className="premium-panel rounded-md p-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-semibold text-white">Export proof report</p>
@@ -132,7 +132,7 @@ export function ProofVault({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-        <form onSubmit={submitEntry} className="rounded-md border border-white/10 bg-panel/75 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.16)]">
+        <form onSubmit={submitEntry} className="premium-panel rounded-md p-5">
           <div className="grid gap-4">
             <Field label="Project name">
               <input
@@ -210,7 +210,7 @@ export function ProofVault({
           </div>
         </form>
 
-        <div className="rounded-md border border-white/10 bg-white/[0.035] p-5">
+        <div className="premium-panel rounded-md p-5">
           {entries.length === 0 ? (
             <div className="grid min-h-80 place-items-center text-center">
               <div>
@@ -223,7 +223,7 @@ export function ProofVault({
           ) : (
             <div className="space-y-3">
               {entries.map((entry) => (
-                <article key={entry.id} className="rounded-md border border-white/10 bg-panel p-4">
+                <article key={entry.id} className="rounded-md border border-cream/10 bg-black/20 p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <h3 className="font-bold text-white">{entry.projectName}</h3>

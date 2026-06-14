@@ -53,7 +53,7 @@ export function SmartFilters({
   const hasActiveFilters = state.activePreset || Object.values(state.filters).some(Boolean) || state.sort !== "best-match";
 
   return (
-    <section className="rounded-md border border-cream/10 bg-[linear-gradient(180deg,rgba(243,234,215,0.065),rgba(8,12,11,0.8))] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.22)]">
+    <section className="premium-panel rounded-md p-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-moss">Smart Filters</p>

@@ -20,7 +20,7 @@ export function OpportunityCard({
   const saturationLabel = opportunity.stars < 500 ? "Low saturation" : "Moderate saturation";
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-md border border-cream/10 bg-[linear-gradient(180deg,rgba(243,234,215,0.075),rgba(10,16,14,0.88))] p-5 shadow-[0_28px_90px_rgba(0,0,0,0.28)] transition hover:-translate-y-0.5 hover:border-moss/45">
+    <article className="premium-panel premium-lift flex h-full flex-col overflow-hidden rounded-md p-5">
       <div className="flex min-h-40 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap gap-2">
@@ -105,7 +105,7 @@ export function OpportunityCard({
                 href={opportunity.url}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex rounded-md border border-cream/10 bg-cream/[0.07] px-3 py-2 text-sm font-semibold text-cream transition hover:border-moss/50 hover:bg-moss/10"
+                className="premium-action inline-flex rounded-md border border-cream/10 bg-cream/[0.07] px-3 py-2 text-sm font-semibold text-cream transition hover:border-moss/50 hover:bg-moss/10"
               >
                 Open repository
               </a>
@@ -114,21 +114,21 @@ export function OpportunityCard({
               type="button"
               onClick={() => onSaveToWatchlist(opportunity)}
               disabled={isInWatchlist}
-              className="inline-flex rounded-md border border-cream/10 bg-cream/[0.045] px-3 py-2 text-sm font-semibold text-cream/78 transition hover:border-moss/50 hover:text-cream disabled:cursor-default disabled:border-moss/25 disabled:bg-moss/10 disabled:text-moss"
+              className="premium-action inline-flex rounded-md border border-cream/10 bg-cream/[0.045] px-3 py-2 text-sm font-semibold text-cream/78 transition hover:border-moss/50 hover:text-cream disabled:cursor-default disabled:border-moss/25 disabled:bg-moss/10 disabled:text-moss"
             >
               {isInWatchlist ? "In Watchlist" : "Save"}
             </button>
             <button
               type="button"
               onClick={() => onCreateBrief(opportunity)}
-              className="inline-flex rounded-md border border-cream/10 bg-cream/[0.045] px-3 py-2 text-sm font-semibold text-cream/78 transition hover:border-moss/50 hover:text-cream"
+              className="premium-action inline-flex rounded-md border border-cream/10 bg-cream/[0.045] px-3 py-2 text-sm font-semibold text-cream/78 transition hover:border-moss/50 hover:text-cream"
             >
               Brief
             </button>
             <button
               type="button"
               onClick={() => onCreatePrKit(opportunity)}
-              className="inline-flex rounded-md border border-warm/25 bg-warm/10 px-3 py-2 text-sm font-semibold text-cream transition hover:border-warm/60 hover:bg-warm/15"
+              className="premium-action inline-flex rounded-md border border-warm/25 bg-warm/10 px-3 py-2 text-sm font-semibold text-cream transition hover:border-warm/60 hover:bg-warm/15"
             >
               PR Kit
             </button>

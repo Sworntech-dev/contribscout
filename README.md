@@ -94,6 +94,8 @@ In v1.0, Mission Control redesign upgrades the dashboard into a polished contrib
 
 In v1.0.1, the visual polish pass adds a more premium landing-page feel inspired by high-end agency design patterns without copying any brand or layout. The focus is first impression, editorial spacing, richer dark surfaces, muted green accents, warm CTAs, and clearer open-source workflow presentation.
 
+In v1.0.2, Premium Scroll Experience adds section-level scene backgrounds, richer scroll depth, integrated hero workflow treatment, premium card hover states, and more cinematic visual pacing across the contribution workflow.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.
