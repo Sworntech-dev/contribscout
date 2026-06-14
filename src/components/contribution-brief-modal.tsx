@@ -1,10 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useReducedMotion } from "framer-motion";
 import {
   buildContributionBriefMarkdown,
   getContributionBriefFilename,
 } from "@/lib/contribution-brief";
+import { Motion } from "@/components/motion-shell";
 import type { ContributionBriefTarget } from "@/lib/types";
 
 export function ContributionBriefModal({
@@ -20,6 +22,7 @@ export function ContributionBriefModal({
 }) {
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saved" | "error">("idle");
+  const reduceMotion = useReducedMotion();
   const markdown = useMemo(() => (target ? buildContributionBriefMarkdown(target) : ""), [target]);
 
   if (!target) return null;
@@ -60,8 +63,18 @@ export function ContributionBriefModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-ink/85 px-4 py-6 backdrop-blur-md">
-      <div className="relative mx-auto max-w-3xl overflow-hidden rounded-md border border-cream/10 bg-[linear-gradient(180deg,rgba(243,234,215,0.08),rgba(8,12,11,0.96))] p-5 shadow-[0_40px_130px_rgba(0,0,0,0.5)]">
+    <Motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      className="fixed inset-0 z-50 overflow-y-auto bg-ink/85 px-4 py-6 backdrop-blur-md"
+    >
+      <Motion.div
+        initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 24, scale: 0.985 }}
+        animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.52, ease: [0.22, 1, 0.36, 1] }}
+        className="relative mx-auto max-w-3xl overflow-hidden rounded-md border border-cream/10 bg-[linear-gradient(180deg,rgba(243,234,215,0.08),rgba(8,12,11,0.96))] p-5 shadow-[0_40px_130px_rgba(0,0,0,0.5)]"
+      >
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-moss/60 to-transparent" />
         <div className="flex flex-col gap-4 border-b border-white/10 pb-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
@@ -126,8 +139,8 @@ export function ContributionBriefModal({
             {markdown}
           </pre>
         </details>
-      </div>
-    </div>
+      </Motion.div>
+    </Motion.div>
   );
 }
 
@@ -142,12 +155,14 @@ function BriefMetric({ label, value }: { label: string; value: string }) {
 
 function BriefButton({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
   return (
-    <button
+    <Motion.button
       type="button"
+      whileHover={{ y: -1 }}
+      whileTap={{ scale: 0.985 }}
       onClick={onClick}
       className="rounded-md border border-cream/10 bg-cream/[0.045] px-3 py-2 text-sm font-semibold text-cream/78 transition hover:border-moss/50 hover:text-cream"
     >
       {children}
-    </button>
+    </Motion.button>
   );
 }

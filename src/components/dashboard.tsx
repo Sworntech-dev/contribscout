@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ContributionBriefModal } from "@/components/contribution-brief-modal";
 import { DailyOpportunityReport } from "@/components/daily-opportunity-report";
+import { FloatingPanel, Motion, MotionBackdrop, Reveal, StaggerGroup, StaggerItem } from "@/components/motion-shell";
 import { OpportunityCard } from "@/components/opportunity-card";
 import { PrReadinessKitModal } from "@/components/pr-readiness-kit-modal";
 import { ProofVault } from "@/components/proof-vault";
@@ -277,8 +278,14 @@ export function Dashboard() {
 
   return (
     <main className="relative min-h-screen overflow-hidden">
+      <MotionBackdrop />
       <section className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
-        <nav className="flex items-center justify-between rounded-md border border-cream/10 bg-cream/[0.045] px-4 py-3 shadow-[0_20px_80px_rgba(0,0,0,0.22)] backdrop-blur">
+        <Motion.nav
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.68, ease: [0.22, 1, 0.36, 1] }}
+          className="flex items-center justify-between rounded-md border border-cream/10 bg-cream/[0.045] px-4 py-3 shadow-[0_20px_80px_rgba(0,0,0,0.22)] backdrop-blur"
+        >
           <div className="flex items-center gap-3">
             <div className="grid h-10 w-10 place-items-center rounded-md border border-moss/40 bg-moss/10 text-sm font-black text-cream shadow-[0_0_30px_rgba(157,191,154,0.18)]">
               CS
@@ -296,50 +303,69 @@ export function Dashboard() {
           >
             Proof Vault
           </a>
-        </nav>
+        </Motion.nav>
 
-        <section className="scroll-scene scene-hero relative overflow-hidden rounded-md border border-cream/10 p-5 shadow-[0_42px_130px_rgba(0,0,0,0.42)] sm:p-8 lg:min-h-[680px] lg:p-10">
+        <Motion.section
+          initial={{ opacity: 0, scale: 0.985 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          className="scroll-scene scene-hero relative overflow-hidden rounded-md border border-cream/10 p-5 shadow-[0_42px_130px_rgba(0,0,0,0.42)] sm:p-8 lg:min-h-[680px] lg:p-10"
+        >
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-moss/70 to-transparent" />
           <div className="absolute right-0 top-0 h-full w-1/2 bg-[linear-gradient(135deg,transparent,rgba(157,191,154,0.08),transparent)]" />
           <div className="absolute bottom-0 left-0 h-1/2 w-full bg-[linear-gradient(90deg,rgba(217,168,95,0.055),transparent_45%)]" />
           <div className="relative grid gap-10 lg:grid-cols-[1.06fr_0.94fr] lg:items-end">
-            <div className="max-w-4xl py-6 sm:py-10">
-              <p className="mb-5 text-sm font-semibold uppercase tracking-[0.28em] text-moss">
+            <StaggerGroup className="max-w-4xl py-6 sm:py-10">
+              <StaggerItem>
+                <p className="mb-5 text-sm font-semibold uppercase tracking-[0.28em] text-moss">
                 ContribScout / Open-source mission control
-              </p>
-              <h1 className="max-w-4xl text-5xl font-black leading-[0.94] text-cream sm:text-7xl lg:text-8xl">
-                Find the right open-source contribution before you open the PR.
-              </h1>
-              <p className="mt-6 max-w-2xl text-lg leading-8 text-cream/72">
-                ContribScout scans GitHub signals, scores contribution leverage, and turns repo discovery into a clean PR workflow.
-              </p>
-              <div className="mt-7 flex flex-wrap gap-3">
-                {["Live GitHub Scanner", "Hermes Skill Layer", "PR Workflow Kit", "Local Proof Vault"].map((badge) => (
-                  <span
-                    key={`hero-badge-${badge}`}
-                    className="rounded-md border border-cream/10 bg-cream/[0.075] px-3 py-2 text-sm font-semibold text-cream/80"
+                </p>
+              </StaggerItem>
+              <StaggerItem>
+                <h1 className="max-w-4xl text-5xl font-black leading-[0.94] text-cream sm:text-7xl lg:text-8xl">
+                  Find the right open-source contribution before you open the PR.
+                </h1>
+              </StaggerItem>
+              <StaggerItem>
+                <p className="mt-6 max-w-2xl text-lg leading-8 text-cream/72">
+                  ContribScout scans GitHub signals, scores contribution leverage, and turns repo discovery into a clean PR workflow.
+                </p>
+              </StaggerItem>
+              <StaggerItem>
+                <div className="mt-7 flex flex-wrap gap-3">
+                  {["Live GitHub Scanner", "Hermes Skill Layer", "PR Workflow Kit", "Local Proof Vault"].map((badge) => (
+                    <span
+                      key={`hero-badge-${badge}`}
+                      className="rounded-md border border-cream/10 bg-cream/[0.075] px-3 py-2 text-sm font-semibold text-cream/80"
+                    >
+                      {badge}
+                    </span>
+                  ))}
+                </div>
+              </StaggerItem>
+              <StaggerItem>
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <Motion.a
+                    href="#top-opportunities"
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.985 }}
+                    className="premium-action rounded-md bg-warm px-4 py-3 text-center text-sm font-black text-ink shadow-[0_18px_60px_rgba(217,168,95,0.22)] transition hover:bg-cream"
                   >
-                    {badge}
-                  </span>
-                ))}
-              </div>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a
-                  href="#top-opportunities"
-                  className="premium-action rounded-md bg-warm px-4 py-3 text-center text-sm font-black text-ink shadow-[0_18px_60px_rgba(217,168,95,0.22)] transition hover:bg-cream"
-                >
-                  Review opportunities
-                </a>
-                <a
-                  href="#daily-report"
-                  className="premium-action rounded-md border border-cream/10 bg-cream/[0.065] px-4 py-3 text-center text-sm font-semibold text-cream/85 transition hover:border-moss/50 hover:text-cream"
-                >
-                  Generate report
-                </a>
-              </div>
-            </div>
+                    Review opportunities
+                  </Motion.a>
+                  <Motion.a
+                    href="#daily-report"
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.985 }}
+                    className="premium-action rounded-md border border-cream/10 bg-cream/[0.065] px-4 py-3 text-center text-sm font-semibold text-cream/85 transition hover:border-moss/50 hover:text-cream"
+                  >
+                    Generate report
+                  </Motion.a>
+                </div>
+              </StaggerItem>
+            </StaggerGroup>
 
-            <div className="premium-panel sticky top-6 rounded-md p-5 backdrop-blur">
+            <FloatingPanel className="premium-panel sticky top-6 rounded-md p-5 backdrop-blur">
               <p className="text-sm font-semibold text-cream/80">Current operation</p>
               <div className="mt-4 grid grid-cols-3 gap-3">
                 <Metric
@@ -368,23 +394,23 @@ export function Dashboard() {
               <p className="mt-5 rounded-md border border-cream/10 bg-black/20 px-3 py-2 text-xs leading-5 text-cream/55">
                 {loading ? "Running live GitHub scan..." : error ?? "Live GitHub scanner returned normalized opportunities."}
               </p>
-            </div>
+            </FloatingPanel>
           </div>
 
-          <div className="relative mt-8 border-t border-cream/10 pt-5">
+          <Reveal className="relative mt-8 border-t border-cream/10 pt-5" delay={0.12}>
             <WorkflowStrip />
-          </div>
-        </section>
+          </Reveal>
+        </Motion.section>
 
-        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          <StatusCard label="Visible opportunities" value={filteredOpportunities.length.toString()} detail={`${opportunities.length} scanned`} />
-          <StatusCard label="Watchlist" value={watchlist.length.toString()} detail="local pipeline" />
-          <StatusCard label="Proof Vault" value={proofCount.toString()} detail="local entries" />
-          <StatusCard label="Source" value={sourceLabel} detail={isSampleFallback ? "sample fallback" : "live preference"} />
-          <StatusCard label="Active filters" value={activeFilterCount.toString()} detail={activeFilterCount ? "mission narrowed" : "all signals"} />
-        </section>
+        <StaggerGroup className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          <StaggerItem><StatusCard label="Visible opportunities" value={filteredOpportunities.length.toString()} detail={`${opportunities.length} scanned`} /></StaggerItem>
+          <StaggerItem><StatusCard label="Watchlist" value={watchlist.length.toString()} detail="local pipeline" /></StaggerItem>
+          <StaggerItem><StatusCard label="Proof Vault" value={proofCount.toString()} detail="local entries" /></StaggerItem>
+          <StaggerItem><StatusCard label="Source" value={sourceLabel} detail={isSampleFallback ? "sample fallback" : "live preference"} /></StaggerItem>
+          <StaggerItem><StatusCard label="Active filters" value={activeFilterCount.toString()} detail={activeFilterCount ? "mission narrowed" : "all signals"} /></StaggerItem>
+        </StaggerGroup>
 
-        <section className="scroll-scene scene-workflow rounded-md p-1">
+        <Reveal className="scroll-scene scene-workflow rounded-md p-1">
           <SmartFilters
             state={smartFilters}
             totalCount={opportunities.length}
@@ -395,9 +421,9 @@ export function Dashboard() {
             onSortChange={changeSort}
             onClear={clearFilters}
           />
-        </section>
+        </Reveal>
 
-        <section id="top-opportunities" className="scroll-scene scene-opportunities space-y-4 rounded-md p-1">
+        <Reveal id="top-opportunities" className="scroll-scene scene-opportunities space-y-4 rounded-md p-1">
           <SectionHeader
             kicker="Opportunities"
             title="Ranked contribution targets"
@@ -410,23 +436,24 @@ export function Dashboard() {
           ) : filteredOpportunities.length === 0 ? (
             <EmptyFilteredState onClear={clearFilters} />
           ) : (
-            <div className="grid gap-4 lg:grid-cols-2">
+            <StaggerGroup className="grid gap-4 lg:grid-cols-2">
               {filteredOpportunities.map((opportunity) => (
-                <OpportunityCard
-                  key={opportunity.fullName}
-                  opportunity={opportunity}
-                  isSampleFallback={isSampleFallback}
-                  isInWatchlist={isInWatchlist(opportunity)}
-                  onSaveToWatchlist={saveToWatchlist}
-                  onCreateBrief={createBriefFromOpportunity}
-                  onCreatePrKit={createPrKitFromOpportunity}
-                />
+                <StaggerItem key={opportunity.fullName}>
+                  <OpportunityCard
+                    opportunity={opportunity}
+                    isSampleFallback={isSampleFallback}
+                    isInWatchlist={isInWatchlist(opportunity)}
+                    onSaveToWatchlist={saveToWatchlist}
+                    onCreateBrief={createBriefFromOpportunity}
+                    onCreatePrKit={createPrKitFromOpportunity}
+                  />
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerGroup>
           )}
-        </section>
+        </Reveal>
 
-        <section className="scroll-scene scene-pipeline grid gap-8 rounded-md p-1">
+        <Reveal className="scroll-scene scene-pipeline grid gap-8 rounded-md p-1">
           <DailyOpportunityReport
             opportunities={filteredOpportunities}
             source={source}
@@ -442,13 +469,13 @@ export function Dashboard() {
             onCreateBrief={createBriefFromWatchlist}
             onCreatePrKit={createPrKitFromWatchlist}
           />
-        </section>
+        </Reveal>
 
-        <section className="scroll-scene scene-proof rounded-md p-1">
+        <Reveal className="scroll-scene scene-proof rounded-md p-1">
           <ProofVault opportunities={opportunities} onEntryCountChange={setProofCount} />
-        </section>
+        </Reveal>
 
-        <section className="mb-10 border-t border-white/10 pt-8">
+        <Reveal className="mb-10 border-t border-white/10 pt-8">
           <SectionHeader
             kicker="Roadmap"
             title="Small first, useful next"
@@ -466,7 +493,7 @@ export function Dashboard() {
               ),
             )}
           </div>
-        </section>
+        </Reveal>
       </section>
       <ContributionBriefModal
         target={briefTarget}
@@ -508,16 +535,19 @@ function WorkflowStrip() {
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-moss">Workflow</p>
           <h2 className="mt-2 text-xl font-bold text-cream">Discover to proof, without losing the thread</h2>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <StaggerGroup className="flex flex-wrap items-center gap-2">
           {steps.map((step, index) => (
-            <div key={`workflow-${step}`} className="flex items-center gap-2">
-              <span className="rounded-md border border-cream/10 bg-ink/60 px-3 py-2 text-sm font-semibold text-cream/78">
+            <StaggerItem key={`workflow-${step}`} className="flex items-center gap-2">
+              <Motion.span
+                whileHover={{ y: -1 }}
+                className="rounded-md border border-cream/10 bg-ink/60 px-3 py-2 text-sm font-semibold text-cream/78"
+              >
                 {step}
-              </span>
+              </Motion.span>
               {index < steps.length - 1 ? <span className="hidden text-warm/45 sm:inline">/</span> : null}
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGroup>
       </div>
     </section>
   );

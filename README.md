@@ -96,6 +96,8 @@ In v1.0.1, the visual polish pass adds a more premium landing-page feel inspired
 
 In v1.0.2, Premium Scroll Experience adds section-level scene backgrounds, richer scroll depth, integrated hero workflow treatment, premium card hover states, and more cinematic visual pacing across the contribution workflow.
 
+In v1.0.3, Cinematic Scroll Motion adds Framer Motion-powered scroll depth, parallax hero layers, animated section reveals, staggered workflow/card entrances, premium modal motion, and reduced-motion fallbacks.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.
