@@ -98,6 +98,8 @@ In v1.0.2, Premium Scroll Experience adds section-level scene backgrounds, riche
 
 In v1.0.3, Cinematic Scroll Motion adds Framer Motion-powered scroll depth, parallax hero layers, animated section reveals, staggered workflow/card entrances, premium modal motion, and reduced-motion fallbacks.
 
+In v1.0.4, Real Cinematic Landing Scroll adds a dedicated landing story before the dashboard: a full-screen hero, pinned scroll-driven workflow section, animated product cards, moving background gradients, and a clear handoff into Mission Control.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.

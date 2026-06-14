@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { CinematicLanding } from "@/components/cinematic-landing";
 import { ContributionBriefModal } from "@/components/contribution-brief-modal";
 import { DailyOpportunityReport } from "@/components/daily-opportunity-report";
-import { FloatingPanel, Motion, MotionBackdrop, Reveal, StaggerGroup, StaggerItem } from "@/components/motion-shell";
+import { Motion, MotionBackdrop, Reveal, StaggerGroup, StaggerItem } from "@/components/motion-shell";
 import { OpportunityCard } from "@/components/opportunity-card";
 import { PrReadinessKitModal } from "@/components/pr-readiness-kit-modal";
 import { ProofVault } from "@/components/proof-vault";
@@ -305,102 +306,7 @@ export function Dashboard() {
           </a>
         </Motion.nav>
 
-        <Motion.section
-          initial={{ opacity: 0, scale: 0.985 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="scroll-scene scene-hero relative overflow-hidden rounded-md border border-cream/10 p-5 shadow-[0_42px_130px_rgba(0,0,0,0.42)] sm:p-8 lg:min-h-[680px] lg:p-10"
-        >
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-moss/70 to-transparent" />
-          <div className="absolute right-0 top-0 h-full w-1/2 bg-[linear-gradient(135deg,transparent,rgba(157,191,154,0.08),transparent)]" />
-          <div className="absolute bottom-0 left-0 h-1/2 w-full bg-[linear-gradient(90deg,rgba(217,168,95,0.055),transparent_45%)]" />
-          <div className="relative grid gap-10 lg:grid-cols-[1.06fr_0.94fr] lg:items-end">
-            <StaggerGroup className="max-w-4xl py-6 sm:py-10">
-              <StaggerItem>
-                <p className="mb-5 text-sm font-semibold uppercase tracking-[0.28em] text-moss">
-                ContribScout / Open-source mission control
-                </p>
-              </StaggerItem>
-              <StaggerItem>
-                <h1 className="max-w-4xl text-5xl font-black leading-[0.94] text-cream sm:text-7xl lg:text-8xl">
-                  Find the right open-source contribution before you open the PR.
-                </h1>
-              </StaggerItem>
-              <StaggerItem>
-                <p className="mt-6 max-w-2xl text-lg leading-8 text-cream/72">
-                  ContribScout scans GitHub signals, scores contribution leverage, and turns repo discovery into a clean PR workflow.
-                </p>
-              </StaggerItem>
-              <StaggerItem>
-                <div className="mt-7 flex flex-wrap gap-3">
-                  {["Live GitHub Scanner", "Hermes Skill Layer", "PR Workflow Kit", "Local Proof Vault"].map((badge) => (
-                    <span
-                      key={`hero-badge-${badge}`}
-                      className="rounded-md border border-cream/10 bg-cream/[0.075] px-3 py-2 text-sm font-semibold text-cream/80"
-                    >
-                      {badge}
-                    </span>
-                  ))}
-                </div>
-              </StaggerItem>
-              <StaggerItem>
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                  <Motion.a
-                    href="#top-opportunities"
-                    whileHover={{ y: -2 }}
-                    whileTap={{ scale: 0.985 }}
-                    className="premium-action rounded-md bg-warm px-4 py-3 text-center text-sm font-black text-ink shadow-[0_18px_60px_rgba(217,168,95,0.22)] transition hover:bg-cream"
-                  >
-                    Review opportunities
-                  </Motion.a>
-                  <Motion.a
-                    href="#daily-report"
-                    whileHover={{ y: -2 }}
-                    whileTap={{ scale: 0.985 }}
-                    className="premium-action rounded-md border border-cream/10 bg-cream/[0.065] px-4 py-3 text-center text-sm font-semibold text-cream/85 transition hover:border-moss/50 hover:text-cream"
-                  >
-                    Generate report
-                  </Motion.a>
-                </div>
-              </StaggerItem>
-            </StaggerGroup>
-
-            <FloatingPanel className="premium-panel sticky top-6 rounded-md p-5 backdrop-blur">
-              <p className="text-sm font-semibold text-cream/80">Current operation</p>
-              <div className="mt-4 grid grid-cols-3 gap-3">
-                <Metric
-                  label="Visible"
-                  value={
-                    opportunities.length
-                      ? `${filteredOpportunities.length}/${opportunities.length}`
-                      : opportunities.length.toString()
-                  }
-                />
-                <Metric label="Avg score" value={filteredOpportunities.length ? averageScore.toString() : "-"} />
-                <Metric label="Source" value={sourceLabel} />
-              </div>
-              <div className="mt-5 border-t border-white/10 pt-5">
-                <p className="text-sm text-cream/55">Top lead</p>
-                <p className="mt-2 text-xl font-bold text-cream">
-                  {topOpportunity?.name ?? (opportunities.length ? "No matching opportunities" : "Running live GitHub scan...")}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-cream/70">
-                  {topOpportunity?.suggestedAction ??
-                    (opportunities.length
-                      ? "Clear filters or choose a broader preset to see more projects."
-                      : "Fetching current repositories before showing fallback data.")}
-                </p>
-              </div>
-              <p className="mt-5 rounded-md border border-cream/10 bg-black/20 px-3 py-2 text-xs leading-5 text-cream/55">
-                {loading ? "Running live GitHub scan..." : error ?? "Live GitHub scanner returned normalized opportunities."}
-              </p>
-            </FloatingPanel>
-          </div>
-
-          <Reveal className="relative mt-8 border-t border-cream/10 pt-5" delay={0.12}>
-            <WorkflowStrip />
-          </Reveal>
-        </Motion.section>
+        <CinematicLanding />
 
         <StaggerGroup className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <StaggerItem><StatusCard label="Visible opportunities" value={filteredOpportunities.length.toString()} detail={`${opportunities.length} scanned`} /></StaggerItem>
@@ -522,34 +428,6 @@ function StatusCard({ label, value, detail }: { label: string; value: string; de
       <p className="mt-3 text-3xl font-black text-cream">{value}</p>
       <p className="mt-1 text-sm capitalize text-cream/58">{detail}</p>
     </div>
-  );
-}
-
-function WorkflowStrip() {
-  const steps = ["Discover", "Filter", "Save", "Brief", "PR Kit", "Proof Vault"];
-
-  return (
-    <section className="rounded-md border border-cream/10 bg-black/20 p-4 shadow-[0_18px_70px_rgba(0,0,0,0.2)] backdrop-blur">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-moss">Workflow</p>
-          <h2 className="mt-2 text-xl font-bold text-cream">Discover to proof, without losing the thread</h2>
-        </div>
-        <StaggerGroup className="flex flex-wrap items-center gap-2">
-          {steps.map((step, index) => (
-            <StaggerItem key={`workflow-${step}`} className="flex items-center gap-2">
-              <Motion.span
-                whileHover={{ y: -1 }}
-                className="rounded-md border border-cream/10 bg-ink/60 px-3 py-2 text-sm font-semibold text-cream/78"
-              >
-                {step}
-              </Motion.span>
-              {index < steps.length - 1 ? <span className="hidden text-warm/45 sm:inline">/</span> : null}
-            </StaggerItem>
-          ))}
-        </StaggerGroup>
-      </div>
-    </section>
   );
 }
 
