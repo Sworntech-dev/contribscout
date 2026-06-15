@@ -92,7 +92,7 @@ export function CinematicLanding() {
   }, []);
 
   useEffect(() => {
-    if (reduceMotion || typeof window === "undefined") return;
+    if (typeof window === "undefined") return;
 
     const desktopQuery = window.matchMedia("(min-width: 768px)");
     if (!desktopQuery.matches) return;
@@ -106,13 +106,21 @@ export function CinematicLanding() {
 
       gsap.set(stageTexts, { autoAlpha: 0, y: 28 });
       gsap.set(stageTexts[0], { autoAlpha: 1, y: 0 });
-      gsap.set(cards, { autoAlpha: 0, x: 220, y: 80, scale: 0.74, rotateY: -24, rotateZ: 5, pointerEvents: "none" });
+      gsap.set(cards, {
+        autoAlpha: 0,
+        x: reduceMotion ? 0 : 220,
+        y: reduceMotion ? 16 : 80,
+        scale: reduceMotion ? 0.98 : 0.74,
+        rotateY: reduceMotion ? 0 : -24,
+        rotateZ: reduceMotion ? 0 : 5,
+        pointerEvents: "none",
+      });
       gsap.set(cards[0], { autoAlpha: 1, x: 0, y: 0, scale: 1, rotateY: 0, pointerEvents: "auto" });
       gsap.set(ghosts, { autoAlpha: 0.11, scale: 0.82 });
       gsap.set(progressFillRef.current, { scaleX: 0.2, transformOrigin: "left center" });
 
       const segment = 1 / stages.length;
-      const transitionDuration = 0.07;
+      const transitionDuration = reduceMotion ? 0.045 : 0.07;
 
       const timeline = gsap.timeline({
         defaults: { ease: "power2.inOut" },
@@ -137,20 +145,48 @@ export function CinematicLanding() {
 
         if (index > 0) {
           timeline
-            .to(stageTexts[previousIndex], { autoAlpha: 0, y: -34, duration: transitionDuration }, position)
-            .fromTo(stageTexts[index], { autoAlpha: 0, y: 46 }, { autoAlpha: 1, y: 0, duration: transitionDuration }, position)
-            .to(cards[previousIndex], { autoAlpha: 0, x: -220, y: -82, scale: 0.72, rotateY: 24, rotateZ: -5, pointerEvents: "none", duration: transitionDuration }, position)
+            .to(stageTexts[previousIndex], { autoAlpha: 0, y: reduceMotion ? -10 : -34, duration: transitionDuration }, position)
+            .fromTo(stageTexts[index], { autoAlpha: 0, y: reduceMotion ? 10 : 46 }, { autoAlpha: 1, y: 0, duration: transitionDuration }, position)
+            .to(cards[previousIndex], {
+              autoAlpha: 0,
+              x: reduceMotion ? 0 : -220,
+              y: reduceMotion ? -12 : -82,
+              scale: reduceMotion ? 0.98 : 0.72,
+              rotateY: reduceMotion ? 0 : 24,
+              rotateZ: reduceMotion ? 0 : -5,
+              pointerEvents: "none",
+              duration: transitionDuration,
+            }, position)
             .fromTo(
               cards[index],
-              { autoAlpha: 0, x: 220, y: 84, scale: 0.72, rotateY: -24, rotateZ: 5, pointerEvents: "none" },
+              {
+                autoAlpha: 0,
+                x: reduceMotion ? 0 : 220,
+                y: reduceMotion ? 12 : 84,
+                scale: reduceMotion ? 0.98 : 0.72,
+                rotateY: reduceMotion ? 0 : -24,
+                rotateZ: reduceMotion ? 0 : 5,
+                pointerEvents: "none",
+              },
               { autoAlpha: 1, x: 0, y: 0, scale: 1, rotateY: 0, rotateZ: 0, pointerEvents: "auto", duration: transitionDuration },
               position,
             );
         }
 
         timeline
-          .to(glowRef.current, { xPercent: -22 + index * 11, yPercent: index % 2 === 0 ? -9 : 12, backgroundColor: stage.glow, opacity: 0.95, duration: transitionDuration }, position)
-          .to(warmGlowRef.current, { xPercent: 24 - index * 11, yPercent: index % 2 === 0 ? 14 : -10, opacity: index % 2 === 0 ? 0.45 : 0.78, duration: transitionDuration }, position)
+          .to(glowRef.current, {
+            xPercent: reduceMotion ? 0 : -22 + index * 11,
+            yPercent: reduceMotion ? 0 : index % 2 === 0 ? -9 : 12,
+            backgroundColor: stage.glow,
+            opacity: reduceMotion ? 0.72 : 0.95,
+            duration: transitionDuration,
+          }, position)
+          .to(warmGlowRef.current, {
+            xPercent: reduceMotion ? 0 : 24 - index * 11,
+            yPercent: reduceMotion ? 0 : index % 2 === 0 ? 14 : -10,
+            opacity: reduceMotion ? 0.42 : index % 2 === 0 ? 0.45 : 0.78,
+            duration: transitionDuration,
+          }, position)
           .to(progressFillRef.current, { scaleX: (index + 1) / stages.length, duration: transitionDuration }, position)
           .to(ghosts, { autoAlpha: 0.06, scale: 0.78, duration: transitionDuration }, position)
           .to(ghosts[index], { autoAlpha: 0.28, scale: 1, duration: transitionDuration }, position);
@@ -171,24 +207,18 @@ export function CinematicLanding() {
       <Hero reduceMotion={reduceMotion} />
 
       <div id="cinematic-story">
-        {reduceMotion ? (
-          <StaticStageStack />
-        ) : (
-          <>
-            <DesktopScrollStory
-              activeStage={activeStage}
-              storyRef={storyRef}
-              pinRef={pinRef}
-              glowRef={glowRef}
-              warmGlowRef={warmGlowRef}
-              progressFillRef={progressFillRef}
-              stageTextRefs={stageTextRefs}
-              cardRefs={cardRefs}
-              ghostRefs={ghostRefs}
-            />
-            <StaticStageStack mobileOnly />
-          </>
-        )}
+        <DesktopScrollStory
+          activeStage={activeStage}
+          storyRef={storyRef}
+          pinRef={pinRef}
+          glowRef={glowRef}
+          warmGlowRef={warmGlowRef}
+          progressFillRef={progressFillRef}
+          stageTextRefs={stageTextRefs}
+          cardRefs={cardRefs}
+          ghostRefs={ghostRefs}
+        />
+        <StaticStageStack mobileOnly />
       </div>
 
       <MissionControlHandoff />
