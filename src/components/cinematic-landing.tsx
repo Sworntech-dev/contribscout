@@ -2,7 +2,7 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 const stages = [
@@ -67,17 +67,29 @@ const productSignals = ["Live GitHub Scanner", "Hermes Skill Layer", "PR Workflo
 const workflowSteps = ["Discover", "Filter", "Build Brief", "PR Kit", "Proof Vault"];
 
 export function CinematicLanding() {
-  const reduceMotion = useReducedMotion();
+  const [reduceMotion, setReduceMotion] = useState(false);
   const [activeStage, setActiveStage] = useState(0);
   const storyRef = useRef<HTMLElement | null>(null);
   const pinRef = useRef<HTMLDivElement | null>(null);
-  const objectRef = useRef<HTMLDivElement | null>(null);
   const glowRef = useRef<HTMLDivElement | null>(null);
   const warmGlowRef = useRef<HTMLDivElement | null>(null);
   const progressFillRef = useRef<HTMLDivElement | null>(null);
   const stageTextRefs = useRef<Array<HTMLDivElement | null>>([]);
   const cardRefs = useRef<Array<HTMLDivElement | null>>([]);
   const ghostRefs = useRef<Array<HTMLDivElement | null>>([]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateReducedMotion = () => setReduceMotion(mediaQuery.matches);
+    updateReducedMotion();
+    mediaQuery.addEventListener("change", updateReducedMotion);
+
+    return () => {
+      mediaQuery.removeEventListener("change", updateReducedMotion);
+    };
+  }, []);
 
   useEffect(() => {
     if (reduceMotion || typeof window === "undefined") return;
@@ -94,19 +106,23 @@ export function CinematicLanding() {
 
       gsap.set(stageTexts, { autoAlpha: 0, y: 28 });
       gsap.set(stageTexts[0], { autoAlpha: 1, y: 0 });
-      gsap.set(cards, { autoAlpha: 0, x: 120, y: 36, scale: 0.88, rotateY: -12, pointerEvents: "none" });
+      gsap.set(cards, { autoAlpha: 0, x: 220, y: 80, scale: 0.74, rotateY: -24, rotateZ: 5, pointerEvents: "none" });
       gsap.set(cards[0], { autoAlpha: 1, x: 0, y: 0, scale: 1, rotateY: 0, pointerEvents: "auto" });
-      gsap.set(ghosts, { autoAlpha: 0.18, scale: 0.88 });
+      gsap.set(ghosts, { autoAlpha: 0.11, scale: 0.82 });
       gsap.set(progressFillRef.current, { scaleX: 0.2, transformOrigin: "left center" });
 
+      const segment = 1 / stages.length;
+      const transitionDuration = 0.07;
+
       const timeline = gsap.timeline({
-        defaults: { ease: "none" },
+        defaults: { ease: "power2.inOut" },
         scrollTrigger: {
           trigger: storyRef.current,
           start: "top top",
-          end: "+=3200",
+          end: "+=140%",
           scrub: true,
           pin: pinRef.current,
+          pinSpacing: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
@@ -116,32 +132,33 @@ export function CinematicLanding() {
       });
 
       stages.forEach((stage, index) => {
-        const position = index;
+        const position = index * segment;
         const previousIndex = index - 1;
 
         if (index > 0) {
           timeline
-            .to(stageTexts[previousIndex], { autoAlpha: 0, y: -24, duration: 0.42 }, position)
-            .fromTo(stageTexts[index], { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: 0.42 }, position)
-            .to(cards[previousIndex], { autoAlpha: 0, x: -110, y: -28, scale: 0.9, rotateY: 10, pointerEvents: "none", duration: 0.42 }, position)
+            .to(stageTexts[previousIndex], { autoAlpha: 0, y: -34, duration: transitionDuration }, position)
+            .fromTo(stageTexts[index], { autoAlpha: 0, y: 46 }, { autoAlpha: 1, y: 0, duration: transitionDuration }, position)
+            .to(cards[previousIndex], { autoAlpha: 0, x: -220, y: -82, scale: 0.72, rotateY: 24, rotateZ: -5, pointerEvents: "none", duration: transitionDuration }, position)
             .fromTo(
               cards[index],
-              { autoAlpha: 0, x: 120, y: 36, scale: 0.88, rotateY: -12, pointerEvents: "none" },
-              { autoAlpha: 1, x: 0, y: 0, scale: 1, rotateY: 0, pointerEvents: "auto", duration: 0.42 },
+              { autoAlpha: 0, x: 220, y: 84, scale: 0.72, rotateY: -24, rotateZ: 5, pointerEvents: "none" },
+              { autoAlpha: 1, x: 0, y: 0, scale: 1, rotateY: 0, rotateZ: 0, pointerEvents: "auto", duration: transitionDuration },
               position,
             );
         }
 
         timeline
-          .to(objectRef.current, { y: index % 2 === 0 ? -8 : 10, rotate: index % 2 === 0 ? -1.5 : 1.5, scale: index === 2 ? 1.035 : 1, duration: 0.55 }, position)
-          .to(glowRef.current, { xPercent: -10 + index * 5, yPercent: index % 2 === 0 ? -4 : 6, backgroundColor: stage.glow, duration: 0.55 }, position)
-          .to(warmGlowRef.current, { xPercent: 12 - index * 5, yPercent: index % 2 === 0 ? 8 : -6, duration: 0.55 }, position)
-          .to(progressFillRef.current, { scaleX: (index + 1) / stages.length, duration: 0.42 }, position)
-          .to(ghosts, { autoAlpha: 0.1, duration: 0.25 }, position)
-          .to(ghosts[index], { autoAlpha: 0.34, scale: 0.94, duration: 0.3 }, position);
+          .to(glowRef.current, { xPercent: -22 + index * 11, yPercent: index % 2 === 0 ? -9 : 12, backgroundColor: stage.glow, opacity: 0.95, duration: transitionDuration }, position)
+          .to(warmGlowRef.current, { xPercent: 24 - index * 11, yPercent: index % 2 === 0 ? 14 : -10, opacity: index % 2 === 0 ? 0.45 : 0.78, duration: transitionDuration }, position)
+          .to(progressFillRef.current, { scaleX: (index + 1) / stages.length, duration: transitionDuration }, position)
+          .to(ghosts, { autoAlpha: 0.06, scale: 0.78, duration: transitionDuration }, position)
+          .to(ghosts[index], { autoAlpha: 0.28, scale: 1, duration: transitionDuration }, position);
       });
 
-      timeline.to({}, { duration: 0.6 });
+      timeline.to(progressFillRef.current, { scaleX: 1, duration: 0.001 }, 1);
+
+      ScrollTrigger.refresh();
     }, storyRef);
 
     return () => {
@@ -151,27 +168,28 @@ export function CinematicLanding() {
 
   return (
     <section className="relative overflow-hidden">
-      <Hero reduceMotion={Boolean(reduceMotion)} />
+      <Hero reduceMotion={reduceMotion} />
 
-      {reduceMotion ? (
-        <StaticStageStack />
-      ) : (
-        <>
-          <DesktopScrollStory
-            activeStage={activeStage}
-            storyRef={storyRef}
-            pinRef={pinRef}
-            objectRef={objectRef}
-            glowRef={glowRef}
-            warmGlowRef={warmGlowRef}
-            progressFillRef={progressFillRef}
-            stageTextRefs={stageTextRefs}
-            cardRefs={cardRefs}
-            ghostRefs={ghostRefs}
-          />
-          <StaticStageStack mobileOnly />
-        </>
-      )}
+      <div id="cinematic-story">
+        {reduceMotion ? (
+          <StaticStageStack />
+        ) : (
+          <>
+            <DesktopScrollStory
+              activeStage={activeStage}
+              storyRef={storyRef}
+              pinRef={pinRef}
+              glowRef={glowRef}
+              warmGlowRef={warmGlowRef}
+              progressFillRef={progressFillRef}
+              stageTextRefs={stageTextRefs}
+              cardRefs={cardRefs}
+              ghostRefs={ghostRefs}
+            />
+            <StaticStageStack mobileOnly />
+          </>
+        )}
+      </div>
 
       <MissionControlHandoff />
     </section>
@@ -180,7 +198,7 @@ export function CinematicLanding() {
 
 function Hero({ reduceMotion }: { reduceMotion: boolean }) {
   return (
-    <section className="relative grid min-h-screen items-center overflow-hidden rounded-md border border-cream/10 bg-[#050806] px-5 py-12 shadow-[0_44px_150px_rgba(0,0,0,0.48)] sm:px-8 lg:px-10">
+    <section className="relative grid min-h-[86vh] items-center overflow-hidden rounded-md border border-cream/10 bg-[#050806] px-5 py-10 shadow-[0_44px_150px_rgba(0,0,0,0.48)] sm:px-8 lg:min-h-[92vh] lg:px-10">
       <motion.div
         aria-hidden="true"
         animate={reduceMotion ? undefined : { x: ["-2%", "3%", "-2%"], y: ["0%", "-2%", "0%"] }}
@@ -246,7 +264,6 @@ function DesktopScrollStory({
   activeStage,
   storyRef,
   pinRef,
-  objectRef,
   glowRef,
   warmGlowRef,
   progressFillRef,
@@ -257,7 +274,6 @@ function DesktopScrollStory({
   activeStage: number;
   storyRef: React.MutableRefObject<HTMLElement | null>;
   pinRef: React.MutableRefObject<HTMLDivElement | null>;
-  objectRef: React.MutableRefObject<HTMLDivElement | null>;
   glowRef: React.MutableRefObject<HTMLDivElement | null>;
   warmGlowRef: React.MutableRefObject<HTMLDivElement | null>;
   progressFillRef: React.MutableRefObject<HTMLDivElement | null>;
@@ -266,10 +282,10 @@ function DesktopScrollStory({
   ghostRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
 }) {
   return (
-    <section id="cinematic-story" ref={storyRef} className="relative hidden md:block">
+    <section ref={storyRef} className="relative hidden md:block">
       <div
         ref={pinRef}
-        className="relative grid min-h-screen items-center overflow-hidden rounded-md border-y border-cream/10 bg-[#050806] px-6 py-10 lg:px-10"
+        className="relative grid h-screen items-center overflow-hidden rounded-md border-y border-cream/10 bg-[#050806] px-6 py-10 lg:px-10"
       >
         <div
           ref={glowRef}
@@ -297,7 +313,7 @@ function DesktopScrollStory({
                 className="absolute inset-x-0 top-1/2 -translate-y-1/2"
               >
                 <p className={`text-sm font-semibold uppercase tracking-[0.32em] ${stage.accent}`}>
-                  Stage {index + 1} / {stages.length} · {stage.label}
+                  Stage {index + 1} / {stages.length} - {stage.label}
                 </p>
                 <h2 className="mt-5 max-w-3xl text-5xl font-black leading-[0.96] text-cream xl:text-6xl">
                   {stage.title}
@@ -327,7 +343,7 @@ function DesktopScrollStory({
             </div>
           </div>
 
-          <ProductStageObject objectRef={objectRef} cardRefs={cardRefs} ghostRefs={ghostRefs} activeStage={activeStage} />
+          <ProductStageObject cardRefs={cardRefs} ghostRefs={ghostRefs} activeStage={activeStage} />
         </div>
       </div>
     </section>
@@ -335,18 +351,16 @@ function DesktopScrollStory({
 }
 
 function ProductStageObject({
-  objectRef,
   cardRefs,
   ghostRefs,
   activeStage,
 }: {
-  objectRef: React.MutableRefObject<HTMLDivElement | null>;
   cardRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
   ghostRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
   activeStage: number;
 }) {
   return (
-    <div ref={objectRef} className="relative mx-auto min-h-[38rem] w-full max-w-3xl [perspective:1400px]">
+    <div className="relative mx-auto min-h-[42rem] w-full max-w-4xl [perspective:1500px]">
       <div className="absolute inset-8 rounded-[2rem] border border-cream/10 bg-cream/[0.035] shadow-[0_52px_150px_rgba(0,0,0,0.48)]" />
 
       {stages.map((stage, index) => (
@@ -367,7 +381,7 @@ function ProductStageObject({
         </div>
       ))}
 
-      <div className="absolute left-1/2 top-1/2 h-[28rem] w-[min(92%,34rem)] -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute left-1/2 top-1/2 h-[31rem] w-[min(94%,38rem)] -translate-x-1/2 -translate-y-1/2">
         {stages.map((stage, index) => (
           <div
             key={`stage-card-${stage.key}`}
@@ -473,7 +487,7 @@ function HeroObject({ reduceMotion }: { reduceMotion: boolean }) {
 
 function StaticStageStack({ mobileOnly = false }: { mobileOnly?: boolean }) {
   return (
-    <section id="cinematic-story" className={`grid gap-4 px-1 py-8 ${mobileOnly ? "md:hidden" : ""}`}>
+    <section className={`grid gap-4 px-1 py-8 ${mobileOnly ? "md:hidden" : ""}`}>
       {stages.map((stage, index) => (
         <article key={`static-stage-${stage.key}`} className="premium-panel rounded-md p-5">
           <p className={`text-xs font-semibold uppercase tracking-[0.24em] ${stage.accent}`}>
@@ -496,7 +510,7 @@ function MissionControlHandoff() {
   return (
     <section
       id="mission-control"
-      className="relative mx-auto mb-2 grid max-w-5xl place-items-center rounded-md border border-cream/10 bg-[linear-gradient(180deg,rgba(243,234,215,0.075),rgba(5,7,9,0.88))] px-5 py-12 text-center shadow-[0_26px_100px_rgba(0,0,0,0.28)]"
+      className="relative mx-auto mb-0 grid max-w-5xl place-items-center rounded-md border border-cream/10 bg-[linear-gradient(180deg,rgba(243,234,215,0.075),rgba(5,7,9,0.88))] px-5 py-6 text-center shadow-[0_22px_80px_rgba(0,0,0,0.24)]"
     >
       <div>
         <p className="text-sm font-semibold uppercase tracking-[0.32em] text-moss">Dashboard handoff</p>

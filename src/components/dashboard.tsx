@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ContributionBriefModal } from "@/components/contribution-brief-modal";
 import { DailyOpportunityReport } from "@/components/daily-opportunity-report";
-import { Motion, MotionBackdrop, Reveal, StaggerGroup, StaggerItem } from "@/components/motion-shell";
+import { MotionBackdrop, Reveal, StaggerGroup, StaggerItem } from "@/components/motion-shell";
 import { OpportunityCard } from "@/components/opportunity-card";
 import { PrReadinessKitModal } from "@/components/pr-readiness-kit-modal";
 import { ProofVault } from "@/components/proof-vault";
@@ -279,32 +279,7 @@ export function Dashboard() {
   return (
     <main className="relative min-h-screen overflow-hidden">
       <MotionBackdrop />
-      <section className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
-        <Motion.nav
-          initial={{ opacity: 0, y: -12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.68, ease: [0.22, 1, 0.36, 1] }}
-          className="flex items-center justify-between rounded-md border border-cream/10 bg-cream/[0.045] px-4 py-3 shadow-[0_20px_80px_rgba(0,0,0,0.22)] backdrop-blur"
-        >
-          <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-md border border-moss/40 bg-moss/10 text-sm font-black text-cream shadow-[0_0_30px_rgba(157,191,154,0.18)]">
-              CS
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <p className="text-base font-black text-cream">ContribScout</p>
-              <span className="rounded-md border border-moss/25 bg-moss/10 px-2 py-1 text-xs font-semibold text-moss">
-                Hermes Skill Layer
-              </span>
-            </div>
-          </div>
-          <a
-            href="#proof-vault"
-            className="rounded-md border border-cream/10 bg-cream/[0.06] px-3 py-2 text-sm text-cream/85 transition hover:border-moss/50 hover:text-cream"
-          >
-            Proof Vault
-          </a>
-        </Motion.nav>
-
+      <section className="relative mx-auto flex w-full max-w-7xl flex-col gap-7 px-4 pb-6 pt-2 sm:px-6 lg:px-8">
         <StaggerGroup className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <StaggerItem><StatusCard label="Visible opportunities" value={filteredOpportunities.length.toString()} detail={`${opportunities.length} scanned`} /></StaggerItem>
           <StaggerItem><StatusCard label="Watchlist" value={watchlist.length.toString()} detail="local pipeline" /></StaggerItem>

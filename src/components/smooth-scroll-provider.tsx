@@ -1,6 +1,7 @@
 "use client";
 
 import Lenis from "lenis";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { type ReactNode, useEffect } from "react";
 
 export function SmoothScrollProvider({ children }: { children: ReactNode }) {
@@ -11,11 +12,12 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
     if (mediaQuery.matches) return;
 
     const lenis = new Lenis({
-      duration: 1.05,
+      duration: 0.82,
       easing: (time: number) => Math.min(1, 1.001 - Math.pow(2, -10 * time)),
       smoothWheel: true,
       syncTouch: false,
     });
+    lenis.on("scroll", ScrollTrigger.update);
 
     let frameId = 0;
     const raf = (time: number) => {
@@ -27,6 +29,7 @@ export function SmoothScrollProvider({ children }: { children: ReactNode }) {
 
     return () => {
       window.cancelAnimationFrame(frameId);
+      lenis.off("scroll", ScrollTrigger.update);
       lenis.destroy();
     };
   }, []);

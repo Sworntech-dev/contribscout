@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Opportunity } from "@/lib/types";
 
 type ReportSource = "github" | "sample" | null;
@@ -19,19 +19,28 @@ export function DailyOpportunityReport({
   usesFilteredResults?: boolean;
 }) {
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "error">("idle");
-  const generatedAt = new Date().toISOString();
+  const [generatedAt, setGeneratedAt] = useState<string | null>(null);
   const sourceLabel = loading && !source ? "scanning" : source ?? "scanning";
+  const generatedLabel = generatedAt ? new Date(generatedAt).toLocaleString() : "Generating...";
   const markdownReport = useMemo(
     () =>
       buildDailyMarkdownReport({
         opportunities,
         source: sourceLabel,
         notice,
-        generatedAt,
+        generatedAt: generatedAt ?? "Generating...",
       }),
     [generatedAt, notice, opportunities, sourceLabel],
   );
   const hasReport = opportunities.length > 0;
+
+  useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => {
+      setGeneratedAt(new Date().toISOString());
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, []);
 
   async function copyReport() {
     if (!hasReport) return;
@@ -70,7 +79,7 @@ export function DailyOpportunityReport({
 
       <div className="premium-panel rounded-md p-5">
         <div className="grid gap-3 sm:grid-cols-3">
-          <ReportMetric label="Generated" value={new Date(generatedAt).toLocaleString()} />
+          <ReportMetric label="Generated" value={generatedLabel} />
           <ReportMetric label="Source" value={sourceLabel} />
           <ReportMetric label="Top projects" value={Math.min(opportunities.length, 5).toString()} />
         </div>
