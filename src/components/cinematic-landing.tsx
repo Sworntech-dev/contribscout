@@ -68,6 +68,7 @@ const workflowSteps = ["Discover", "Filter", "Build Brief", "PR Kit", "Proof Vau
 
 export function CinematicLanding() {
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [motionPreferenceReady, setMotionPreferenceReady] = useState(false);
   const [activeStage, setActiveStage] = useState(0);
   const storyRef = useRef<HTMLElement | null>(null);
   const pinRef = useRef<HTMLDivElement | null>(null);
@@ -82,16 +83,21 @@ export function CinematicLanding() {
     if (typeof window === "undefined") return;
 
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const updateReducedMotion = () => setReduceMotion(mediaQuery.matches);
-    updateReducedMotion();
+    const updateReducedMotion = () => {
+      setReduceMotion(mediaQuery.matches);
+      setMotionPreferenceReady(true);
+    };
+    const frameId = window.requestAnimationFrame(updateReducedMotion);
     mediaQuery.addEventListener("change", updateReducedMotion);
 
     return () => {
+      window.cancelAnimationFrame(frameId);
       mediaQuery.removeEventListener("change", updateReducedMotion);
     };
   }, []);
 
   useEffect(() => {
+    if (!motionPreferenceReady) return;
     if (typeof window === "undefined") return;
 
     const desktopQuery = window.matchMedia("(min-width: 768px)");
@@ -200,7 +206,7 @@ export function CinematicLanding() {
     return () => {
       ctx.revert();
     };
-  }, [reduceMotion]);
+  }, [motionPreferenceReady, reduceMotion]);
 
   return (
     <section className="relative overflow-hidden">
@@ -229,10 +235,8 @@ export function CinematicLanding() {
 function Hero({ reduceMotion }: { reduceMotion: boolean }) {
   return (
     <section className="relative grid min-h-[86vh] items-center overflow-hidden rounded-md border border-cream/10 bg-[#050806] px-5 py-10 shadow-[0_44px_150px_rgba(0,0,0,0.48)] sm:px-8 lg:min-h-[92vh] lg:px-10">
-      <motion.div
+      <div
         aria-hidden="true"
-        animate={reduceMotion ? undefined : { x: ["-2%", "3%", "-2%"], y: ["0%", "-2%", "0%"] }}
-        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
         className="absolute inset-[-18%] bg-[radial-gradient(62%_56%_at_76%_18%,rgba(157,191,154,0.24),transparent_64%),radial-gradient(48%_44%_at_18%_78%,rgba(217,168,95,0.16),transparent_68%)] blur-2xl"
       />
       <div
@@ -242,11 +246,7 @@ function Hero({ reduceMotion }: { reduceMotion: boolean }) {
       <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(243,234,215,0.10),transparent_34%,rgba(8,12,11,0.86))]" />
 
       <div className="relative grid gap-10 lg:grid-cols-[1fr_0.95fr] lg:items-center">
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 28 }}
-          animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
-          transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
-        >
+        <motion.div>
           <div className="flex flex-wrap gap-2">
             {productSignals.map((signal) => (
               <span
@@ -284,7 +284,7 @@ function Hero({ reduceMotion }: { reduceMotion: boolean }) {
           </div>
         </motion.div>
 
-        <HeroObject reduceMotion={reduceMotion} />
+        <HeroObject />
       </div>
     </section>
   );
@@ -340,6 +340,7 @@ function DesktopScrollStory({
                 ref={(node) => {
                   stageTextRefs.current[index] = node;
                 }}
+                style={{ opacity: index === 0 ? 1 : 0, visibility: index === 0 ? "visible" : "hidden" }}
                 className="absolute inset-x-0 top-1/2 -translate-y-1/2"
               >
                 <p className={`text-sm font-semibold uppercase tracking-[0.32em] ${stage.accent}`}>
@@ -368,7 +369,7 @@ function DesktopScrollStory({
                 ))}
               </div>
               <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-cream/10">
-                <div ref={progressFillRef} className="h-full origin-left rounded-full bg-warm" />
+                <div ref={progressFillRef} style={{ transform: "scaleX(0.2)" }} className="h-full origin-left rounded-full bg-warm" />
               </div>
             </div>
           </div>
@@ -399,6 +400,7 @@ function ProductStageObject({
           ref={(node) => {
             ghostRefs.current[index] = node;
           }}
+          style={{ opacity: index === 0 ? 0.28 : 0.06 }}
           className={`absolute rounded-md border border-cream/10 bg-cream/[0.035] shadow-[0_24px_80px_rgba(0,0,0,0.25)] ${
             index % 2 === 0 ? "left-8 top-10 h-28 w-48" : "bottom-10 right-8 h-24 w-44"
           }`}
@@ -418,6 +420,7 @@ function ProductStageObject({
             ref={(node) => {
               cardRefs.current[index] = node;
             }}
+            style={{ opacity: index === 0 ? 1 : 0, visibility: index === 0 ? "visible" : "hidden", pointerEvents: index === 0 ? "auto" : "none" }}
             className="absolute inset-0 rounded-md border border-cream/12 bg-[linear-gradient(180deg,rgba(243,234,215,0.14),rgba(8,12,11,0.94))] p-5 shadow-[0_48px_130px_rgba(0,0,0,0.48)]"
           >
             <div className="flex items-start justify-between gap-4">
@@ -460,14 +463,9 @@ function ProductStageObject({
   );
 }
 
-function HeroObject({ reduceMotion }: { reduceMotion: boolean }) {
+function HeroObject() {
   return (
-    <motion.div
-      initial={reduceMotion ? false : { opacity: 0, y: 34, rotate: -1 }}
-      animate={reduceMotion ? undefined : { opacity: 1, y: 0, rotate: 0 }}
-      transition={{ duration: 1, delay: 0.14, ease: [0.22, 1, 0.36, 1] }}
-      className="relative mx-auto w-full max-w-xl"
-    >
+    <motion.div className="relative mx-auto w-full max-w-xl">
       <div aria-hidden="true" className="absolute inset-8 rounded-[2rem] bg-moss/18 blur-3xl" />
       <div className="relative rounded-md border border-cream/12 bg-[linear-gradient(180deg,rgba(243,234,215,0.13),rgba(8,12,11,0.92))] p-4 shadow-[0_48px_140px_rgba(0,0,0,0.5)]">
         <div className="rounded-md border border-cream/10 bg-black/24 p-4">
@@ -492,15 +490,13 @@ function HeroObject({ reduceMotion }: { reduceMotion: boolean }) {
             ["Brief", "Markdown"],
             ["PR Kit", "Ready"],
           ].map(([label, value], index) => (
-            <motion.div
+            <div
               key={label}
-              animate={reduceMotion ? undefined : { y: [0, index % 2 === 0 ? -5 : 5, 0] }}
-              transition={{ duration: 5 + index, repeat: Infinity, ease: "easeInOut" }}
               className="rounded-md border border-cream/10 bg-cream/[0.055] p-4"
             >
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cream/42">{label}</p>
               <p className="mt-2 text-lg font-black text-cream">{value}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
 
