@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CinematicLanding } from "@/components/cinematic-landing";
 import { ContributionBriefModal } from "@/components/contribution-brief-modal";
 import { DailyOpportunityReport } from "@/components/daily-opportunity-report";
 import { Motion, MotionBackdrop, Reveal, StaggerGroup, StaggerItem } from "@/components/motion-shell";
@@ -305,8 +304,6 @@ export function Dashboard() {
             Proof Vault
           </a>
         </Motion.nav>
-
-        <CinematicLanding />
 
         <StaggerGroup className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <StaggerItem><StatusCard label="Visible opportunities" value={filteredOpportunities.length.toString()} detail={`${opportunities.length} scanned`} /></StaggerItem>
