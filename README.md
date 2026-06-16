@@ -100,6 +100,8 @@ In v1.0.3, Cinematic Scroll Motion adds Framer Motion-powered scroll depth, para
 
 In v1.0.4, Real Cinematic Landing Scroll adds a dedicated landing story before the dashboard: a full-screen hero, pinned scroll-driven workflow section, animated product cards, moving background gradients, and a clear handoff into Mission Control.
 
+Hackathon Phase 1 adds ContribScout Agent, a Hermes-compatible open-source growth operations workflow. The new `/api/agent/run` endpoint accepts a business goal, selects one opportunity from the current scanner results, and returns a structured agent run with business rationale, a contribution brief, a PR readiness kit, a Proof Vault candidate, an operations recommendation, and a Markdown summary. The Hermes skill package lives at `hermes/skills/contribscout-agent/` and calls this API; it is a skill layer for using ContribScout output in Hermes-style workflows, not a hosted Hermes runtime.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.
