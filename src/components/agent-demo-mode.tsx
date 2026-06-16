@@ -9,6 +9,15 @@ const DEFAULT_TEAM_CONTEXT = "Small AI tooling team";
 
 type RunState = "idle" | "running" | "success" | "error";
 type CopyState = "idle" | "copied" | "error";
+type ProvisionState = "idle" | "loading" | "ready" | "not_configured" | "error";
+type ProvisionResponse = {
+  configured: boolean;
+  status: string;
+  message: string;
+  checkoutUrl?: string | null;
+  sessionId?: string;
+  livemode?: boolean;
+};
 
 export function AgentDemoMode() {
   const [businessGoal, setBusinessGoal] = useState(DEFAULT_GOAL);
@@ -16,6 +25,8 @@ export function AgentDemoMode() {
   const [runState, setRunState] = useState<RunState>("idle");
   const [copyState, setCopyState] = useState<CopyState>("idle");
   const [saveState, setSaveState] = useState<"idle" | "saved" | "error">("idle");
+  const [provisionState, setProvisionState] = useState<ProvisionState>("idle");
+  const [provisionResult, setProvisionResult] = useState<ProvisionResponse | null>(null);
   const [error, setError] = useState("");
   const [result, setResult] = useState<AgentRunResult | null>(null);
 
@@ -35,6 +46,8 @@ export function AgentDemoMode() {
     setError("");
     setCopyState("idle");
     setSaveState("idle");
+    setProvisionState("idle");
+    setProvisionResult(null);
 
     try {
       const response = await fetch("/api/agent/run", {
@@ -99,6 +112,50 @@ export function AgentDemoMode() {
     } catch {
       setSaveState("error");
       window.setTimeout(() => setSaveState("idle"), 2400);
+    }
+  }
+
+  async function provisionWorkspace() {
+    if (!result) return;
+
+    setProvisionState("loading");
+    setProvisionResult(null);
+
+    try {
+      const response = await fetch("/api/ops/provision", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          runId: result.runId,
+          businessGoal: result.businessGoal,
+          selectedOpportunity: result.selectedOpportunity.fullName,
+          plan: "ContribScout OSS Growth Workspace",
+        }),
+      });
+      const payload = (await response.json()) as ProvisionResponse;
+
+      setProvisionResult(payload);
+
+      if (!payload.configured) {
+        setProvisionState("not_configured");
+        return;
+      }
+
+      if (!response.ok || !payload.checkoutUrl) {
+        setProvisionState("error");
+        return;
+      }
+
+      setProvisionState("ready");
+    } catch {
+      setProvisionResult({
+        configured: false,
+        status: "request_failed",
+        message: "Provisioning request failed. Check the local server or deployment logs.",
+      });
+      setProvisionState("error");
     }
   }
 
@@ -218,7 +275,7 @@ export function AgentDemoMode() {
               </Panel>
             </div>
 
-            <div className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr]">
+            <div className="grid gap-5 lg:grid-cols-2">
               <Panel eyebrow="Proof Vault candidate" title="Evidence plan">
                 <div className="space-y-3 text-sm leading-6 text-slate-300">
                   <KeyValue label="Project" value={result.proofVaultCandidate.projectName} />
@@ -243,6 +300,56 @@ export function AgentDemoMode() {
                 </div>
               </Panel>
 
+              <Panel eyebrow="Ops provisioning" title="Stripe workspace step">
+                <div className="space-y-3 text-sm leading-6 text-slate-300">
+                  <p>
+                    The agent recommends provisioning an OSS growth workspace for this run. This is the spending and
+                    provisioning step, backed by Stripe Checkout in test mode when configured.
+                  </p>
+                  <KeyValue label="Plan" value="ContribScout OSS Growth Workspace" />
+                  <KeyValue label="Amount" value="$5.00 USD test-mode payment" />
+                  <KeyValue label="Selected opportunity" value={result.selectedOpportunity.fullName} />
+                  <button
+                    type="button"
+                    onClick={provisionWorkspace}
+                    disabled={provisionState === "loading"}
+                    className="mt-2 rounded-md border border-warm/40 bg-warm/10 px-4 py-2 text-sm font-bold text-warm transition hover:border-warm hover:bg-warm hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {provisionState === "loading" ? "Creating session..." : "Provision with Stripe"}
+                  </button>
+                  {provisionResult ? (
+                    <div
+                      className={`rounded-md border px-3 py-2 text-xs leading-5 ${
+                        provisionState === "ready"
+                          ? "border-mint/30 bg-mint/10 text-mint"
+                          : "border-warm/30 bg-warm/10 text-warm"
+                      }`}
+                    >
+                      <p className="font-bold">{labelForProvisionStatus(provisionResult.status)}</p>
+                      <p className="mt-1">{provisionResult.message}</p>
+                      {provisionResult.sessionId ? <p className="mt-1">Session: {provisionResult.sessionId}</p> : null}
+                      {provisionResult.livemode === false ? <p className="mt-1">Mode: Stripe test mode</p> : null}
+                      {provisionResult.checkoutUrl ? (
+                        <a
+                          href={provisionResult.checkoutUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-3 inline-flex rounded-md border border-mint/40 px-3 py-2 font-bold text-mint transition hover:bg-mint hover:text-ink"
+                        >
+                          Open Stripe Checkout
+                        </a>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  <p className="text-xs leading-5 text-slate-500">
+                    If `STRIPE_SECRET_KEY` is missing or not a test key, this card shows setup guidance and does not
+                    create a fake checkout URL.
+                  </p>
+                </div>
+              </Panel>
+            </div>
+
+            <div className="grid gap-5">
               <Panel eyebrow="Markdown summary" title="Reusable report">
                 <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   <SecondaryButton onClick={copyMarkdown}>
@@ -460,6 +567,14 @@ function extractBriefDetails(markdown: string) {
 function findMarkdownValue(markdown: string, label: string) {
   const line = markdown.split("\n").find((item) => item.startsWith(label));
   return line?.replace(label, "").replace(/`/g, "").trim() ?? "";
+}
+
+function labelForProvisionStatus(status: string) {
+  if (status === "checkout_created") return "Checkout session created";
+  if (status === "not_configured") return "Stripe not configured";
+  if (status === "test_key_required") return "Stripe test key required";
+  if (status === "stripe_error") return "Stripe error";
+  return "Provisioning status";
 }
 
 function downloadText(filename: string, content: string, type: string) {

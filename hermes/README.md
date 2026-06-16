@@ -16,6 +16,8 @@ The skill package fetches top opportunities from `https://contribscout.vercel.ap
 
 The agent skill package posts a business goal to `https://contribscout.vercel.app/api/agent/run` by default. The API selects one opportunity from the current scanner results and returns a business rationale, contribution brief, PR readiness kit, Proof Vault candidate, operations recommendation, and Markdown summary.
 
+Hackathon Phase 3 adds an optional Stripe test-mode provisioning endpoint at `/api/ops/provision` for the dashboard Agent Demo Mode. It requires `STRIPE_SECRET_KEY`; when the variable is missing, ContribScout reports `Stripe not configured` and does not create a fake checkout URL. The Hermes skill script does not need Stripe credentials to run the agent report.
+
 Proof Vault export is separate from this Hermes skill package. Proof Vault reports are generated locally in the browser as Markdown or JSON and are not sent to Hermes automatically.
 
 The v0.5 dashboard also includes a Daily Opportunity Report export. It produces a similar Markdown summary from the opportunities currently loaded in the browser, while this Hermes skill package remains the separate skill-layer path for scheduled or agent-assisted report generation.

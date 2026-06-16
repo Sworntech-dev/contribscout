@@ -18,6 +18,9 @@ required_environment_variables:
     required: false
     default: https://contribscout.vercel.app
     description: Base URL for the ContribScout dashboard API.
+  - name: STRIPE_SECRET_KEY
+    required: false
+    description: Optional test-mode Stripe secret key for the dashboard provisioning endpoint. The skill script does not require it.
 ---
 
 # ContribScout Agent Skill
@@ -49,6 +52,10 @@ The API returns a structured agent run with:
 - Proof Vault candidate
 - operations recommendation
 - markdown summary
+
+The dashboard also includes an optional provisioning step at `POST /api/ops/provision`. That endpoint requires
+`STRIPE_SECRET_KEY` with a Stripe test-mode key. If it is missing, ContribScout returns a clear `not_configured`
+status and does not create a fake checkout URL.
 
 ## Run Locally
 
@@ -92,4 +99,5 @@ The skill worked if:
 - If the ContribScout API is unavailable, the script exits non-zero with a concise error.
 - If `GITHUB_TOKEN` is missing in the deployed dashboard environment, ContribScout may return sample fallback data.
 - If GitHub returns limited matches, the report should still mark `Source: github` when live repositories are used.
+- The optional Stripe provisioning step requires a test-mode `STRIPE_SECRET_KEY`; missing Stripe setup should be treated as a setup state, not a successful provision.
 - This skill does not submit PRs or write Proof Vault entries automatically; it prepares the workflow artifacts for a human or a later Hermes flow.

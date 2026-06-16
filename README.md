@@ -104,6 +104,8 @@ Hackathon Phase 1 adds ContribScout Agent, a Hermes-compatible open-source growt
 
 Hackathon Phase 2 adds Agent Demo Mode UI. The site now includes a product-facing ContribScout Agent section that calls `/api/agent/run` directly and displays a Hermes-style action log, selected opportunity, business rationale, contribution brief, PR readiness kit, Proof Vault candidate, and copy/downloadable Markdown summary.
 
+Hackathon Phase 3 adds a real Stripe test-mode provisioning step to Agent Demo Mode. The `/api/ops/provision` endpoint creates a Stripe Checkout Session only when `STRIPE_SECRET_KEY` is configured with a test-mode key. If Stripe is missing or not configured for test mode, the UI shows setup guidance and does not create a fake checkout URL.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.
@@ -138,6 +140,7 @@ Optionally add a GitHub token:
 
 ```bash
 GITHUB_TOKEN=<your_github_token>
+STRIPE_SECRET_KEY=<your_stripe_test_secret_key>
 NEXT_PUBLIC_APP_NAME=ContribScout
 ```
 
@@ -165,6 +168,7 @@ npm run lint
 | Variable | Required | Description |
 | --- | --- | --- |
 | `GITHUB_TOKEN` | No | Optional GitHub token used by the server-side scanner. The app works without it by using sample fallback data. |
+| `STRIPE_SECRET_KEY` | No | Optional Stripe test-mode secret key used by `/api/ops/provision` to create real Checkout Sessions. If missing, Agent Demo Mode shows "Stripe not configured" and no fake checkout URL is created. |
 | `NEXT_PUBLIC_APP_NAME` | No | Public app name shown in metadata and UI. Defaults to `ContribScout`. |
 
 ## Vercel Deployment
@@ -174,7 +178,8 @@ npm run lint
 3. Keep the framework preset as Next.js.
 4. Add `GITHUB_TOKEN` in Vercel Project Settings if you want live GitHub scanning.
 5. Add `NEXT_PUBLIC_APP_NAME=ContribScout` if desired.
-6. Deploy.
+6. Add `STRIPE_SECRET_KEY` with a Stripe test-mode secret key if you want the Agent Demo Mode provisioning step to create real test Checkout Sessions.
+7. Deploy.
 
 The app is safe to deploy without `GITHUB_TOKEN`; it will use sample data.
 
