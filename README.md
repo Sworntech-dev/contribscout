@@ -102,6 +102,8 @@ In v1.0.4, Real Cinematic Landing Scroll adds a dedicated landing story before t
 
 Hackathon Phase 1 adds ContribScout Agent, a Hermes-compatible open-source growth operations workflow. The new `/api/agent/run` endpoint accepts a business goal, selects one opportunity from the current scanner results, and returns a structured agent run with business rationale, a contribution brief, a PR readiness kit, a Proof Vault candidate, an operations recommendation, and a Markdown summary. The Hermes skill package lives at `hermes/skills/contribscout-agent/` and calls this API; it is a skill layer for using ContribScout output in Hermes-style workflows, not a hosted Hermes runtime.
 
+Hackathon Phase 2 adds Agent Demo Mode UI. The site now includes a product-facing ContribScout Agent section that calls `/api/agent/run` directly and displays a Hermes-style action log, selected opportunity, business rationale, contribution brief, PR readiness kit, Proof Vault candidate, and copy/downloadable Markdown summary.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.
