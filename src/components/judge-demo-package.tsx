@@ -49,9 +49,8 @@ export function JudgeDemoPackage({
   }
 
   return (
-    <section id="judge-demo-package" className="relative overflow-hidden border-b border-cream/10 bg-ink px-4 py-16 sm:px-6 lg:px-8">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_0%,rgba(244,181,98,0.12),transparent_24%),radial-gradient(circle_at_85%_25%,rgba(128,185,154,0.16),transparent_30%)]" />
-      <div className="mx-auto max-w-7xl space-y-6">
+    <section id="judge-demo-package" className="scroll-mt-24 space-y-6">
+      <div className="space-y-6">
         <div className="max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-[0.32em] text-warm">Judge-ready packet</p>
           <h2 className="mt-3 text-3xl font-black tracking-tight text-cream sm:text-4xl">
@@ -140,9 +139,14 @@ export function JudgeDemoPackage({
                   </SecondaryButton>
                   <SecondaryButton onClick={downloadSummary}>Download Judge Summary</SecondaryButton>
                 </div>
-                <pre className="mt-4 max-h-96 overflow-auto rounded-md border border-cream/10 bg-black/40 p-4 text-xs leading-5 text-slate-300">
-                  {judgeSummary}
-                </pre>
+                <details className="mt-4 rounded-md border border-cream/10 bg-black/30">
+                  <summary className="cursor-pointer px-4 py-3 text-sm font-bold text-slate-200">
+                    Preview judge summary
+                  </summary>
+                  <pre className="max-h-96 overflow-auto border-t border-cream/10 p-4 text-xs leading-5 text-slate-300">
+                    {judgeSummary}
+                  </pre>
+                </details>
               </Panel>
 
               <Panel eyebrow="Demo script" title="1-3 minute walkthrough">

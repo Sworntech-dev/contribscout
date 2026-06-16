@@ -190,9 +190,8 @@ export function AgentDemoMode({
   }
 
   return (
-    <section id="agent-demo" className="relative overflow-hidden border-y border-cream/10 bg-black/40 px-4 py-16 sm:px-6 lg:px-8">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(128,185,154,0.18),transparent_28%),radial-gradient(circle_at_78%_12%,rgba(244,181,98,0.14),transparent_24%),linear-gradient(180deg,rgba(9,15,12,0.86),rgba(3,5,5,0.98))]" />
-      <div className="mx-auto max-w-7xl space-y-8">
+    <section id="agent-demo" className="scroll-mt-24 space-y-6">
+      <div className="space-y-6">
         <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.32em] text-mint">Hackathon agent workflow</p>
@@ -328,79 +327,89 @@ export function AgentDemoMode({
               </Panel>
             </div>
 
-            <div className="grid gap-5 lg:grid-cols-2">
-              <Panel eyebrow="Proof Vault candidate" title="Evidence plan">
-                <div className="space-y-3 text-sm leading-6 text-slate-300">
-                  <KeyValue label="Project" value={result.proofVaultCandidate.projectName} />
-                  <KeyValue label="Action" value={result.proofVaultCandidate.actionTaken} />
-                  <KeyValue label="Proof link" value={result.proofVaultCandidate.proofLink || "n/a"} />
-                  <KeyValue label="Status" value={result.proofVaultCandidate.status} />
-                  <KeyValue label="Notes" value={result.proofVaultCandidate.notes} />
-                  <button
-                    type="button"
-                    onClick={saveProofCandidate}
-                    className="mt-2 rounded-md border border-mint/40 bg-mint/10 px-4 py-2 text-sm font-bold text-mint transition hover:border-mint hover:bg-mint hover:text-ink"
-                  >
-                    {saveState === "saved"
-                      ? "Saved"
-                      : saveState === "error"
-                        ? "Save failed"
-                        : "Save to Proof Vault"}
-                  </button>
-                  <p className="text-xs leading-5 text-slate-500">
-                    Saved agent proof candidates use `contribscout.agentProof.v1` and do not overwrite the existing Proof Vault.
-                  </p>
-                </div>
-              </Panel>
-
-              <Panel eyebrow="Ops provisioning" title="Stripe workspace step">
-                <div className="space-y-3 text-sm leading-6 text-slate-300">
-                  <p>
-                    The agent recommends provisioning an OSS growth workspace for this run. This is the spending and
-                    provisioning step, backed by Stripe Checkout in test mode when configured.
-                  </p>
-                  <KeyValue label="Plan" value="ContribScout OSS Growth Workspace" />
-                  <KeyValue label="Amount" value="$5.00 USD test-mode payment" />
-                  <KeyValue label="Selected opportunity" value={result.selectedOpportunity.fullName} />
-                  <button
-                    type="button"
-                    onClick={provisionWorkspace}
-                    disabled={provisionState === "loading"}
-                    className="mt-2 rounded-md border border-warm/40 bg-warm/10 px-4 py-2 text-sm font-bold text-warm transition hover:border-warm hover:bg-warm hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {provisionState === "loading" ? "Creating session..." : "Provision with Stripe"}
-                  </button>
-                  {provisionResult ? (
-                    <div
-                      className={`rounded-md border px-3 py-2 text-xs leading-5 ${
-                        provisionState === "ready"
-                          ? "border-mint/30 bg-mint/10 text-mint"
-                          : "border-warm/30 bg-warm/10 text-warm"
-                      }`}
+            <section id="ops-provisioning" className="scroll-mt-24 space-y-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-warm">Ops provisioning</p>
+                <h3 className="mt-2 text-2xl font-black text-white">Provisioning and evidence</h3>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
+                  Keep the operations step separate from the agent decision: Stripe shows real configuration status,
+                  and Proof Vault prepares local evidence tracking.
+                </p>
+              </div>
+              <div className="grid gap-5 lg:grid-cols-2">
+                <Panel eyebrow="Proof Vault candidate" title="Evidence plan">
+                  <div className="space-y-3 text-sm leading-6 text-slate-300">
+                    <KeyValue label="Project" value={result.proofVaultCandidate.projectName} />
+                    <KeyValue label="Action" value={result.proofVaultCandidate.actionTaken} />
+                    <KeyValue label="Proof link" value={result.proofVaultCandidate.proofLink || "n/a"} />
+                    <KeyValue label="Status" value={result.proofVaultCandidate.status} />
+                    <KeyValue label="Notes" value={result.proofVaultCandidate.notes} />
+                    <button
+                      type="button"
+                      onClick={saveProofCandidate}
+                      className="mt-2 rounded-md border border-mint/40 bg-mint/10 px-4 py-2 text-sm font-bold text-mint transition hover:border-mint hover:bg-mint hover:text-ink"
                     >
-                      <p className="font-bold">{labelForProvisionStatus(provisionResult.status)}</p>
-                      <p className="mt-1">{provisionResult.message}</p>
-                      {provisionResult.sessionId ? <p className="mt-1">Session: {provisionResult.sessionId}</p> : null}
-                      {provisionResult.livemode === false ? <p className="mt-1">Mode: Stripe test mode</p> : null}
-                      {provisionResult.checkoutUrl ? (
-                        <a
-                          href={provisionResult.checkoutUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="mt-3 inline-flex rounded-md border border-mint/40 px-3 py-2 font-bold text-mint transition hover:bg-mint hover:text-ink"
-                        >
-                          Open Stripe Checkout
-                        </a>
-                      ) : null}
-                    </div>
-                  ) : null}
-                  <p className="text-xs leading-5 text-slate-500">
-                    If `STRIPE_SECRET_KEY` is missing or not a test key, this card shows setup guidance and does not
-                    create a fake checkout URL.
-                  </p>
-                </div>
-              </Panel>
-            </div>
+                      {saveState === "saved"
+                        ? "Saved"
+                        : saveState === "error"
+                          ? "Save failed"
+                          : "Save to Proof Vault"}
+                    </button>
+                    <p className="text-xs leading-5 text-slate-500">
+                      Saved agent proof candidates use `contribscout.agentProof.v1` and do not overwrite the existing Proof Vault.
+                    </p>
+                  </div>
+                </Panel>
+
+                <Panel eyebrow="Ops provisioning" title="Stripe workspace step">
+                  <div className="space-y-3 text-sm leading-6 text-slate-300">
+                    <p>
+                      The agent recommends provisioning an OSS growth workspace for this run. This is the spending and
+                      provisioning step, backed by Stripe Checkout in test mode when configured.
+                    </p>
+                    <KeyValue label="Plan" value="ContribScout OSS Growth Workspace" />
+                    <KeyValue label="Amount" value="$5.00 USD test-mode payment" />
+                    <KeyValue label="Selected opportunity" value={result.selectedOpportunity.fullName} />
+                    <button
+                      type="button"
+                      onClick={provisionWorkspace}
+                      disabled={provisionState === "loading"}
+                      className="mt-2 rounded-md border border-warm/40 bg-warm/10 px-4 py-2 text-sm font-bold text-warm transition hover:border-warm hover:bg-warm hover:text-ink disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {provisionState === "loading" ? "Creating session..." : "Provision with Stripe"}
+                    </button>
+                    {provisionResult ? (
+                      <div
+                        className={`rounded-md border px-3 py-2 text-xs leading-5 ${
+                          provisionState === "ready"
+                            ? "border-mint/30 bg-mint/10 text-mint"
+                            : "border-warm/30 bg-warm/10 text-warm"
+                        }`}
+                      >
+                        <p className="font-bold">{labelForProvisionStatus(provisionResult.status)}</p>
+                        <p className="mt-1">{provisionResult.message}</p>
+                        {provisionResult.sessionId ? <p className="mt-1">Session: {provisionResult.sessionId}</p> : null}
+                        {provisionResult.livemode === false ? <p className="mt-1">Mode: Stripe test mode</p> : null}
+                        {provisionResult.checkoutUrl ? (
+                          <a
+                            href={provisionResult.checkoutUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="mt-3 inline-flex rounded-md border border-mint/40 px-3 py-2 font-bold text-mint transition hover:bg-mint hover:text-ink"
+                          >
+                            Open Stripe Checkout
+                          </a>
+                        ) : null}
+                      </div>
+                    ) : null}
+                    <p className="text-xs leading-5 text-slate-500">
+                      If `STRIPE_SECRET_KEY` is missing or not a test key, this card shows setup guidance and does not
+                      create a fake checkout URL.
+                    </p>
+                  </div>
+                </Panel>
+              </div>
+            </section>
 
             <div className="grid gap-5">
               <Panel eyebrow="Markdown summary" title="Reusable report">
@@ -410,9 +419,14 @@ export function AgentDemoMode({
                   </SecondaryButton>
                   <SecondaryButton onClick={downloadMarkdown}>Download Markdown</SecondaryButton>
                 </div>
-                <pre className="mt-4 max-h-80 overflow-auto rounded-md border border-cream/10 bg-black/40 p-4 text-xs leading-5 text-slate-300">
-                  {result.markdownSummary}
-                </pre>
+                <details className="mt-4 rounded-md border border-cream/10 bg-black/30">
+                  <summary className="cursor-pointer px-4 py-3 text-sm font-bold text-slate-200">
+                    Preview Markdown summary
+                  </summary>
+                  <pre className="max-h-80 overflow-auto border-t border-cream/10 p-4 text-xs leading-5 text-slate-300">
+                    {result.markdownSummary}
+                  </pre>
+                </details>
               </Panel>
             </div>
           </div>
