@@ -190,8 +190,8 @@ export function AgentDemoMode({
   }
 
   return (
-    <section id="agent-console-home" className="scroll-mt-24 space-y-8">
-      <div className="relative overflow-hidden rounded-[2rem] border border-cream/10 bg-black/40 px-5 py-10 shadow-2xl shadow-black/30 backdrop-blur sm:px-8 lg:px-12">
+    <section id="agent-console-home" className="scroll-mt-24 space-y-7">
+      <div className="relative overflow-hidden rounded-[2rem] px-2 py-8 sm:px-6 lg:px-10">
         <div className="absolute left-1/2 top-8 -z-10 h-64 w-64 -translate-x-1/2 rounded-full bg-mint/20 blur-3xl" />
         <div className="absolute right-12 top-14 -z-10 h-40 w-40 rounded-full border border-mint/20 bg-[radial-gradient(circle,rgba(128,185,154,0.28),rgba(128,185,154,0.04)_58%,transparent_70%)] shadow-[0_0_80px_rgba(128,185,154,0.18)]" />
 
@@ -223,7 +223,7 @@ export function AgentDemoMode({
           ))}
         </div>
 
-        <div className="mx-auto mt-6 max-w-4xl rounded-[1.5rem] border border-mint/20 bg-[#07110e]/85 p-4 shadow-[0_0_70px_rgba(128,185,154,0.12)]">
+        <div className="mx-auto mt-6 max-w-4xl rounded-[1.5rem] border border-mint/20 bg-[#07110e]/90 p-4 shadow-[0_0_70px_rgba(128,185,154,0.12)] backdrop-blur">
           <div className="grid gap-4">
             <Field label="Business goal">
               <textarea

@@ -36,17 +36,23 @@ export function AppShell() {
   }, [activeView]);
 
   return (
-    <main id="agent-app-shell" className="relative min-h-screen overflow-hidden bg-[#030706] px-4 py-4 sm:px-6 lg:px-8">
+    <main id="agent-app-shell" className="relative min-h-screen overflow-hidden bg-[#030706] px-4 pb-6 pt-6 sm:px-6 lg:px-8">
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:46px_46px]" />
       <div className="absolute left-[18%] top-16 -z-10 h-[30rem] w-[30rem] rounded-full bg-mint/12 blur-3xl" />
       <div className="absolute right-[-8rem] top-48 -z-10 h-[32rem] w-[32rem] rounded-full bg-warm/10 blur-3xl" />
 
-      <div className="mx-auto grid max-w-7xl gap-4 lg:grid-cols-[72px_1fr]">
+      <div className="relative z-10 mx-auto grid max-w-7xl gap-5 lg:grid-cols-[72px_minmax(0,1fr)]">
         <DesktopSidebar activeView={activeView} onSelect={setActiveView} />
 
-        <div className="min-w-0">
+        <div className="relative z-0 min-w-0">
           <MobileTabs activeView={activeView} onSelect={setActiveView} />
-          <section className="min-h-[calc(100vh-8rem)] rounded-[2rem] border border-cream/10 bg-black/35 p-3 shadow-2xl shadow-black/35 backdrop-blur sm:p-5">
+          <section
+            className={
+              activeView === "agent"
+                ? "min-h-[calc(100vh-8rem)]"
+                : "min-h-[calc(100vh-8rem)] rounded-[2rem] border border-cream/10 bg-black/35 p-3 shadow-2xl shadow-black/35 backdrop-blur sm:p-5"
+            }
+          >
             {activeView === "agent" ? (
               <AgentDemoMode
                 onRunResultChange={setAgentRun}
@@ -84,8 +90,8 @@ function DesktopSidebar({
   onSelect: (view: AppView) => void;
 }) {
   return (
-    <aside className="hidden lg:block">
-      <nav className="group sticky top-24 flex min-h-[calc(100vh-7rem)] w-[72px] flex-col gap-2 rounded-[1.5rem] border border-cream/10 bg-black/45 p-3 shadow-2xl shadow-black/30 backdrop-blur transition-all duration-300 hover:w-[238px]">
+    <aside className="relative z-30 hidden lg:block">
+      <nav className="group sticky top-24 z-30 flex min-h-[calc(100vh-7rem)] w-[72px] flex-col gap-2 rounded-[1.5rem] border border-cream/10 bg-black/80 p-3 shadow-2xl shadow-black/45 backdrop-blur-xl transition-all duration-300 hover:w-[238px]">
         <button
           type="button"
           onClick={() => onSelect("agent")}
