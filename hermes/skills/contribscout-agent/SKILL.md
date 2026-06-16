@@ -52,6 +52,7 @@ The API returns a structured agent run with:
 - Proof Vault candidate
 - operations recommendation
 - markdown summary
+- source metadata such as scanned count, considered count, selected reason, and token-configured status
 
 The dashboard also includes an optional provisioning step at `POST /api/ops/provision`. That endpoint requires
 `STRIPE_SECRET_KEY` with a Stripe test-mode key. If it is missing, ContribScout returns a clear `not_configured`
@@ -86,6 +87,8 @@ The script prints a Markdown report headed:
 
 If ContribScout is using sample fallback data, the report includes `Source: sample` and the API notice. If live GitHub data is available, the report includes `Source: github`.
 
+For the strongest live demo, configure `GITHUB_TOKEN` in the ContribScout deployment. When live GitHub results are available, the agent selects from those results. When they are not available, the API keeps the fallback honest by returning `Source: sample` and the scanner notice.
+
 ## Verification
 
 The skill worked if:
@@ -98,6 +101,7 @@ The skill worked if:
 
 - If the ContribScout API is unavailable, the script exits non-zero with a concise error.
 - If `GITHUB_TOKEN` is missing in the deployed dashboard environment, ContribScout may return sample fallback data.
+- Sample fallback is not presented as live GitHub data. Use the source and notice fields when displaying or forwarding the report.
 - If GitHub returns limited matches, the report should still mark `Source: github` when live repositories are used.
 - The optional Stripe provisioning step requires a test-mode `STRIPE_SECRET_KEY`; missing Stripe setup should be treated as a setup state, not a successful provision.
 - This skill does not submit PRs or write Proof Vault entries automatically; it prepares the workflow artifacts for a human or a later Hermes flow.

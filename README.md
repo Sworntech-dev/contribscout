@@ -106,6 +106,8 @@ Hackathon Phase 2 adds Agent Demo Mode UI. The site now includes a product-facin
 
 Hackathon Phase 3 adds a real Stripe test-mode provisioning step to Agent Demo Mode. The `/api/ops/provision` endpoint creates a Stripe Checkout Session only when `STRIPE_SECRET_KEY` is configured with a test-mode key. If Stripe is missing or not configured for test mode, the UI shows setup guidance and does not create a fake checkout URL.
 
+Hackathon Phase 4 improves live GitHub agent quality. Agent runs now expose safe source metadata such as scanned count, considered count, selected reason, and whether `GITHUB_TOKEN` is configured. For the strongest demo, configure `GITHUB_TOKEN` so `/api/agent/run` can select from live GitHub scanner results. If live data is unavailable, ContribScout keeps the fallback honest by returning `source: sample`, preserving the notice, and never claiming sample data is live.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.
@@ -181,7 +183,7 @@ npm run lint
 6. Add `STRIPE_SECRET_KEY` with a Stripe test-mode secret key if you want the Agent Demo Mode provisioning step to create real test Checkout Sessions.
 7. Deploy.
 
-The app is safe to deploy without `GITHUB_TOKEN`; it will use sample data.
+The app is safe to deploy without `GITHUB_TOKEN`; it will use sample data. For hackathon demos, `GITHUB_TOKEN` is recommended because Agent Demo Mode can then select from live GitHub scanner results when usable repositories are available.
 
 ## Hermes Skill Layer
 

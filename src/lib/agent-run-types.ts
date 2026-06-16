@@ -39,6 +39,9 @@ export type BusinessRationale = {
   summary: string;
   growthAngle: string;
   whyNow: string;
+  highLeverageReason: string;
+  immediateNextAction: string;
+  riskToCheck: string;
   evidence: string[];
 };
 
@@ -81,6 +84,10 @@ export type AgentRunResult = {
   completedAt: string;
   source: AgentRunSource;
   notice?: string;
+  scannedCount?: number;
+  consideredCount?: number;
+  selectedReason?: string;
+  tokenConfigured?: boolean;
   steps: AgentRunStep[];
   selectedOpportunity: SelectedOpportunity;
   businessRationale: BusinessRationale;

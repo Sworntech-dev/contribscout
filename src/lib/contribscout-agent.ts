@@ -49,6 +49,8 @@ type RunAgentInput = {
   opportunities: Opportunity[];
   source: AgentRunSource;
   notice?: string;
+  scannedCount?: number;
+  tokenConfigured?: boolean;
 };
 
 export function runContribScoutAgent({
@@ -56,6 +58,8 @@ export function runContribScoutAgent({
   opportunities,
   source,
   notice,
+  scannedCount,
+  tokenConfigured,
 }: RunAgentInput): AgentRunResult {
   if (!opportunities.length) {
     throw new Error("ContribScout Agent needs at least one opportunity to evaluate.");
@@ -65,8 +69,10 @@ export function runContribScoutAgent({
   const businessGoal = normalizeText(request.businessGoal, DEFAULT_BUSINESS_GOAL);
   const teamContext = normalizeText(request.teamContext, DEFAULT_TEAM_CONTEXT);
   const maxOpportunities = clampMaxOpportunities(request.maxOpportunities);
-  const ranked = rankOpportunities(opportunities.slice(0, Math.max(maxOpportunities, 1)), businessGoal, teamContext);
+  const considered = opportunities.slice(0, Math.max(maxOpportunities, 1));
+  const ranked = rankOpportunities(considered, businessGoal, teamContext);
   const selected = ranked[0];
+  const selectedReason = buildSelectedReason(selected, businessGoal, teamContext);
   const target = toContributionBriefTarget(selected, source);
   const contributionBriefMarkdown = buildContributionBriefMarkdown(target);
   const prKitMarkdown = buildPrReadinessKitMarkdown(target);
@@ -99,6 +105,10 @@ export function runContribScoutAgent({
     completedAt,
     source,
     notice,
+    scannedCount: scannedCount ?? opportunities.length,
+    consideredCount: considered.length,
+    selectedReason,
+    tokenConfigured,
     selectedOpportunity,
     businessRationale,
     proofVaultCandidate,
@@ -113,6 +123,10 @@ export function runContribScoutAgent({
     completedAt,
     source,
     notice,
+    scannedCount: scannedCount ?? opportunities.length,
+    consideredCount: considered.length,
+    selectedReason,
+    tokenConfigured,
     steps,
     selectedOpportunity,
     businessRationale,
@@ -154,27 +168,32 @@ function agentSelectionScore(opportunity: Opportunity, businessGoal: string, tea
     .join(" ")
     .toLowerCase();
   const goalFit = goalKeywordScore(goalText, opportunityText);
+  const categoryFit = categoryMatchScore(goalText, opportunity);
   const pathScore =
     Math.min(12, opportunity.openIssues) +
-    Math.min(14, signals.goodFirstIssueCount * 5) +
-    Math.min(12, signals.helpWantedCount * 4) +
-    (signals.hasContributing ? 6 : 0);
+    Math.min(18, signals.goodFirstIssueCount * 6) +
+    Math.min(14, signals.helpWantedCount * 5) +
+    (signals.hasContributing ? 5 : 0);
   const documentationScore =
-    (signals.readmeQuality === "thin" || signals.readmeQuality === "basic" ? 8 : 0) +
-    (!signals.hasDocsFolder ? 6 : 0) +
-    (!signals.hasContributing ? 5 : 0);
-  const freshnessScore = signals.isFresh ? 8 : 0;
-  const saturationScore = opportunity.stars < 500 ? 7 : opportunity.stars < 2000 ? 3 : -5;
+    (signals.readmeQuality === "thin" ? 10 : signals.readmeQuality === "basic" ? 7 : 0) +
+    (!signals.hasDocsFolder ? 8 : signals.hasDocsFolder ? 3 : 0) +
+    (!signals.hasContributing ? 7 : 0);
+  const freshnessScore = signals.isFresh ? 10 : 0;
+  const saturationScore = opportunity.stars < 250 ? 10 : opportunity.stars < 1000 ? 6 : opportunity.stars < 3000 ? 2 : -6;
   const noPathPenalty = hasContributionPath ? 0 : 18;
+  const issueQualityPenalty =
+    opportunity.openIssues === 0 && signals.goodFirstIssueCount === 0 && signals.helpWantedCount === 0 ? 12 : 0;
 
   return (
     opportunity.roleOpportunityScore +
     goalFit +
+    categoryFit +
     pathScore +
     documentationScore +
     freshnessScore +
     saturationScore -
-    noPathPenalty
+    noPathPenalty -
+    issueQualityPenalty
   );
 }
 
@@ -204,6 +223,50 @@ function goalKeywordScore(goalText: string, opportunityText: string) {
   }, 0);
 }
 
+function categoryMatchScore(goalText: string, opportunity: Opportunity) {
+  const categoryText = [opportunity.category, opportunity.description, ...opportunity.topics].join(" ").toLowerCase();
+  const groups = [
+    ["ai", "agent", "llm", "automation"],
+    ["web3", "crypto", "onchain", "wallet", "defi", "zk"],
+    ["developer", "tool", "sdk", "cli", "workflow"],
+    ["docs", "devrel", "visibility", "growth", "community"],
+  ];
+
+  return groups.reduce((score, group) => {
+    const goalHit = group.some((term) => goalText.includes(term));
+    const repoHit = group.some((term) => categoryText.includes(term));
+    return score + (goalHit && repoHit ? 8 : 0);
+  }, 0);
+}
+
+function buildSelectedReason(opportunity: Opportunity, businessGoal: string, teamContext: string) {
+  const signals = opportunity.signals;
+  const reasons = [
+    `${opportunity.roleOpportunityScore}/100 Role Opportunity Score`,
+    signals.isFresh ? "fresh project activity" : "usable contribution surface",
+  ];
+
+  if (signals.goodFirstIssueCount > 0) reasons.push(`${signals.goodFirstIssueCount} good first issue path`);
+  if (signals.helpWantedCount > 0) reasons.push(`${signals.helpWantedCount} help wanted path`);
+  if (opportunity.openIssues > 0) reasons.push(`${opportunity.openIssues} open issues`);
+  if (signals.readmeQuality === "thin" || signals.readmeQuality === "basic") {
+    reasons.push(`${signals.readmeQuality} README leaves room for contributor-facing improvements`);
+  }
+  if (!signals.hasContributing) reasons.push("missing CONTRIBUTING guide creates a clear onboarding gap");
+  if (opportunity.stars < 1000) reasons.push("lower saturation gives a small team room to stand out");
+
+  const goalFit = goalKeywordScore(
+    `${businessGoal} ${teamContext}`.toLowerCase(),
+    [opportunity.name, opportunity.fullName, opportunity.description, opportunity.category, ...opportunity.topics]
+      .join(" ")
+      .toLowerCase(),
+  );
+
+  if (goalFit >= 10) reasons.push("repo language/category aligns with the business goal");
+
+  return `Selected ${opportunity.fullName} because it combines ${joinHumanList(reasons.slice(0, 5))}.`;
+}
+
 function buildBusinessRationale(
   opportunity: Opportunity,
   businessGoal: string,
@@ -221,13 +284,46 @@ function buildBusinessRationale(
   }
 
   return {
-    summary: `${opportunity.fullName} is the strongest fit for the goal: ${businessGoal}`,
-    growthAngle: `${teamContext} can create visible value by making a small, reviewable contribution that improves the project's contributor path.`,
+    summary: `${opportunity.fullName} is the strongest contribution target for the goal: ${businessGoal}`,
+    growthAngle: `${teamContext} can use a narrow, maintainer-friendly contribution to create public proof of usefulness in a related open-source ecosystem.`,
     whyNow: opportunity.signals.isFresh
       ? "The repository looks fresh enough that early, useful contribution signals can still stand out."
       : "The repository still has enough visible contribution surface to support a focused outreach or PR workflow.",
+    highLeverageReason: buildHighLeverageReason(opportunity),
+    immediateNextAction: opportunity.suggestedAction,
+    riskToCheck: buildRiskToCheck(opportunity),
     evidence,
   };
+}
+
+function buildHighLeverageReason(opportunity: Opportunity) {
+  const signals = opportunity.signals;
+
+  if (signals.goodFirstIssueCount > 0 || signals.helpWantedCount > 0) {
+    return "Maintainer labels create a warmer path than cold outreach, so a small accepted contribution can become visible DevRel proof quickly.";
+  }
+
+  if (!signals.hasContributing || signals.readmeQuality === "thin" || !signals.hasDocsFolder) {
+    return "Contributor-facing docs gaps are high leverage because they improve the project for every future builder while keeping the first PR reviewable.";
+  }
+
+  if (opportunity.openIssues > 0) {
+    return "Open issues provide concrete context for triage, reproduction notes, or a narrow fix that can start a useful maintainer conversation.";
+  }
+
+  return "The opportunity is best approached as a small discovery contribution: validate setup, document friction, and ask maintainers before expanding scope.";
+}
+
+function buildRiskToCheck(opportunity: Opportunity) {
+  if (opportunity.openIssues === 0 && opportunity.signals.goodFirstIssueCount === 0 && opportunity.signals.helpWantedCount === 0) {
+    return "No obvious issue path is visible. Check recent PRs/issues and consider opening a small discussion or setup-friction issue before coding.";
+  }
+
+  if (!opportunity.signals.hasContributing) {
+    return "Contribution rules may be unclear. Check README, existing PR style, and maintainer expectations before submitting.";
+  }
+
+  return "Check for duplicate PRs/issues and keep the first PR narrow enough for a fast maintainer review.";
 }
 
 function buildProofVaultCandidate(opportunity: Opportunity, completedAt: string): ProofVaultCandidate {
@@ -260,14 +356,14 @@ function buildSteps(opportunity: Opportunity, completedAt: string, source: Agent
       id: "load-opportunities",
       label: "Load opportunities",
       status: "completed",
-      detail: `Loaded opportunity data from ${source}.`,
+      detail: source === "github" ? "Loaded live GitHub opportunity data from the scanner." : "Loaded sample fallback data from the scanner.",
       completedAt,
     },
     {
       id: "select-opportunity",
       label: "Select strongest opportunity",
       status: "completed",
-      detail: `Selected ${opportunity.fullName} using score, contribution signals, freshness, and business fit.`,
+      detail: `Selected ${opportunity.fullName} using score, freshness, issue paths, documentation gaps, saturation, and business fit.`,
       completedAt,
     },
     {
@@ -344,6 +440,10 @@ function buildMarkdownSummary({
   businessRationale,
   proofVaultCandidate,
   opsRecommendation,
+  scannedCount,
+  consideredCount,
+  selectedReason,
+  tokenConfigured,
 }: {
   runId: string;
   businessGoal: string;
@@ -352,6 +452,10 @@ function buildMarkdownSummary({
   completedAt: string;
   source: AgentRunSource;
   notice?: string;
+  scannedCount?: number;
+  consideredCount?: number;
+  selectedReason?: string;
+  tokenConfigured?: boolean;
   selectedOpportunity: SelectedOpportunity;
   businessRationale: BusinessRationale;
   proofVaultCandidate: ProofVaultCandidate;
@@ -364,6 +468,9 @@ function buildMarkdownSummary({
     `Started: ${startedAt}`,
     `Completed: ${completedAt}`,
     `Source: ${source}`,
+    `GITHUB_TOKEN configured: ${tokenConfigured ? "yes" : "no"}`,
+    `Scanned opportunities: ${scannedCount ?? "n/a"}`,
+    `Considered opportunities: ${consideredCount ?? "n/a"}`,
   ];
 
   if (notice) {
@@ -386,6 +493,7 @@ function buildMarkdownSummary({
     `- Category: ${selectedOpportunity.category}`,
     `- Suggested action: ${selectedOpportunity.suggestedAction}`,
     `- Score reason: ${selectedOpportunity.scoreReason}`,
+    `- Selected reason: ${selectedReason ?? "Selected by deterministic agent ranking."}`,
     "",
     "## Business Rationale",
     "",
@@ -393,6 +501,9 @@ function buildMarkdownSummary({
     "",
     `Growth angle: ${businessRationale.growthAngle}`,
     `Why now: ${businessRationale.whyNow}`,
+    `High leverage reason: ${businessRationale.highLeverageReason}`,
+    `Immediate next action: ${businessRationale.immediateNextAction}`,
+    `Risk to check: ${businessRationale.riskToCheck}`,
     "",
     "Evidence:",
     ...businessRationale.evidence.map((item) => `- ${item}`),
@@ -426,6 +537,12 @@ function clampMaxOpportunities(value: number | undefined) {
 function normalizeText(value: string | undefined, fallback: string) {
   const trimmed = value?.trim();
   return trimmed || fallback;
+}
+
+function joinHumanList(items: string[]) {
+  if (items.length <= 1) return items[0] ?? "";
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
 }
 
 function createRunId(startedAt: string, fullName: string) {

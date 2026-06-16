@@ -47,6 +47,8 @@ export async function POST(request: Request) {
       opportunities: payload.opportunities,
       source: payload.source,
       notice: payload.notice,
+      scannedCount: payload.opportunities.length,
+      tokenConfigured: Boolean(process.env.GITHUB_TOKEN),
     });
 
     return NextResponse.json(result, { headers: noStoreHeaders() });

@@ -6,6 +6,23 @@ import type { AgentRunResult, ProofVaultCandidate } from "@/lib/agent-run-types"
 const AGENT_PROOF_STORAGE_KEY = "contribscout.agentProof.v1";
 const DEFAULT_GOAL = "Grow visibility for an AI agent tooling project through useful open-source contributions.";
 const DEFAULT_TEAM_CONTEXT = "Small AI tooling team";
+const GOAL_PRESETS = [
+  {
+    label: "AI agent tooling visibility",
+    businessGoal: "Grow visibility for an AI agent tooling project through useful open-source contributions.",
+    teamContext: "Small AI tooling team",
+  },
+  {
+    label: "Web3 developer tooling growth",
+    businessGoal: "Find high-leverage Web3 developer tooling contributions that can create public proof for a small infrastructure team.",
+    teamContext: "Small Web3 developer tools team",
+  },
+  {
+    label: "Open-source DevRel pipeline",
+    businessGoal: "Build an open-source DevRel pipeline by contributing useful docs, examples, and issue notes to active developer projects.",
+    teamContext: "DevRel and growth team",
+  },
+];
 
 type RunState = "idle" | "running" | "success" | "error";
 type CopyState = "idle" | "copied" | "error";
@@ -176,6 +193,21 @@ export function AgentDemoMode() {
 
           <div className="premium-panel rounded-md p-4">
             <div className="grid gap-4">
+              <div className="flex flex-wrap gap-2">
+                {GOAL_PRESETS.map((preset) => (
+                  <button
+                    key={`agent-preset-${preset.label}`}
+                    type="button"
+                    onClick={() => {
+                      setBusinessGoal(preset.businessGoal);
+                      setTeamContext(preset.teamContext);
+                    }}
+                    className="rounded-full border border-cream/10 bg-white/[0.04] px-3 py-1.5 text-xs font-bold text-slate-300 transition hover:border-mint/50 hover:text-white"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
               <Field label="Business goal">
                 <textarea
                   value={businessGoal}
@@ -228,8 +260,16 @@ export function AgentDemoMode() {
                     <span className="font-semibold text-white">Why now:</span> {result.businessRationale.whyNow}
                   </p>
                   <p>
+                    <span className="font-semibold text-white">High leverage:</span>{" "}
+                    {result.businessRationale.highLeverageReason}
+                  </p>
+                  <p>
                     <span className="font-semibold text-white">Next action:</span>{" "}
-                    {result.opsRecommendation.nextMove}
+                    {result.businessRationale.immediateNextAction}
+                  </p>
+                  <p>
+                    <span className="font-semibold text-white">Risk to check:</span>{" "}
+                    {result.businessRationale.riskToCheck}
                   </p>
                 </div>
               </Panel>
@@ -405,6 +445,7 @@ function ActionLog({ result }: { result: AgentRunResult }) {
 
 function SelectedOpportunityPanel({ result }: { result: AgentRunResult }) {
   const isSample = result.source === "sample";
+  const sourceStatus = getSourceStatus(result);
 
   return (
     <Panel eyebrow="Selected opportunity" title={result.selectedOpportunity.fullName}>
@@ -417,15 +458,32 @@ function SelectedOpportunityPanel({ result }: { result: AgentRunResult }) {
         </div>
         <div className="space-y-3 text-sm leading-6 text-slate-300">
           <p>{result.selectedOpportunity.description}</p>
+          <div
+            className={`rounded-md border px-3 py-2 text-xs leading-5 ${
+              isSample ? "border-warm/35 bg-warm/10 text-warm" : "border-mint/35 bg-mint/10 text-mint"
+            }`}
+          >
+            <p className="font-black uppercase tracking-[0.18em]">{sourceStatus.label}</p>
+            <p className="mt-1">{sourceStatus.detail}</p>
+          </div>
           <div className="flex flex-wrap gap-2">
             <Badge>{result.selectedOpportunity.category}</Badge>
-            <Badge>{result.source}</Badge>
+            <Badge>{isSample ? "sample" : "github"}</Badge>
             {isSample ? <Badge tone="warm">Sample fallback</Badge> : null}
+            {result.tokenConfigured ? <Badge>Token configured</Badge> : <Badge tone="warm">No token</Badge>}
           </div>
           <p>
             <span className="font-semibold text-white">Why selected:</span>{" "}
-            {result.businessRationale.evidence[0] || result.selectedOpportunity.scoreReason}
+            {result.selectedReason || result.businessRationale.evidence[0] || result.selectedOpportunity.scoreReason}
           </p>
+          <div className="flex flex-wrap gap-2 text-xs text-slate-400">
+            <span className="rounded-md bg-white/[0.05] px-2 py-1">
+              Scanned: {result.scannedCount ?? "n/a"}
+            </span>
+            <span className="rounded-md bg-white/[0.05] px-2 py-1">
+              Considered: {result.consideredCount ?? "n/a"}
+            </span>
+          </div>
           {result.notice ? (
             <p className={`rounded-md border px-3 py-2 text-xs leading-5 ${isSample ? "border-warm/30 bg-warm/10 text-warm" : "border-mint/30 bg-mint/10 text-mint"}`}>
               {result.notice}
@@ -575,6 +633,29 @@ function labelForProvisionStatus(status: string) {
   if (status === "test_key_required") return "Stripe test key required";
   if (status === "stripe_error") return "Stripe error";
   return "Provisioning status";
+}
+
+function getSourceStatus(result: AgentRunResult) {
+  if (result.source === "github") {
+    return {
+      label: "Live GitHub scan",
+      detail: result.notice?.toLowerCase().includes("limited")
+        ? "Live GitHub data is being used, with a limited-results notice from the scanner."
+        : "The agent selected from live GitHub scanner results.",
+    };
+  }
+
+  if (!result.tokenConfigured) {
+    return {
+      label: "GITHUB_TOKEN is not configured",
+      detail: "The agent is using sample fallback data. Add GITHUB_TOKEN for stronger live demo quality.",
+    };
+  }
+
+  return {
+    label: "Sample fallback",
+    detail: result.notice || "The live scan did not provide usable results, so sample fallback data is shown honestly.",
+  };
 }
 
 function downloadText(filename: string, content: string, type: string) {
