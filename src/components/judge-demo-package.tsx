@@ -52,7 +52,7 @@ export function JudgeDemoPackage({
     <section id="judge-demo-package" className="scroll-mt-24 space-y-6">
       <div className="space-y-6">
         <div className="max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-warm">Judge-ready packet</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-warm">Section D · Judge-ready packet</p>
           <h2 className="mt-3 text-3xl font-black tracking-tight text-cream sm:text-4xl">
             Hackathon Demo Package
           </h2>

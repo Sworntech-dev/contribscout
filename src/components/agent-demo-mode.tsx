@@ -190,77 +190,98 @@ export function AgentDemoMode({
   }
 
   return (
-    <section id="agent-demo" className="scroll-mt-24 space-y-6">
-      <div className="space-y-6">
-        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-end">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.32em] text-mint">Hackathon agent workflow</p>
-            <h2 className="mt-3 text-4xl font-black tracking-tight text-cream sm:text-5xl">ContribScout Agent</h2>
-            <p className="mt-3 text-xl font-semibold text-white">Open-source growth operations for AI teams.</p>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-              The agent takes a business goal, scans contribution opportunities, selects the highest-leverage path,
-              prepares a brief, builds a PR readiness kit, and creates a Proof Vault candidate.
-            </p>
-          </div>
+    <section id="agent-console-home" className="scroll-mt-24 space-y-8">
+      <div className="relative overflow-hidden rounded-[2rem] border border-cream/10 bg-black/40 px-5 py-10 shadow-2xl shadow-black/30 backdrop-blur sm:px-8 lg:px-12">
+        <div className="absolute left-1/2 top-8 -z-10 h-64 w-64 -translate-x-1/2 rounded-full bg-mint/20 blur-3xl" />
+        <div className="absolute right-12 top-14 -z-10 h-40 w-40 rounded-full border border-mint/20 bg-[radial-gradient(circle,rgba(128,185,154,0.28),rgba(128,185,154,0.04)_58%,transparent_70%)] shadow-[0_0_80px_rgba(128,185,154,0.18)]" />
 
-          <div className="premium-panel rounded-md p-4">
-            <div className="grid gap-4">
-              <div className="flex flex-wrap gap-2">
-                {GOAL_PRESETS.map((preset) => (
-                  <button
-                    key={`agent-preset-${preset.label}`}
-                    type="button"
-                    onClick={() => {
-                      setBusinessGoal(preset.businessGoal);
-                      setTeamContext(preset.teamContext);
-                    }}
-                    className="rounded-full border border-cream/10 bg-white/[0.04] px-3 py-1.5 text-xs font-bold text-slate-300 transition hover:border-mint/50 hover:text-white"
-                  >
-                    {preset.label}
-                  </button>
-                ))}
-              </div>
-              <Field label="Business goal">
-                <textarea
-                  value={businessGoal}
-                  onChange={(event) => setBusinessGoal(event.target.value)}
-                  className="min-h-24 w-full resize-y rounded-md border border-cream/10 bg-black/30 px-3 py-3 text-sm leading-6 text-white outline-none transition focus:border-mint/60"
+        <div className="mx-auto max-w-4xl text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.36em] text-mint">Hackathon agent workflow</p>
+          <h2 className="mt-5 text-4xl font-black tracking-tight text-cream sm:text-6xl">
+            Hey! What should ContribScout Agent run?
+          </h2>
+          <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+            Turn an open-source growth goal into a live GitHub scan, contribution brief, PR kit, Stripe provisioning
+            step, and judge-ready report.
+          </p>
+        </div>
+
+        <div className="mx-auto mt-8 grid max-w-4xl gap-3 md:grid-cols-3">
+          {GOAL_PRESETS.map((preset) => (
+            <button
+              key={`agent-preset-${preset.label}`}
+              type="button"
+              onClick={() => {
+                setBusinessGoal(preset.businessGoal);
+                setTeamContext(preset.teamContext);
+              }}
+              className="rounded-2xl border border-cream/10 bg-white/[0.045] p-4 text-left transition hover:-translate-y-0.5 hover:border-mint/50 hover:bg-mint/10"
+            >
+              <p className="text-sm font-black text-white">{preset.label}</p>
+              <p className="mt-2 text-xs leading-5 text-slate-400">{preset.teamContext}</p>
+            </button>
+          ))}
+        </div>
+
+        <div className="mx-auto mt-6 max-w-4xl rounded-[1.5rem] border border-mint/20 bg-[#07110e]/85 p-4 shadow-[0_0_70px_rgba(128,185,154,0.12)]">
+          <div className="grid gap-4">
+            <Field label="Business goal">
+              <textarea
+                value={businessGoal}
+                onChange={(event) => setBusinessGoal(event.target.value)}
+                className="min-h-28 w-full resize-y rounded-2xl border border-cream/10 bg-black/35 px-4 py-4 text-base leading-7 text-white outline-none transition placeholder:text-slate-600 focus:border-mint/60"
+              />
+            </Field>
+            <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+              <Field label="Team context">
+                <input
+                  value={teamContext}
+                  onChange={(event) => setTeamContext(event.target.value)}
+                  className="w-full rounded-2xl border border-cream/10 bg-black/35 px-4 py-3 text-sm text-white outline-none transition focus:border-mint/60"
                 />
               </Field>
-              <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-                <Field label="Team context">
-                  <input
-                    value={teamContext}
-                    onChange={(event) => setTeamContext(event.target.value)}
-                    className="w-full rounded-md border border-cream/10 bg-black/30 px-3 py-3 text-sm text-white outline-none transition focus:border-mint/60"
-                  />
-                </Field>
-                <button
-                  type="button"
-                  onClick={runAgent}
-                  disabled={runState === "running"}
-                  className="rounded-md bg-warm px-5 py-3 text-sm font-black text-ink shadow-[0_0_28px_rgba(244,181,98,0.24)] transition hover:bg-cream disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {runState === "running" ? "Running..." : "Run Agent"}
-                </button>
-              </div>
-              {runState === "error" ? (
-                <p className="rounded-md border border-rose/30 bg-rose/10 px-3 py-2 text-sm text-rose">{error}</p>
-              ) : null}
+              <button
+                type="button"
+                onClick={runAgent}
+                disabled={runState === "running"}
+                className="rounded-2xl bg-warm px-6 py-3 text-sm font-black text-ink shadow-[0_0_34px_rgba(244,181,98,0.28)] transition hover:bg-cream disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {runState === "running" ? "Running agent..." : "Run Agent"}
+              </button>
             </div>
+            <p className="text-xs leading-5 text-slate-500">
+              The run calls `/api/agent/run`, uses the current GitHub scanner source honestly, prepares PR workflow
+              artifacts, and keeps provisioning separate until Stripe is configured.
+            </p>
+            {runState === "error" ? (
+              <p className="rounded-2xl border border-rose/30 bg-rose/10 px-3 py-2 text-sm text-rose">{error}</p>
+            ) : null}
           </div>
         </div>
 
         {runState === "running" ? <AgentLoadingState /> : null}
 
         {result ? (
-          <div className="grid gap-5">
-            <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="grid gap-8">
+            <section id="agent-run-results" className="scroll-mt-24 space-y-4">
+              <SectionHeading
+                eyebrow="Section A"
+                title="Agent Run"
+                description="The live run log, selected opportunity, and source status stay together for a clean judge walkthrough."
+              />
+              <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
               <ActionLog result={result} />
               <SelectedOpportunityPanel result={result} />
-            </div>
+              </div>
+            </section>
 
-            <div className="grid gap-5 xl:grid-cols-3">
+            <section className="space-y-4">
+              <SectionHeading
+                eyebrow="Section B"
+                title="Contribution Plan"
+                description="Business rationale, contribution brief, and PR readiness kit are grouped as one practical plan."
+              />
+              <div className="grid gap-5 xl:grid-cols-3">
               <Panel eyebrow="Business rationale" title="Why this matters">
                 <div className="space-y-3 text-sm leading-6 text-slate-300">
                   <p>{result.businessRationale.summary}</p>
@@ -325,17 +346,15 @@ export function AgentDemoMode({
                   </p>
                 </div>
               </Panel>
-            </div>
+              </div>
+            </section>
 
             <section id="ops-provisioning" className="scroll-mt-24 space-y-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-warm">Ops provisioning</p>
-                <h3 className="mt-2 text-2xl font-black text-white">Provisioning and evidence</h3>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-                  Keep the operations step separate from the agent decision: Stripe shows real configuration status,
-                  and Proof Vault prepares local evidence tracking.
-                </p>
-              </div>
+              <SectionHeading
+                eyebrow="Section C"
+                title="Operations"
+                description="Stripe and Proof Vault are operational steps, separated from the agent decision and kept honest."
+              />
               <div className="grid gap-5 lg:grid-cols-2">
                 <Panel eyebrow="Proof Vault candidate" title="Evidence plan">
                   <div className="space-y-3 text-sm leading-6 text-slate-300">
@@ -561,6 +580,24 @@ function Panel({
       <h3 className="mt-2 text-xl font-black text-white">{title}</h3>
       <div className="mt-4">{children}</div>
     </article>
+  );
+}
+
+function SectionHeading({
+  eyebrow,
+  title,
+  description,
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-mint">{eyebrow}</p>
+      <h3 className="mt-2 text-2xl font-black text-white">{title}</h3>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">{description}</p>
+    </div>
   );
 }
 
