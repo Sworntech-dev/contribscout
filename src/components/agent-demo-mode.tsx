@@ -27,7 +27,7 @@ const GOAL_PRESETS = [
 type RunState = "idle" | "running" | "success" | "error";
 type CopyState = "idle" | "copied" | "error";
 type ProvisionState = "idle" | "loading" | "ready" | "not_configured" | "error";
-type ProvisionResponse = {
+export type ProvisionResponse = {
   configured: boolean;
   status: string;
   message: string;
@@ -36,7 +36,15 @@ type ProvisionResponse = {
   livemode?: boolean;
 };
 
-export function AgentDemoMode() {
+export function AgentDemoMode({
+  onRunResultChange,
+  onProvisionResultChange,
+  onProofSavedChange,
+}: {
+  onRunResultChange?: (result: AgentRunResult | null) => void;
+  onProvisionResultChange?: (result: ProvisionResponse | null) => void;
+  onProofSavedChange?: (saved: boolean) => void;
+}) {
   const [businessGoal, setBusinessGoal] = useState(DEFAULT_GOAL);
   const [teamContext, setTeamContext] = useState(DEFAULT_TEAM_CONTEXT);
   const [runState, setRunState] = useState<RunState>("idle");
@@ -65,6 +73,8 @@ export function AgentDemoMode() {
     setSaveState("idle");
     setProvisionState("idle");
     setProvisionResult(null);
+    onProvisionResultChange?.(null);
+    onProofSavedChange?.(false);
 
     try {
       const response = await fetch("/api/agent/run", {
@@ -86,6 +96,7 @@ export function AgentDemoMode() {
       }
 
       setResult(payload as AgentRunResult);
+      onRunResultChange?.(payload as AgentRunResult);
       setRunState("success");
     } catch (agentError) {
       setError(agentError instanceof Error ? agentError.message : "Agent run failed.");
@@ -125,6 +136,7 @@ export function AgentDemoMode() {
 
       window.localStorage.setItem(AGENT_PROOF_STORAGE_KEY, JSON.stringify(next));
       setSaveState("saved");
+      onProofSavedChange?.(true);
       window.setTimeout(() => setSaveState("idle"), 2200);
     } catch {
       setSaveState("error");
@@ -154,6 +166,7 @@ export function AgentDemoMode() {
       const payload = (await response.json()) as ProvisionResponse;
 
       setProvisionResult(payload);
+      onProvisionResultChange?.(payload);
 
       if (!payload.configured) {
         setProvisionState("not_configured");

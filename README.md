@@ -108,6 +108,8 @@ Hackathon Phase 3 adds a real Stripe test-mode provisioning step to Agent Demo M
 
 Hackathon Phase 4 improves live GitHub agent quality. Agent runs now expose safe source metadata such as scanned count, considered count, selected reason, and whether `GITHUB_TOKEN` is configured. For the strongest demo, configure `GITHUB_TOKEN` so `/api/agent/run` can select from live GitHub scanner results. If live data is unavailable, ContribScout keeps the fallback honest by returning `source: sample`, preserving the notice, and never claiming sample data is live.
 
+Hackathon Phase 5 adds the Judge Demo Package. After an agent run, the site summarizes integration status cards, the exact Hermes skill command, a six-step demo timeline, a judge-facing Markdown summary export, and a concise 1-3 minute demo script. The package reflects real run state, including GitHub source, Stripe provisioning status, and Proof Vault save status.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.
