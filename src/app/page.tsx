@@ -1,6 +1,4 @@
-import { CinematicLanding } from "@/components/cinematic-landing";
-import { HackathonDemoStack } from "@/components/hackathon-demo-stack";
-import { MissionControlDashboard } from "@/components/mission-control-dashboard";
+import { AppShell } from "@/components/app-shell";
 import { SmoothScrollProvider } from "@/components/smooth-scroll-provider";
 import { SiteHeader } from "@/components/site-header";
 
@@ -12,9 +10,7 @@ export default function Home() {
   return (
     <SmoothScrollProvider>
       <SiteHeader />
-      <CinematicLanding />
-      <HackathonDemoStack />
-      <MissionControlDashboard />
+      <AppShell />
     </SmoothScrollProvider>
   );
 }
