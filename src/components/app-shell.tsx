@@ -36,12 +36,12 @@ export function AppShell() {
   }, [activeView]);
 
   return (
-    <main id="agent-app-shell" className="relative min-h-screen overflow-hidden bg-[#030706] px-4 pb-6 pt-6 sm:px-6 lg:px-8">
+    <main id="agent-app-shell" className="relative min-h-screen overflow-hidden bg-[#030706] px-4 pb-6 pt-5 sm:px-6 lg:px-8">
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:46px_46px]" />
       <div className="absolute left-[18%] top-16 -z-10 h-[30rem] w-[30rem] rounded-full bg-mint/12 blur-3xl" />
       <div className="absolute right-[-8rem] top-48 -z-10 h-[32rem] w-[32rem] rounded-full bg-warm/10 blur-3xl" />
 
-      <div className="relative z-10 mx-auto grid max-w-7xl gap-5 lg:grid-cols-[72px_minmax(0,1fr)]">
+      <div className="relative z-10 mx-auto max-w-7xl lg:ml-24">
         <DesktopSidebar activeView={activeView} onSelect={setActiveView} />
 
         <div className="relative z-0 min-w-0">
@@ -90,12 +90,12 @@ function DesktopSidebar({
   onSelect: (view: AppView) => void;
 }) {
   return (
-    <aside className="relative z-30 hidden lg:block">
-      <nav className="group sticky top-24 z-30 flex min-h-[calc(100vh-7rem)] w-[72px] flex-col gap-2 rounded-[1.5rem] border border-cream/10 bg-black/80 p-3 shadow-2xl shadow-black/45 backdrop-blur-xl transition-all duration-300 hover:w-[238px]">
+    <aside className="fixed left-4 top-24 z-40 hidden lg:block">
+      <nav className="group flex h-[calc(100vh-7rem)] w-[68px] flex-col gap-2 rounded-[1.35rem] border border-cream/10 bg-black/78 p-2.5 shadow-2xl shadow-black/45 backdrop-blur-xl transition-all duration-300 hover:w-[232px]">
         <button
           type="button"
           onClick={() => onSelect("agent")}
-          className="flex h-12 items-center gap-3 rounded-2xl border border-mint/30 bg-mint/10 px-3 text-left text-mint"
+          className="flex h-11 items-center gap-3 rounded-2xl border border-mint/25 bg-mint/10 px-2.5 text-left text-mint"
         >
           <span className="grid h-7 w-7 shrink-0 place-items-center rounded-xl bg-mint/15 text-xs font-black">CS</span>
           <span className="hidden whitespace-nowrap text-sm font-black group-hover:inline">ContribScout Agent</span>
@@ -109,7 +109,7 @@ function DesktopSidebar({
                 key={`app-shell-nav-${item.id}`}
                 type="button"
                 onClick={() => onSelect(item.id)}
-                className={`flex h-12 items-center gap-3 rounded-2xl border px-3 text-left transition ${
+                className={`flex h-11 items-center gap-3 rounded-2xl border px-2.5 text-left transition ${
                   active
                     ? "border-mint/40 bg-mint/10 text-white"
                     : "border-cream/10 bg-white/[0.03] text-slate-400 hover:border-mint/35 hover:text-white"

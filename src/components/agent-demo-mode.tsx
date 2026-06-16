@@ -191,7 +191,7 @@ export function AgentDemoMode({
 
   return (
     <section id="agent-console-home" className="scroll-mt-24 space-y-7">
-      <div className="relative overflow-hidden rounded-[2rem] px-2 py-8 sm:px-6 lg:px-10">
+      <div className="relative overflow-hidden rounded-[2rem] px-1 py-7 sm:px-6 lg:px-10">
         <div className="absolute left-1/2 top-8 -z-10 h-64 w-64 -translate-x-1/2 rounded-full bg-mint/20 blur-3xl" />
         <div className="absolute right-12 top-14 -z-10 h-40 w-40 rounded-full border border-mint/20 bg-[radial-gradient(circle,rgba(128,185,154,0.28),rgba(128,185,154,0.04)_58%,transparent_70%)] shadow-[0_0_80px_rgba(128,185,154,0.18)]" />
 
@@ -215,7 +215,7 @@ export function AgentDemoMode({
                 setBusinessGoal(preset.businessGoal);
                 setTeamContext(preset.teamContext);
               }}
-              className="rounded-2xl border border-cream/10 bg-white/[0.045] p-4 text-left transition hover:-translate-y-0.5 hover:border-mint/50 hover:bg-mint/10"
+              className="rounded-2xl border border-cream/[0.08] bg-white/[0.025] p-4 text-left transition hover:-translate-y-0.5 hover:border-mint/35 hover:bg-mint/[0.07]"
             >
               <p className="text-sm font-black text-white">{preset.label}</p>
               <p className="mt-2 text-xs leading-5 text-slate-400">{preset.teamContext}</p>
@@ -223,13 +223,13 @@ export function AgentDemoMode({
           ))}
         </div>
 
-        <div className="mx-auto mt-6 max-w-4xl rounded-[1.5rem] border border-mint/20 bg-[#07110e]/90 p-4 shadow-[0_0_70px_rgba(128,185,154,0.12)] backdrop-blur">
+        <div className="mx-auto mt-6 max-w-4xl rounded-[1.75rem] border border-mint/15 bg-[#07110e]/72 p-4 shadow-[0_24px_90px_rgba(0,0,0,0.28),0_0_60px_rgba(128,185,154,0.08)] backdrop-blur-xl">
           <div className="grid gap-4">
             <Field label="Business goal">
               <textarea
                 value={businessGoal}
                 onChange={(event) => setBusinessGoal(event.target.value)}
-                className="min-h-28 w-full resize-y rounded-2xl border border-cream/10 bg-black/35 px-4 py-4 text-base leading-7 text-white outline-none transition placeholder:text-slate-600 focus:border-mint/60"
+                className="min-h-28 w-full resize-y rounded-2xl border border-cream/[0.08] bg-black/24 px-4 py-4 text-base leading-7 text-white outline-none transition placeholder:text-slate-500 focus:border-mint/55"
               />
             </Field>
             <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
@@ -237,7 +237,7 @@ export function AgentDemoMode({
                 <input
                   value={teamContext}
                   onChange={(event) => setTeamContext(event.target.value)}
-                  className="w-full rounded-2xl border border-cream/10 bg-black/35 px-4 py-3 text-sm text-white outline-none transition focus:border-mint/60"
+                  className="w-full rounded-2xl border border-cream/[0.08] bg-black/24 px-4 py-3 text-sm text-white outline-none transition focus:border-mint/55"
                 />
               </Field>
               <button
