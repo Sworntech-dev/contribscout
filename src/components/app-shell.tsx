@@ -263,7 +263,7 @@ function HermesSkillView() {
       <ShellIntro
         eyebrow="Hermes Skill"
         title="Hermes-compatible agent layer"
-        body="Short instructions for running the skill layer against the ContribScout Agent API."
+        body="The browser UI calls the ContribScout Agent API. The Hermes Skill Layer can run the same workflow separately through the included skill script."
       />
       <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
         <div className="min-w-0 rounded-[1.5rem] border border-cream/10 bg-black/28 p-5">

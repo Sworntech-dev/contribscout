@@ -262,16 +262,23 @@ export function AgentDemoMode({
                 aria-label="Business goal"
                 value={businessGoal}
                 onChange={(event) => onBusinessGoalChange(event.target.value)}
-                placeholder="Describe your open-source growth goal..."
+                placeholder="Describe the open-source growth goal you want ContribScout to run..."
                 className="min-h-28 w-full resize-y rounded-2xl border border-transparent bg-transparent px-2 py-2 text-base leading-7 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/15"
               />
-              <div className="mt-2 flex flex-col gap-2 border-t border-cream/[0.07] pt-3 sm:flex-row sm:items-center">
-                <input
-                  aria-label="Team context"
-                  value={teamContext}
-                  onChange={(event) => onTeamContextChange(event.target.value)}
-                  className="min-w-0 flex-1 rounded-2xl border border-cream/[0.08] bg-black/20 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/25"
-                />
+              <div className="px-2 text-xs leading-5 text-slate-400">
+                <span className="font-bold text-cyan-100/80">Growth goal.</span> This is not a general chat. ContribScout uses this goal to scan GitHub, automatically choose a contribution target, and prepare a PR-ready workflow.
+              </div>
+              <div className="mt-3 flex flex-col gap-2 border-t border-cream/[0.07] pt-3 sm:flex-row sm:items-end">
+                <label className="min-w-0 flex-1 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+                  Team context
+                  <input
+                    aria-label="Team context"
+                    value={teamContext}
+                    onChange={(event) => onTeamContextChange(event.target.value)}
+                    placeholder="Small AI tooling team, Web3 infra team, DevRel team..."
+                    className="mt-2 w-full rounded-2xl border border-cream/[0.08] bg-black/20 px-4 py-3 text-sm normal-case tracking-normal text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/25"
+                  />
+                </label>
                 <button
                   type="button"
                   onClick={runAgent}
@@ -282,7 +289,10 @@ export function AgentDemoMode({
                 </button>
               </div>
               <p className="mt-3 text-xs leading-5 text-slate-400">
-                Run Agent to scan GitHub, select an opportunity, and generate the contribution workflow.
+                Run Agent to scan GitHub, automatically choose the strongest opportunity, and generate the contribution workflow.
+              </p>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                The web app calls `/api/agent/run`. The Hermes Skill Layer can run the same workflow through the included skill script.
               </p>
               {runState === "error" ? (
                 <p className="mt-3 rounded-2xl border border-rose/30 bg-rose/10 px-3 py-2 text-sm text-rose">{error}</p>
@@ -299,7 +309,7 @@ export function AgentDemoMode({
               <SectionHeading
                 eyebrow="Section A"
                 title="Agent Run"
-                description="The live run log, selected opportunity, and source status stay together for a clean judge walkthrough."
+                description="The live run log shows how the agent scanned GitHub, automatically chose a target, and kept source status honest."
               />
               <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
                 <ActionLog result={result} />
