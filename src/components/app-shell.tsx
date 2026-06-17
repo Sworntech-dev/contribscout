@@ -116,14 +116,14 @@ function DesktopSidebar({
           onClick={() => onSelect("agent")}
           className="flex h-11 items-center gap-3 rounded-2xl border border-mint/25 bg-mint/10 px-2.5 text-left text-mint"
         >
-          <span className="relative grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-xl bg-mint/15 text-xs font-black">
-            <span className="text-[9px] text-mint/35">CS</span>
+          <span className="relative grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-xl">
+            <span className="text-[9px] text-mint/25">CS</span>
             <Image
               src="/brand/contribscout-logo.png"
               alt="ContribScout"
               fill
-              sizes="28px"
-              className="object-contain p-1"
+              sizes="32px"
+              className="object-contain"
               priority
             />
           </span>
@@ -254,8 +254,8 @@ function HermesSkillView() {
         title="Hermes-compatible agent layer"
         body="Short instructions for running the skill layer against the ContribScout Agent API."
       />
-      <div className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
-        <div className="rounded-[1.5rem] border border-cream/10 bg-black/28 p-5">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+        <div className="min-w-0 rounded-[1.5rem] border border-cream/10 bg-black/28 p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-100/70">Skill path</p>
           <p className="mt-2 break-words text-sm font-bold text-white">hermes/skills/contribscout-agent</p>
           <div className="mt-5 space-y-3 text-sm leading-6 text-slate-300">
@@ -264,9 +264,9 @@ function HermesSkillView() {
             <p><span className="text-slate-500">Stripe:</span> not required by the skill script</p>
           </div>
         </div>
-        <div className="rounded-[1.5rem] border border-cream/10 bg-black/28 p-5">
+        <div className="min-w-0 rounded-[1.5rem] border border-cream/10 bg-black/28 p-5">
           <p className="text-sm font-bold text-white">Command</p>
-          <pre className="mt-3 overflow-auto rounded-2xl border border-cream/10 bg-black/45 p-4 text-xs leading-6 text-slate-300">
+          <pre className="mt-3 max-w-full overflow-x-auto rounded-2xl border border-cream/10 bg-black/45 p-4 text-xs leading-6 text-slate-300">
             {`python hermes/skills/contribscout-agent/scripts/run_contribscout_agent.py "Grow visibility for an AI agent tooling project through useful open-source contributions."`}
           </pre>
         </div>

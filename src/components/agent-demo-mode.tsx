@@ -198,7 +198,7 @@ export function AgentDemoMode({
         {/* Future hero visual slot: this branded helping hand can be replaced with a final 3D glass hand asset later. */}
         <div
           aria-hidden="true"
-          className="future-hero-visual pointer-events-none absolute left-1/2 top-14 z-0 hidden h-[38rem] w-[50rem] -translate-x-[24%] overflow-hidden opacity-30 mix-blend-screen blur-[0.5px] md:block lg:top-4 lg:h-[42rem] lg:w-[56rem] xl:-translate-x-[18%]"
+          className="future-hero-visual pointer-events-none absolute left-1/2 top-24 z-0 hidden h-[38rem] w-[50rem] -translate-x-1/2 overflow-hidden opacity-[0.24] mix-blend-screen blur-[0.5px] md:block lg:top-16 lg:h-[42rem] lg:w-[56rem] xl:-translate-x-[46%]"
         >
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_56%_44%,rgba(94,234,212,0.22),transparent_42%),radial-gradient(circle_at_34%_62%,rgba(244,181,98,0.12),transparent_34%)]" />
           <Image
@@ -206,7 +206,7 @@ export function AgentDemoMode({
             alt=""
             fill
             sizes="(min-width: 1280px) 56rem, (min-width: 768px) 50rem, 0px"
-            className="object-contain [mask-image:radial-gradient(ellipse_at_center,black_42%,rgba(0,0,0,0.72)_58%,transparent_78%)]"
+            className="object-contain [mask-image:radial-gradient(ellipse_at_center,black_36%,rgba(0,0,0,0.68)_58%,transparent_80%)]"
             priority
           />
         </div>
