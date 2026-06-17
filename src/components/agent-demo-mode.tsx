@@ -262,7 +262,7 @@ export function AgentDemoMode({
               <div className="rounded-[1.35rem] border border-cream/[0.07] bg-black/22 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                 <div className="mb-2 flex items-center justify-between gap-3 px-1">
                   <span className="text-[11px] font-black uppercase tracking-[0.2em] text-cyan-100/80">
-                    Growth goal
+                    Growth Goal *
                   </span>
                   <span className="hidden rounded-full bg-cyan-100/[0.06] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400 sm:inline-flex">
                     Agent command
@@ -276,22 +276,25 @@ export function AgentDemoMode({
                   className="min-h-28 w-full resize-y rounded-xl border border-transparent bg-transparent px-1 py-1 text-base leading-7 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/10"
                 />
                 <p className="mt-2 px-1 text-xs leading-5 text-slate-400">
-                  This is not a general chat. ContribScout uses this goal to scan GitHub, automatically choose a contribution target, and prepare a PR-ready workflow.
+                  Required. ContribScout uses this goal to scan GitHub and automatically choose a contribution target.
                 </p>
               </div>
 
               <div className="mt-3 rounded-[1.35rem] border border-cream/[0.06] bg-white/[0.025]">
                 <div className="flex flex-col gap-3 border-b border-cream/[0.06] px-3 py-3 sm:flex-row sm:items-end">
                   <label className="min-w-0 flex-1 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
-                    Team context
+                    Team Context <span className="text-slate-600">Optional</span>
                     <input
                       aria-label="Team context"
                       value={teamContext}
                       onChange={(event) => onTeamContextChange(event.target.value)}
                       placeholder="Small AI tooling team, Web3 infra team, DevRel team..."
                       className="mt-2 w-full rounded-2xl border border-transparent bg-black/24 px-4 py-3 text-sm normal-case tracking-normal text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/18"
-                    />
-                  </label>
+                  />
+                  <span className="mt-2 block text-xs normal-case leading-5 tracking-normal text-slate-500">
+                    Optional. This helps tune the output, but the agent can run without it.
+                  </span>
+                </label>
                   <button
                     type="button"
                     onClick={runAgent}
@@ -434,7 +437,7 @@ export function AgentDemoMode({
                           : "Save to Proof Vault"}
                     </button>
                     <p className="text-xs leading-5 text-slate-500">
-                      Saved agent proof candidates use `contribscout.agentProof.v1` and do not overwrite the existing Proof Vault.
+                      Saved locally in this browser. Existing Proof Vault entries are preserved.
                     </p>
                   </div>
                 </Panel>
@@ -481,8 +484,8 @@ export function AgentDemoMode({
                       </div>
                     ) : null}
                     <p className="text-xs leading-5 text-slate-500">
-                      If `STRIPE_SECRET_KEY` is missing or not a test key, this card shows setup guidance and does not
-                      create a fake checkout URL.
+                      Stripe checkout appears when test-mode provisioning is configured. Until then, this card shows the
+                      planned workspace step without creating a fake checkout.
                     </p>
                   </div>
                 </Panel>
