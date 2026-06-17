@@ -252,48 +252,65 @@ export function AgentDemoMode({
           ))}
         </div>
 
-        <div className="relative z-10 mx-auto mt-5 max-w-3xl rounded-[1.75rem] border border-cyan-100/15 bg-[#06100e]/82 p-3 shadow-[0_24px_90px_rgba(0,0,0,0.24),0_0_58px_rgba(94,234,212,0.07)] backdrop-blur-xl">
-          <div className="flex gap-3">
-            <div className="hidden h-11 w-11 shrink-0 place-items-center rounded-2xl border border-cyan-100/15 bg-cyan-200/8 text-sm font-black text-cyan-100 sm:grid">
+        <div className="relative z-10 mx-auto mt-5 max-w-3xl overflow-hidden rounded-[1.9rem] border border-cyan-100/15 bg-[#06100e]/86 shadow-[0_24px_90px_rgba(0,0,0,0.28),0_0_68px_rgba(94,234,212,0.09)] backdrop-blur-xl">
+          <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-100/35 to-transparent" />
+          <div className="flex gap-3 p-3.5 sm:p-4">
+            <div className="hidden h-11 w-11 shrink-0 place-items-center rounded-2xl bg-cyan-200/10 text-sm font-black text-cyan-100 shadow-[inset_0_0_24px_rgba(94,234,212,0.08)] sm:grid">
               AI
             </div>
             <div className="min-w-0 flex-1">
-              <textarea
-                aria-label="Business goal"
-                value={businessGoal}
-                onChange={(event) => onBusinessGoalChange(event.target.value)}
-                placeholder="Describe the open-source growth goal you want ContribScout to run..."
-                className="min-h-28 w-full resize-y rounded-2xl border border-transparent bg-transparent px-2 py-2 text-base leading-7 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/15"
-              />
-              <div className="px-2 text-xs leading-5 text-slate-400">
-                <span className="font-bold text-cyan-100/80">Growth goal.</span> This is not a general chat. ContribScout uses this goal to scan GitHub, automatically choose a contribution target, and prepare a PR-ready workflow.
+              <div className="rounded-[1.35rem] border border-cream/[0.07] bg-black/22 px-3 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+                <div className="mb-2 flex items-center justify-between gap-3 px-1">
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-cyan-100/80">
+                    Growth goal
+                  </span>
+                  <span className="hidden rounded-full bg-cyan-100/[0.06] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-400 sm:inline-flex">
+                    Agent command
+                  </span>
+                </div>
+                <textarea
+                  aria-label="Business goal"
+                  value={businessGoal}
+                  onChange={(event) => onBusinessGoalChange(event.target.value)}
+                  placeholder="Describe the open-source growth goal you want ContribScout to run..."
+                  className="min-h-28 w-full resize-y rounded-xl border border-transparent bg-transparent px-1 py-1 text-base leading-7 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/10"
+                />
+                <p className="mt-2 px-1 text-xs leading-5 text-slate-400">
+                  This is not a general chat. ContribScout uses this goal to scan GitHub, automatically choose a contribution target, and prepare a PR-ready workflow.
+                </p>
               </div>
-              <div className="mt-3 flex flex-col gap-2 border-t border-cream/[0.07] pt-3 sm:flex-row sm:items-end">
-                <label className="min-w-0 flex-1 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
-                  Team context
-                  <input
-                    aria-label="Team context"
-                    value={teamContext}
-                    onChange={(event) => onTeamContextChange(event.target.value)}
-                    placeholder="Small AI tooling team, Web3 infra team, DevRel team..."
-                    className="mt-2 w-full rounded-2xl border border-cream/[0.08] bg-black/20 px-4 py-3 text-sm normal-case tracking-normal text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/25"
-                  />
-                </label>
-                <button
-                  type="button"
-                  onClick={runAgent}
-                  disabled={runState === "running"}
-                  className="rounded-2xl bg-warm px-6 py-3 text-sm font-black text-ink shadow-[0_0_34px_rgba(244,181,98,0.22)] transition hover:bg-cream disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {runState === "running" ? "Running agent..." : "Run Agent"}
-                </button>
+
+              <div className="mt-3 rounded-[1.35rem] border border-cream/[0.06] bg-white/[0.025]">
+                <div className="flex flex-col gap-3 border-b border-cream/[0.06] px-3 py-3 sm:flex-row sm:items-end">
+                  <label className="min-w-0 flex-1 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
+                    Team context
+                    <input
+                      aria-label="Team context"
+                      value={teamContext}
+                      onChange={(event) => onTeamContextChange(event.target.value)}
+                      placeholder="Small AI tooling team, Web3 infra team, DevRel team..."
+                      className="mt-2 w-full rounded-2xl border border-transparent bg-black/24 px-4 py-3 text-sm normal-case tracking-normal text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/18"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={runAgent}
+                    disabled={runState === "running"}
+                    className="rounded-2xl bg-warm px-6 py-3 text-sm font-black text-ink shadow-[0_0_34px_rgba(244,181,98,0.22)] transition hover:bg-cream disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {runState === "running" ? "Running agent..." : "Run Agent"}
+                  </button>
+                </div>
+                <div className="px-3 py-3">
+                  <p className="text-xs leading-5 text-slate-400">
+                    Run Agent to scan GitHub, automatically choose the strongest opportunity, and generate the contribution workflow.
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    The web app calls `/api/agent/run`. The Hermes Skill Layer can run the same workflow through the included skill script.
+                  </p>
+                </div>
               </div>
-              <p className="mt-3 text-xs leading-5 text-slate-400">
-                Run Agent to scan GitHub, automatically choose the strongest opportunity, and generate the contribution workflow.
-              </p>
-              <p className="mt-1 text-xs leading-5 text-slate-500">
-                The web app calls `/api/agent/run`. The Hermes Skill Layer can run the same workflow through the included skill script.
-              </p>
+
               {runState === "error" ? (
                 <p className="mt-3 rounded-2xl border border-rose/30 bg-rose/10 px-3 py-2 text-sm text-rose">{error}</p>
               ) : null}
