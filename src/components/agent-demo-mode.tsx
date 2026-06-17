@@ -54,6 +54,7 @@ export function AgentDemoMode({
   const [provisionResult, setProvisionResult] = useState<ProvisionResponse | null>(null);
   const [error, setError] = useState("");
   const [result, setResult] = useState<AgentRunResult | null>(null);
+  const [activePreset, setActivePreset] = useState(GOAL_PRESETS[0].label);
 
   const prDetails = useMemo(() => (result ? extractPrDetails(result.prReadinessKit.markdown) : null), [result]);
   const briefDetails = useMemo(() => (result ? extractBriefDetails(result.contributionBrief.markdown) : null), [result]);
@@ -191,79 +192,89 @@ export function AgentDemoMode({
 
   return (
     <section id="agent-console-home" className="scroll-mt-24 space-y-7">
-      <div className="relative overflow-hidden rounded-[2rem] px-1 py-7 sm:px-6 lg:px-10">
-        <div className="absolute left-1/2 top-8 -z-10 h-64 w-64 -translate-x-1/2 rounded-full bg-mint/20 blur-3xl" />
+      <div className="relative overflow-hidden px-1 py-7 sm:px-6 lg:px-10">
+        <div className="absolute left-1/2 top-6 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-cyan-300/10 blur-3xl" />
+        {/* Future hero visual slot: replace this abstract shell with the 3D hand/agent asset when available. */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute right-4 top-6 hidden h-52 w-52 overflow-hidden rounded-[2rem] border border-mint/10 bg-white/[0.025] shadow-[0_0_90px_rgba(128,185,154,0.12)] backdrop-blur xl:block"
+          className="future-hero-visual pointer-events-none absolute right-3 top-5 hidden h-48 w-48 overflow-hidden rounded-[2rem] border border-cyan-200/10 bg-white/[0.018] shadow-[0_0_90px_rgba(94,234,212,0.1)] backdrop-blur xl:block"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_34%,rgba(128,185,154,0.34),transparent_28%),radial-gradient(circle_at_30%_68%,rgba(244,181,98,0.14),transparent_28%)]" />
-          <div className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border border-mint/25 bg-black/25 shadow-[inset_0_0_40px_rgba(128,185,154,0.18)]" />
-          <div className="absolute bottom-8 left-8 h-14 w-28 rotate-[-18deg] rounded-full border border-cream/10 bg-cream/[0.06]" />
-          <div className="absolute right-8 top-8 h-16 w-16 rounded-2xl border border-mint/20 bg-mint/10" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_34%,rgba(94,234,212,0.25),transparent_30%),radial-gradient(circle_at_32%_68%,rgba(244,181,98,0.12),transparent_28%)]" />
+          <div className="absolute left-1/2 top-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-100/20 bg-black/20 shadow-[inset_0_0_42px_rgba(94,234,212,0.14)]" />
+          <div className="absolute bottom-8 left-8 h-12 w-24 rotate-[-18deg] rounded-full border border-cream/10 bg-cream/[0.045]" />
+          <div className="absolute right-8 top-8 h-14 w-14 rounded-2xl border border-cyan-100/15 bg-cyan-200/8" />
         </div>
 
         <div className="mx-auto max-w-4xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.36em] text-mint">Hackathon agent workflow</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.36em] text-cyan-200/80">Open-source growth agent</p>
           <h2 className="mt-5 text-4xl font-black tracking-tight text-cream sm:text-6xl">
-            Hey! What should ContribScout Agent run?
+            Hey! What should ContribScout run?
           </h2>
-          <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-            Turn an open-source growth goal into a live GitHub scan, contribution brief, PR kit, Stripe provisioning
-            step, and judge-ready report.
+          <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-200 sm:text-base">
+            Find high-leverage GitHub opportunities, prepare a PR-ready plan, save proof, and provision an OSS growth workspace.
           </p>
         </div>
 
-        <div className="mx-auto mt-8 grid max-w-3xl gap-3 md:grid-cols-3">
+        <div className="mx-auto mt-8 grid max-w-3xl gap-2.5 md:grid-cols-3">
           {GOAL_PRESETS.map((preset) => (
             <button
               key={`agent-preset-${preset.label}`}
               type="button"
               onClick={() => {
+                setActivePreset(preset.label);
                 setBusinessGoal(preset.businessGoal);
                 setTeamContext(preset.teamContext);
               }}
-              className="rounded-2xl border border-cream/[0.07] bg-white/[0.02] p-3.5 text-left transition hover:-translate-y-0.5 hover:border-mint/35 hover:bg-mint/[0.06]"
+              className={`rounded-2xl border p-3.5 text-left transition hover:-translate-y-0.5 ${
+                activePreset === preset.label
+                  ? "border-cyan-200/25 bg-cyan-200/[0.07]"
+                  : "border-cream/[0.07] bg-white/[0.018] hover:border-cyan-200/25 hover:bg-cyan-200/[0.045]"
+              }`}
             >
-              <p className="text-sm font-black text-white">{preset.label}</p>
-              <p className="mt-2 text-xs leading-5 text-slate-400">{preset.teamContext}</p>
+              <span className="rounded-full border border-cream/10 bg-black/20 px-2 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-cyan-100/80">
+                {compactPresetLabel(preset.label)}
+              </span>
+              <p className="mt-3 text-xs leading-5 text-slate-300">{presetHelperText(preset.label)}</p>
             </button>
           ))}
         </div>
 
-        <div className="mx-auto mt-6 max-w-3xl rounded-[1.75rem] border border-mint/15 bg-[#07110e]/72 p-4 shadow-[0_24px_90px_rgba(0,0,0,0.28),0_0_60px_rgba(128,185,154,0.08)] backdrop-blur-xl">
-          <div className="grid gap-4">
-            <Field label="Business goal">
+        <div className="mx-auto mt-6 max-w-3xl rounded-[1.75rem] border border-cyan-100/15 bg-[#06100e]/78 p-3 shadow-[0_24px_90px_rgba(0,0,0,0.24),0_0_58px_rgba(94,234,212,0.07)] backdrop-blur-xl">
+          <div className="flex gap-3">
+            <div className="hidden h-11 w-11 shrink-0 place-items-center rounded-2xl border border-cyan-100/15 bg-cyan-200/8 text-sm font-black text-cyan-100 sm:grid">
+              AI
+            </div>
+            <div className="min-w-0 flex-1">
               <textarea
+                aria-label="Business goal"
                 value={businessGoal}
                 onChange={(event) => setBusinessGoal(event.target.value)}
-                className="min-h-28 w-full resize-y rounded-2xl border border-cream/[0.08] bg-black/24 px-4 py-4 text-base leading-7 text-white outline-none transition placeholder:text-slate-500 focus:border-mint/55"
+                className="min-h-28 w-full resize-y rounded-2xl border border-transparent bg-transparent px-2 py-2 text-base leading-7 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/15"
               />
-            </Field>
-            <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-              <Field label="Team context">
+              <div className="mt-2 flex flex-col gap-2 border-t border-cream/[0.07] pt-3 sm:flex-row sm:items-center">
                 <input
+                  aria-label="Team context"
                   value={teamContext}
                   onChange={(event) => setTeamContext(event.target.value)}
-                  className="w-full rounded-2xl border border-cream/[0.08] bg-black/24 px-4 py-3 text-sm text-white outline-none transition focus:border-mint/55"
+                  className="min-w-0 flex-1 rounded-2xl border border-cream/[0.08] bg-black/20 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/25"
                 />
-              </Field>
               <button
                 type="button"
                 onClick={runAgent}
                 disabled={runState === "running"}
-                className="rounded-2xl bg-warm px-6 py-3 text-sm font-black text-ink shadow-[0_0_34px_rgba(244,181,98,0.28)] transition hover:bg-cream disabled:cursor-not-allowed disabled:opacity-60"
+                  className="rounded-2xl bg-warm px-6 py-3 text-sm font-black text-ink shadow-[0_0_34px_rgba(244,181,98,0.22)] transition hover:bg-cream disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {runState === "running" ? "Running agent..." : "Run Agent"}
               </button>
+              </div>
+              <p className="mt-3 text-xs leading-5 text-slate-400">
+                Calls `/api/agent/run`, keeps source status honest, prepares PR workflow artifacts, and leaves
+                provisioning separate until Stripe is configured.
+              </p>
+              {runState === "error" ? (
+                <p className="mt-3 rounded-2xl border border-rose/30 bg-rose/10 px-3 py-2 text-sm text-rose">{error}</p>
+              ) : null}
             </div>
-            <p className="text-xs leading-5 text-slate-500">
-              The run calls `/api/agent/run`, uses the current GitHub scanner source honestly, prepares PR workflow
-              artifacts, and keeps provisioning separate until Stripe is configured.
-            </p>
-            {runState === "error" ? (
-              <p className="rounded-2xl border border-rose/30 bg-rose/10 px-3 py-2 text-sm text-rose">{error}</p>
-            ) : null}
           </div>
         </div>
 
@@ -705,6 +716,18 @@ function labelForProvisionStatus(status: string) {
   if (status === "test_key_required") return "Stripe test key required";
   if (status === "stripe_error") return "Stripe error";
   return "Provisioning status";
+}
+
+function compactPresetLabel(label: string) {
+  if (label.includes("AI")) return "AI tooling growth";
+  if (label.includes("Web3")) return "Web3 developer tools";
+  return "DevRel pipeline";
+}
+
+function presetHelperText(label: string) {
+  if (label.includes("AI")) return "Find useful OSS paths around agents, LLM tools, and developer workflows.";
+  if (label.includes("Web3")) return "Prioritize infra, wallets, onchain apps, and developer-tooling repos.";
+  return "Build a repeatable pipeline for docs, examples, issue notes, and public proof.";
 }
 
 function getSourceStatus(result: AgentRunResult) {
