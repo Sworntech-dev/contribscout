@@ -69,6 +69,7 @@ export function AgentDemoMode({
   const result = agentRun;
   const provisionResult = provisioningResult;
   const provisionState = provisionLoading ? "loading" : getProvisionState(provisionResult);
+  const isGrowthGoalEmpty = businessGoal.trim().length === 0;
 
   const prDetails = useMemo(() => (result ? extractPrDetails(result.prReadinessKit.markdown) : null), [result]);
   const briefDetails = useMemo(() => (result ? extractBriefDetails(result.contributionBrief.markdown) : null), [result]);
@@ -77,7 +78,7 @@ export function AgentDemoMode({
     const goal = businessGoal.trim();
 
     if (!goal) {
-      setError("Add a business goal before running the agent.");
+      setError("Add a growth goal before running the agent.");
       setRunState("error");
       return;
     }
@@ -281,7 +282,7 @@ export function AgentDemoMode({
               </div>
 
               <div className="mt-3 rounded-[1.35rem] border border-cream/[0.06] bg-white/[0.025]">
-                <div className="flex flex-col gap-3 border-b border-cream/[0.06] px-3 py-3 sm:flex-row sm:items-end">
+                <div className="flex flex-col gap-3 border-b border-cream/[0.06] px-3 py-3 sm:flex-row sm:items-start">
                   <label className="min-w-0 flex-1 text-xs font-bold uppercase tracking-[0.18em] text-slate-500">
                     Team Context <span className="text-slate-600">Optional</span>
                     <input
@@ -289,20 +290,23 @@ export function AgentDemoMode({
                       value={teamContext}
                       onChange={(event) => onTeamContextChange(event.target.value)}
                       placeholder="Small AI tooling team, Web3 infra team, DevRel team..."
-                      className="mt-2 w-full rounded-2xl border border-transparent bg-black/24 px-4 py-3 text-sm normal-case tracking-normal text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/18"
-                  />
-                  <span className="mt-2 block text-xs normal-case leading-5 tracking-normal text-slate-500">
-                    Optional. This helps tune the output, but the agent can run without it.
-                  </span>
-                </label>
-                  <button
-                    type="button"
-                    onClick={runAgent}
-                    disabled={runState === "running"}
-                    className="rounded-2xl bg-warm px-6 py-3 text-sm font-black text-ink shadow-[0_0_34px_rgba(244,181,98,0.22)] transition hover:bg-cream disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {runState === "running" ? "Running agent..." : "Run Agent"}
-                  </button>
+                      className="mt-2 h-12 w-full rounded-2xl border border-transparent bg-black/24 px-4 text-sm normal-case tracking-normal text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/18"
+                    />
+                    <span className="mt-2 block text-xs normal-case leading-5 tracking-normal text-slate-500">
+                      Optional. This helps tune the output, but the agent can run without it.
+                    </span>
+                  </label>
+                  <div className="w-full sm:w-44">
+                    <div className="hidden h-[1.45rem] sm:block" aria-hidden="true" />
+                    <button
+                      type="button"
+                      onClick={runAgent}
+                      disabled={runState === "running" || isGrowthGoalEmpty}
+                      className="h-12 w-full rounded-2xl bg-warm px-6 text-sm font-black text-ink shadow-[0_0_34px_rgba(244,181,98,0.22)] transition hover:bg-cream disabled:cursor-not-allowed disabled:bg-slate-700/70 disabled:text-slate-400 disabled:shadow-none"
+                    >
+                      {runState === "running" ? "Running agent..." : "Run Agent"}
+                    </button>
+                  </div>
                 </div>
                 <div className="px-3 py-3">
                   <p className="text-xs leading-5 text-slate-400">
