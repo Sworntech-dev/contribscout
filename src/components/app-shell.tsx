@@ -156,7 +156,6 @@ function DesktopSidebar({
             );
           })}
         </div>
-        <div className="mt-auto h-20 w-px self-center bg-gradient-to-b from-transparent via-mint/40 to-transparent" />
       </nav>
     </aside>
   );
