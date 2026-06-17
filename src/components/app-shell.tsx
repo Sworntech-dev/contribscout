@@ -23,6 +23,22 @@ export function AppShell() {
   const [agentRun, setAgentRun] = useState<AgentRunResult | null>(null);
   const [provisioningResult, setProvisioningResult] = useState<ProvisionResponse | null>(null);
   const [proofCandidateSaved, setProofCandidateSaved] = useState(false);
+  const [agentProofCount, setAgentProofCount] = useState(0);
+
+  useEffect(() => {
+    if (activeView !== "proof") return;
+
+    const timeout = window.setTimeout(() => {
+      try {
+        const saved = window.localStorage.getItem("contribscout.agentProof.v1");
+        setAgentProofCount(saved ? JSON.parse(saved).length ?? 0 : 0);
+      } catch {
+        setAgentProofCount(0);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
+  }, [activeView, proofCandidateSaved]);
 
   useEffect(() => {
     if (activeView !== "scanner" && activeView !== "proof") return;
@@ -65,7 +81,7 @@ export function AppShell() {
             ) : null}
 
             {activeView === "judge" ? (
-              <JudgeDemoPackage
+              <JudgeView
                 agentRun={agentRun}
                 provisioningResult={provisioningResult}
                 proofCandidateSaved={proofCandidateSaved}
@@ -73,7 +89,7 @@ export function AppShell() {
             ) : null}
 
             {activeView === "scanner" || activeView === "mission" || activeView === "proof" ? (
-              <MissionView activeView={activeView} />
+              <MissionView activeView={activeView} agentProofCount={agentProofCount} />
             ) : null}
 
             {activeView === "hermes" ? <HermesSkillView /> : null}
@@ -163,86 +179,166 @@ function MobileTabs({
   );
 }
 
-function MissionView({ activeView }: { activeView: AppView }) {
+function MissionView({ activeView, agentProofCount }: { activeView: AppView; agentProofCount: number }) {
   const heading =
     activeView === "scanner"
       ? {
           eyebrow: "Live scanner",
-          title: "GitHub contribution radar",
-          body: "The full scanner view is loaded below. It preserves filters, watchlist, reports, briefs, PR kits, and Proof Vault behavior.",
+          title: "Live Scanner",
+          body: "Review the GitHub opportunities ContribScout can evaluate for agent runs.",
         }
       : activeView === "proof"
         ? {
             eyebrow: "Proof Vault",
-            title: "Local contribution evidence",
-            body: "The dashboard opens below and scrolls to Proof Vault so existing localStorage-backed proof logic stays untouched.",
+            title: "Proof Vault",
+            body: "Review saved agent proof candidates and contribution evidence.",
           }
         : {
             eyebrow: "Mission Control",
-            title: "Full contribution cockpit",
-            body: "All original ContribScout dashboard features remain available in the app shell.",
+            title: "Mission Control",
+            body: "Track contribution workflow readiness and product signals.",
           };
 
   return (
-    <div className="space-y-5">
+    <ViewFrame>
       <ShellIntro eyebrow={heading.eyebrow} title={heading.title} body={heading.body} />
-      <MissionControlDashboard />
-    </div>
+      {activeView === "proof" ? <ProofCandidateSummary count={agentProofCount} /> : null}
+      {activeView === "scanner" ? <ScannerFocusNote /> : null}
+      {activeView === "mission" ? <MissionFocusNote /> : null}
+      <div className="overflow-hidden rounded-[1.5rem] border border-cream/10 bg-black/20">
+        <MissionControlDashboard />
+      </div>
+    </ViewFrame>
   );
 }
 
 function HermesSkillView() {
   return (
-    <div className="space-y-5">
+    <ViewFrame>
       <ShellIntro
         eyebrow="Hermes Skill"
         title="Hermes-compatible agent layer"
-        body="ContribScout remains a standalone Vercel app. The Hermes skill package calls the Agent API and prints the returned Markdown report."
+        body="Short instructions for running the skill layer against the ContribScout Agent API."
       />
-      <div className="rounded-[1.5rem] border border-cream/10 bg-black/35 p-5">
-        <p className="text-sm font-bold text-white">Command</p>
-        <pre className="mt-3 overflow-auto rounded-2xl border border-cream/10 bg-black/45 p-4 text-xs leading-6 text-slate-300">
-          {`python hermes/skills/contribscout-agent/scripts/run_contribscout_agent.py "Grow visibility for an AI agent tooling project through useful open-source contributions."`}
-        </pre>
-        <p className="mt-4 text-sm leading-7 text-slate-400">
-          The skill does not require Stripe credentials and does not host Hermes inside Vercel. It is a skill layer that
-          consumes `/api/agent/run`.
-        </p>
+      <div className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+        <div className="rounded-[1.5rem] border border-cream/10 bg-black/28 p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-cyan-100/70">Skill path</p>
+          <p className="mt-2 break-words text-sm font-bold text-white">hermes/skills/contribscout-agent</p>
+          <div className="mt-5 space-y-3 text-sm leading-6 text-slate-300">
+            <p><span className="text-slate-500">Endpoint:</span> /api/agent/run</p>
+            <p><span className="text-slate-500">Env:</span> CONTRIBSCOUT_API_URL optional</p>
+            <p><span className="text-slate-500">Stripe:</span> not required by the skill script</p>
+          </div>
+        </div>
+        <div className="rounded-[1.5rem] border border-cream/10 bg-black/28 p-5">
+          <p className="text-sm font-bold text-white">Command</p>
+          <pre className="mt-3 overflow-auto rounded-2xl border border-cream/10 bg-black/45 p-4 text-xs leading-6 text-slate-300">
+            {`python hermes/skills/contribscout-agent/scripts/run_contribscout_agent.py "Grow visibility for an AI agent tooling project through useful open-source contributions."`}
+          </pre>
+        </div>
       </div>
-    </div>
+    </ViewFrame>
   );
 }
 
 function AboutView() {
   return (
-    <div className="space-y-5">
+    <ViewFrame>
       <ShellIntro
         eyebrow="About"
         title="Open-source growth operations for AI teams"
-        body="ContribScout Agent turns a business goal into a live-or-honest-fallback contribution workflow: scan, select, brief, prepare PR, provision, and package for judges."
+        body="A focused agent workspace for turning open-source growth goals into PR-ready contribution workflows."
       />
+      <div className="rounded-[1.5rem] border border-cream/10 bg-black/24 p-5 text-sm leading-7 text-slate-300">
+        ContribScout scans GitHub opportunities, selects a high-leverage contribution path, prepares a PR-ready plan,
+        keeps proof artifacts local, exposes an optional Stripe provisioning step, and ships a Hermes-compatible skill layer
+        for agent-assisted reports.
+      </div>
       <div className="grid gap-4 md:grid-cols-3">
         {[
-          ["No fake live data", "Sample fallback is always marked as sample."],
-          ["No fake provisioning", "Stripe only shows checkout when a real test session exists."],
-          ["Local-first proof", "Proof Vault and agent proof candidates stay in browser storage."],
+          ["GitHub scan", "Live results when configured, honest sample fallback when not."],
+          ["PR-ready plan", "Brief, duplicate guard, PR copy, and validation notes."],
+          ["Proof + provisioning", "Local Proof Vault plus a real Stripe test-mode checkout path."],
         ].map(([title, body]) => (
-          <article key={`about-${title}`} className="rounded-[1.5rem] border border-cream/10 bg-white/[0.035] p-5">
+          <article key={`about-${title}`} className="rounded-[1.5rem] border border-cream/10 bg-white/[0.025] p-5">
             <h3 className="font-black text-white">{title}</h3>
             <p className="mt-2 text-sm leading-6 text-slate-400">{body}</p>
           </article>
         ))}
       </div>
-    </div>
+    </ViewFrame>
   );
 }
 
 function ShellIntro({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
   return (
-    <div className="rounded-[1.75rem] border border-cream/10 bg-white/[0.035] p-5">
-      <p className="text-xs font-semibold uppercase tracking-[0.32em] text-mint">{eyebrow}</p>
-      <h1 className="mt-3 text-3xl font-black tracking-tight text-cream sm:text-4xl">{title}</h1>
-      <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-400">{body}</p>
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-100/70">{eyebrow}</p>
+      <h1 className="mt-2 text-2xl font-black tracking-tight text-cream sm:text-3xl">{title}</h1>
+      <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">{body}</p>
     </div>
+  );
+}
+
+function ViewFrame({ children }: { children: React.ReactNode }) {
+  return <div className="mx-auto max-w-6xl space-y-5">{children}</div>;
+}
+
+function ScannerFocusNote() {
+  return (
+    <div className="rounded-[1.25rem] border border-cyan-100/10 bg-cyan-100/[0.035] px-4 py-3 text-sm text-slate-300">
+      Tip: this view scrolls to ranked opportunities after loading while preserving the scanner&apos;s existing filters and actions.
+    </div>
+  );
+}
+
+function MissionFocusNote() {
+  return (
+    <div className="grid gap-3 sm:grid-cols-3">
+      {["Scanner health", "Watchlist pipeline", "Proof readiness"].map((item) => (
+        <div
+          key={`mission-focus-${item}`}
+          className="rounded-[1.25rem] border border-cream/10 bg-white/[0.025] px-4 py-3 text-sm font-semibold text-slate-300"
+        >
+          {item}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ProofCandidateSummary({ count }: { count: number }) {
+  return (
+    <div className="rounded-[1.25rem] border border-cream/10 bg-black/24 px-4 py-3 text-sm text-slate-300">
+      {count > 0
+        ? `${count} saved agent proof ${count === 1 ? "candidate" : "candidates"} found in local storage.`
+        : "Run the agent and save a proof candidate to populate the vault."}
+    </div>
+  );
+}
+
+function JudgeView({
+  agentRun,
+  provisioningResult,
+  proofCandidateSaved,
+}: {
+  agentRun: AgentRunResult | null;
+  provisioningResult: ProvisionResponse | null;
+  proofCandidateSaved: boolean;
+}) {
+  return (
+    <ViewFrame>
+      <ShellIntro
+        eyebrow="Judge package"
+        title="Judge Package"
+        body="Export the demo narrative, integration status, Hermes command, and submission summary."
+      />
+      <JudgeDemoPackage
+        agentRun={agentRun}
+        provisioningResult={provisioningResult}
+        proofCandidateSaved={proofCandidateSaved}
+        compactHeader
+      />
+    </ViewFrame>
   );
 }
