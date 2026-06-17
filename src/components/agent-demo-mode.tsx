@@ -193,7 +193,15 @@ export function AgentDemoMode({
     <section id="agent-console-home" className="scroll-mt-24 space-y-7">
       <div className="relative overflow-hidden rounded-[2rem] px-1 py-7 sm:px-6 lg:px-10">
         <div className="absolute left-1/2 top-8 -z-10 h-64 w-64 -translate-x-1/2 rounded-full bg-mint/20 blur-3xl" />
-        <div className="absolute right-12 top-14 -z-10 h-40 w-40 rounded-full border border-mint/20 bg-[radial-gradient(circle,rgba(128,185,154,0.28),rgba(128,185,154,0.04)_58%,transparent_70%)] shadow-[0_0_80px_rgba(128,185,154,0.18)]" />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-4 top-6 hidden h-52 w-52 overflow-hidden rounded-[2rem] border border-mint/10 bg-white/[0.025] shadow-[0_0_90px_rgba(128,185,154,0.12)] backdrop-blur xl:block"
+        >
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_58%_34%,rgba(128,185,154,0.34),transparent_28%),radial-gradient(circle_at_30%_68%,rgba(244,181,98,0.14),transparent_28%)]" />
+          <div className="absolute left-1/2 top-1/2 h-28 w-28 -translate-x-1/2 -translate-y-1/2 rounded-full border border-mint/25 bg-black/25 shadow-[inset_0_0_40px_rgba(128,185,154,0.18)]" />
+          <div className="absolute bottom-8 left-8 h-14 w-28 rotate-[-18deg] rounded-full border border-cream/10 bg-cream/[0.06]" />
+          <div className="absolute right-8 top-8 h-16 w-16 rounded-2xl border border-mint/20 bg-mint/10" />
+        </div>
 
         <div className="mx-auto max-w-4xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.36em] text-mint">Hackathon agent workflow</p>
@@ -206,7 +214,7 @@ export function AgentDemoMode({
           </p>
         </div>
 
-        <div className="mx-auto mt-8 grid max-w-4xl gap-3 md:grid-cols-3">
+        <div className="mx-auto mt-8 grid max-w-3xl gap-3 md:grid-cols-3">
           {GOAL_PRESETS.map((preset) => (
             <button
               key={`agent-preset-${preset.label}`}
@@ -215,7 +223,7 @@ export function AgentDemoMode({
                 setBusinessGoal(preset.businessGoal);
                 setTeamContext(preset.teamContext);
               }}
-              className="rounded-2xl border border-cream/[0.08] bg-white/[0.025] p-4 text-left transition hover:-translate-y-0.5 hover:border-mint/35 hover:bg-mint/[0.07]"
+              className="rounded-2xl border border-cream/[0.07] bg-white/[0.02] p-3.5 text-left transition hover:-translate-y-0.5 hover:border-mint/35 hover:bg-mint/[0.06]"
             >
               <p className="text-sm font-black text-white">{preset.label}</p>
               <p className="mt-2 text-xs leading-5 text-slate-400">{preset.teamContext}</p>
@@ -223,7 +231,7 @@ export function AgentDemoMode({
           ))}
         </div>
 
-        <div className="mx-auto mt-6 max-w-4xl rounded-[1.75rem] border border-mint/15 bg-[#07110e]/72 p-4 shadow-[0_24px_90px_rgba(0,0,0,0.28),0_0_60px_rgba(128,185,154,0.08)] backdrop-blur-xl">
+        <div className="mx-auto mt-6 max-w-3xl rounded-[1.75rem] border border-mint/15 bg-[#07110e]/72 p-4 shadow-[0_24px_90px_rgba(0,0,0,0.28),0_0_60px_rgba(128,185,154,0.08)] backdrop-blur-xl">
           <div className="grid gap-4">
             <Field label="Business goal">
               <textarea

@@ -36,12 +36,15 @@ export function AppShell() {
   }, [activeView]);
 
   return (
-    <main id="agent-app-shell" className="relative min-h-screen overflow-hidden bg-[#030706] px-4 pb-6 pt-5 sm:px-6 lg:px-8">
+    <main
+      id="agent-app-shell"
+      className="relative min-h-screen overflow-hidden bg-[#030706] px-4 py-4 sm:px-6 lg:py-6 lg:pl-24 lg:pr-8"
+    >
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:46px_46px]" />
       <div className="absolute left-[18%] top-16 -z-10 h-[30rem] w-[30rem] rounded-full bg-mint/12 blur-3xl" />
       <div className="absolute right-[-8rem] top-48 -z-10 h-[32rem] w-[32rem] rounded-full bg-warm/10 blur-3xl" />
 
-      <div className="relative z-10 mx-auto max-w-7xl lg:ml-24">
+      <div className="relative z-10 mx-auto max-w-6xl">
         <DesktopSidebar activeView={activeView} onSelect={setActiveView} />
 
         <div className="relative z-0 min-w-0">
@@ -90,8 +93,8 @@ function DesktopSidebar({
   onSelect: (view: AppView) => void;
 }) {
   return (
-    <aside className="fixed left-4 top-24 z-40 hidden lg:block">
-      <nav className="group flex h-[calc(100vh-7rem)] w-[68px] flex-col gap-2 rounded-[1.35rem] border border-cream/10 bg-black/78 p-2.5 shadow-2xl shadow-black/45 backdrop-blur-xl transition-all duration-300 hover:w-[232px]">
+    <aside className="fixed left-0 top-0 z-40 hidden h-screen lg:block">
+      <nav className="group flex h-full w-[72px] flex-col gap-2 border-r border-cream/10 bg-black/82 p-2.5 shadow-2xl shadow-black/45 backdrop-blur-xl transition-all duration-300 hover:w-[236px]">
         <button
           type="button"
           onClick={() => onSelect("agent")}
