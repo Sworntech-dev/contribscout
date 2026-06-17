@@ -38,24 +38,37 @@ export type ProvisionResponse = {
 };
 
 export function AgentDemoMode({
+  agentRun,
+  businessGoal,
+  teamContext,
+  provisioningResult,
+  proofCandidateSaved,
+  onBusinessGoalChange,
+  onTeamContextChange,
   onRunResultChange,
   onProvisionResultChange,
   onProofSavedChange,
 }: {
+  agentRun: AgentRunResult | null;
+  businessGoal: string;
+  teamContext: string;
+  provisioningResult: ProvisionResponse | null;
+  proofCandidateSaved: boolean;
+  onBusinessGoalChange: (value: string) => void;
+  onTeamContextChange: (value: string) => void;
   onRunResultChange?: (result: AgentRunResult | null) => void;
   onProvisionResultChange?: (result: ProvisionResponse | null) => void;
   onProofSavedChange?: (saved: boolean) => void;
 }) {
-  const [businessGoal, setBusinessGoal] = useState(DEFAULT_GOAL);
-  const [teamContext, setTeamContext] = useState(DEFAULT_TEAM_CONTEXT);
   const [runState, setRunState] = useState<RunState>("idle");
   const [copyState, setCopyState] = useState<CopyState>("idle");
   const [saveState, setSaveState] = useState<"idle" | "saved" | "error">("idle");
-  const [provisionState, setProvisionState] = useState<ProvisionState>("idle");
-  const [provisionResult, setProvisionResult] = useState<ProvisionResponse | null>(null);
+  const [provisionLoading, setProvisionLoading] = useState(false);
   const [error, setError] = useState("");
-  const [result, setResult] = useState<AgentRunResult | null>(null);
   const [activePreset, setActivePreset] = useState(GOAL_PRESETS[0].label);
+  const result = agentRun;
+  const provisionResult = provisioningResult;
+  const provisionState = provisionLoading ? "loading" : getProvisionState(provisionResult);
 
   const prDetails = useMemo(() => (result ? extractPrDetails(result.prReadinessKit.markdown) : null), [result]);
   const briefDetails = useMemo(() => (result ? extractBriefDetails(result.contributionBrief.markdown) : null), [result]);
@@ -73,8 +86,7 @@ export function AgentDemoMode({
     setError("");
     setCopyState("idle");
     setSaveState("idle");
-    setProvisionState("idle");
-    setProvisionResult(null);
+    setProvisionLoading(false);
     onProvisionResultChange?.(null);
     onProofSavedChange?.(false);
 
@@ -97,7 +109,6 @@ export function AgentDemoMode({
         throw new Error("error" in payload && payload.error ? payload.error : "Agent run failed.");
       }
 
-      setResult(payload as AgentRunResult);
       onRunResultChange?.(payload as AgentRunResult);
       setRunState("success");
     } catch (agentError) {
@@ -149,8 +160,8 @@ export function AgentDemoMode({
   async function provisionWorkspace() {
     if (!result) return;
 
-    setProvisionState("loading");
-    setProvisionResult(null);
+    setProvisionLoading(true);
+    onProvisionResultChange?.(null);
 
     try {
       const response = await fetch("/api/ops/provision", {
@@ -167,27 +178,23 @@ export function AgentDemoMode({
       });
       const payload = (await response.json()) as ProvisionResponse;
 
-      setProvisionResult(payload);
       onProvisionResultChange?.(payload);
 
       if (!payload.configured) {
-        setProvisionState("not_configured");
         return;
       }
 
       if (!response.ok || !payload.checkoutUrl) {
-        setProvisionState("error");
         return;
       }
-
-      setProvisionState("ready");
     } catch {
-      setProvisionResult({
+      onProvisionResultChange?.({
         configured: false,
         status: "request_failed",
         message: "Provisioning request failed. Check the local server or deployment logs.",
       });
-      setProvisionState("error");
+    } finally {
+      setProvisionLoading(false);
     }
   }
 
@@ -228,8 +235,8 @@ export function AgentDemoMode({
               type="button"
               onClick={() => {
                 setActivePreset(preset.label);
-                setBusinessGoal(preset.businessGoal);
-                setTeamContext(preset.teamContext);
+                onBusinessGoalChange(preset.businessGoal);
+                onTeamContextChange(preset.teamContext);
               }}
               className={`rounded-2xl border p-3.5 text-left transition hover:-translate-y-0.5 ${
                 activePreset === preset.label
@@ -254,7 +261,7 @@ export function AgentDemoMode({
               <textarea
                 aria-label="Business goal"
                 value={businessGoal}
-                onChange={(event) => setBusinessGoal(event.target.value)}
+                onChange={(event) => onBusinessGoalChange(event.target.value)}
                 placeholder="Describe your open-source growth goal..."
                 className="min-h-28 w-full resize-y rounded-2xl border border-transparent bg-transparent px-2 py-2 text-base leading-7 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/15"
               />
@@ -262,7 +269,7 @@ export function AgentDemoMode({
                 <input
                   aria-label="Team context"
                   value={teamContext}
-                  onChange={(event) => setTeamContext(event.target.value)}
+                  onChange={(event) => onTeamContextChange(event.target.value)}
                   className="min-w-0 flex-1 rounded-2xl border border-cream/[0.08] bg-black/20 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/25"
                 />
                 <button
@@ -393,7 +400,7 @@ export function AgentDemoMode({
                       onClick={saveProofCandidate}
                       className="mt-2 rounded-md border border-mint/40 bg-mint/10 px-4 py-2 text-sm font-bold text-mint transition hover:border-mint hover:bg-mint hover:text-ink"
                     >
-                      {saveState === "saved"
+                      {saveState === "saved" || proofCandidateSaved
                         ? "Saved"
                         : saveState === "error"
                           ? "Save failed"
@@ -715,6 +722,13 @@ function labelForProvisionStatus(status: string) {
   if (status === "test_key_required") return "Stripe test key required";
   if (status === "stripe_error") return "Stripe error";
   return "Provisioning status";
+}
+
+function getProvisionState(result: ProvisionResponse | null): ProvisionState {
+  if (!result) return "idle";
+  if (result.status === "checkout_created" && result.checkoutUrl) return "ready";
+  if (result.status === "not_configured") return "not_configured";
+  return "error";
 }
 
 function compactPresetLabel(label: string) {

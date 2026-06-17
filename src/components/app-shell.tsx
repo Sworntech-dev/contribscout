@@ -10,6 +10,9 @@ import type { AgentRunResult } from "@/lib/agent-run-types";
 type AppView = "agent" | "workspace" | "judge" | "hermes" | "about";
 type WorkspaceTab = "scanner" | "mission" | "proof";
 
+const DEFAULT_AGENT_GOAL = "Grow visibility for an AI agent tooling project through useful open-source contributions.";
+const DEFAULT_TEAM_CONTEXT = "Small AI tooling team";
+
 const navItems: Array<{ id: AppView; label: string; icon: string; detail: string }> = [
   { id: "agent", label: "Agent Console", icon: "A", detail: "Run growth workflow" },
   { id: "workspace", label: "Workspace", icon: "W", detail: "Scanner, mission, proof" },
@@ -27,6 +30,8 @@ const workspaceTabs: Array<{ id: WorkspaceTab; label: string; targetId: string; 
 export function AppShell() {
   const [activeView, setActiveView] = useState<AppView>("agent");
   const [agentRun, setAgentRun] = useState<AgentRunResult | null>(null);
+  const [agentBusinessGoal, setAgentBusinessGoal] = useState(DEFAULT_AGENT_GOAL);
+  const [agentTeamContext, setAgentTeamContext] = useState(DEFAULT_TEAM_CONTEXT);
   const [provisioningResult, setProvisioningResult] = useState<ProvisionResponse | null>(null);
   const [proofCandidateSaved, setProofCandidateSaved] = useState(false);
   const [agentProofCount, setAgentProofCount] = useState(0);
@@ -70,6 +75,13 @@ export function AppShell() {
           >
             {activeView === "agent" ? (
               <AgentDemoMode
+                agentRun={agentRun}
+                businessGoal={agentBusinessGoal}
+                teamContext={agentTeamContext}
+                provisioningResult={provisioningResult}
+                proofCandidateSaved={proofCandidateSaved}
+                onBusinessGoalChange={setAgentBusinessGoal}
+                onTeamContextChange={setAgentTeamContext}
                 onRunResultChange={setAgentRun}
                 onProvisionResultChange={setProvisioningResult}
                 onProofSavedChange={setProofCandidateSaved}

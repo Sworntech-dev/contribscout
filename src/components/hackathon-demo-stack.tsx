@@ -5,8 +5,13 @@ import { AgentDemoMode, type ProvisionResponse } from "@/components/agent-demo-m
 import { JudgeDemoPackage } from "@/components/judge-demo-package";
 import type { AgentRunResult } from "@/lib/agent-run-types";
 
+const DEFAULT_AGENT_GOAL = "Grow visibility for an AI agent tooling project through useful open-source contributions.";
+const DEFAULT_TEAM_CONTEXT = "Small AI tooling team";
+
 export function HackathonDemoStack() {
   const [agentRun, setAgentRun] = useState<AgentRunResult | null>(null);
+  const [agentBusinessGoal, setAgentBusinessGoal] = useState(DEFAULT_AGENT_GOAL);
+  const [agentTeamContext, setAgentTeamContext] = useState(DEFAULT_TEAM_CONTEXT);
   const [provisioningResult, setProvisioningResult] = useState<ProvisionResponse | null>(null);
   const [proofCandidateSaved, setProofCandidateSaved] = useState(false);
   const navItems = [
@@ -67,6 +72,13 @@ export function HackathonDemoStack() {
           </div>
 
           <AgentDemoMode
+            agentRun={agentRun}
+            businessGoal={agentBusinessGoal}
+            teamContext={agentTeamContext}
+            provisioningResult={provisioningResult}
+            proofCandidateSaved={proofCandidateSaved}
+            onBusinessGoalChange={setAgentBusinessGoal}
+            onTeamContextChange={setAgentTeamContext}
             onRunResultChange={setAgentRun}
             onProvisionResultChange={setProvisioningResult}
             onProofSavedChange={setProofCandidateSaved}
