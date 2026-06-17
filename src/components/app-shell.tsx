@@ -6,16 +6,21 @@ import { JudgeDemoPackage } from "@/components/judge-demo-package";
 import { MissionControlDashboard } from "@/components/mission-control-dashboard";
 import type { AgentRunResult } from "@/lib/agent-run-types";
 
-type AppView = "agent" | "scanner" | "mission" | "proof" | "judge" | "hermes" | "about";
+type AppView = "agent" | "workspace" | "judge" | "hermes" | "about";
+type WorkspaceTab = "scanner" | "mission" | "proof";
 
 const navItems: Array<{ id: AppView; label: string; icon: string; detail: string }> = [
   { id: "agent", label: "Agent Console", icon: "A", detail: "Run growth workflow" },
-  { id: "scanner", label: "Live Scanner", icon: "S", detail: "GitHub opportunities" },
-  { id: "mission", label: "Mission Control", icon: "M", detail: "Full dashboard" },
-  { id: "proof", label: "Proof Vault", icon: "P", detail: "Local evidence" },
+  { id: "workspace", label: "Workspace", icon: "W", detail: "Scanner, mission, proof" },
   { id: "judge", label: "Judge Package", icon: "J", detail: "Demo exports" },
   { id: "hermes", label: "Hermes Skill", icon: "H", detail: "Skill command" },
   { id: "about", label: "About", icon: "?", detail: "What this is" },
+];
+
+const workspaceTabs: Array<{ id: WorkspaceTab; label: string; targetId: string; detail: string }> = [
+  { id: "scanner", label: "Scanner", targetId: "top-opportunities", detail: "GitHub opportunity discovery" },
+  { id: "mission", label: "Mission Control", targetId: "mission-control", detail: "Readiness and pipeline overview" },
+  { id: "proof", label: "Proof Vault", targetId: "proof-vault", detail: "Saved contribution evidence" },
 ];
 
 export function AppShell() {
@@ -24,9 +29,10 @@ export function AppShell() {
   const [provisioningResult, setProvisioningResult] = useState<ProvisionResponse | null>(null);
   const [proofCandidateSaved, setProofCandidateSaved] = useState(false);
   const [agentProofCount, setAgentProofCount] = useState(0);
+  const [workspaceTab, setWorkspaceTab] = useState<WorkspaceTab>("scanner");
 
   useEffect(() => {
-    if (activeView !== "proof") return;
+    if (activeView !== "workspace") return;
 
     const timeout = window.setTimeout(() => {
       try {
@@ -40,27 +46,16 @@ export function AppShell() {
     return () => window.clearTimeout(timeout);
   }, [activeView, proofCandidateSaved]);
 
-  useEffect(() => {
-    if (activeView !== "scanner" && activeView !== "proof") return;
-
-    const targetId = activeView === "scanner" ? "top-opportunities" : "proof-vault";
-    const timeout = window.setTimeout(() => {
-      document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 250);
-
-    return () => window.clearTimeout(timeout);
-  }, [activeView]);
-
   return (
     <main
       id="agent-app-shell"
-      className="relative min-h-screen overflow-hidden bg-[#030706] px-4 py-4 sm:px-6 lg:py-6 lg:pl-24 lg:pr-8"
+      className="relative min-h-screen overflow-x-clip bg-[#030706] px-4 py-4 sm:px-6 lg:py-6 lg:pl-24 lg:pr-8"
     >
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:46px_46px]" />
       <div className="absolute left-[18%] top-16 -z-10 h-[30rem] w-[30rem] rounded-full bg-mint/12 blur-3xl" />
       <div className="absolute right-[-8rem] top-48 -z-10 h-[32rem] w-[32rem] rounded-full bg-warm/10 blur-3xl" />
 
-      <div className="relative z-10 mx-auto max-w-6xl">
+      <div className="relative z-10 mx-auto w-full max-w-7xl">
         <DesktopSidebar activeView={activeView} onSelect={setActiveView} />
 
         <div className="relative z-0 min-w-0">
@@ -69,7 +64,7 @@ export function AppShell() {
             className={
               activeView === "agent"
                 ? "min-h-[calc(100vh-8rem)]"
-                : "min-h-[calc(100vh-8rem)] rounded-[2rem] border border-cream/10 bg-black/35 p-3 shadow-2xl shadow-black/35 backdrop-blur sm:p-5"
+                : "min-h-[calc(100vh-8rem)] overflow-x-clip rounded-[2rem] border border-cream/10 bg-black/35 p-3 shadow-2xl shadow-black/35 backdrop-blur sm:p-5"
             }
           >
             {activeView === "agent" ? (
@@ -88,8 +83,12 @@ export function AppShell() {
               />
             ) : null}
 
-            {activeView === "scanner" || activeView === "mission" || activeView === "proof" ? (
-              <MissionView activeView={activeView} agentProofCount={agentProofCount} />
+            {activeView === "workspace" ? (
+              <WorkspaceView
+                activeTab={workspaceTab}
+                agentProofCount={agentProofCount}
+                onSelectTab={setWorkspaceTab}
+              />
             ) : null}
 
             {activeView === "hermes" ? <HermesSkillView /> : null}
@@ -179,33 +178,57 @@ function MobileTabs({
   );
 }
 
-function MissionView({ activeView, agentProofCount }: { activeView: AppView; agentProofCount: number }) {
-  const heading =
-    activeView === "scanner"
-      ? {
-          eyebrow: "Live scanner",
-          title: "Live Scanner",
-          body: "Review the GitHub opportunities ContribScout can evaluate for agent runs.",
-        }
-      : activeView === "proof"
-        ? {
-            eyebrow: "Proof Vault",
-            title: "Proof Vault",
-            body: "Review saved agent proof candidates and contribution evidence.",
-          }
-        : {
-            eyebrow: "Mission Control",
-            title: "Mission Control",
-            body: "Track contribution workflow readiness and product signals.",
-          };
+function WorkspaceView({
+  activeTab,
+  agentProofCount,
+  onSelectTab,
+}: {
+  activeTab: WorkspaceTab;
+  agentProofCount: number;
+  onSelectTab: (tab: WorkspaceTab) => void;
+}) {
+  function selectTab(tab: WorkspaceTab) {
+    onSelectTab(tab);
+    const targetId = workspaceTabs.find((item) => item.id === tab)?.targetId;
+
+    if (!targetId) return;
+
+    window.setTimeout(() => {
+      document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 160);
+  }
 
   return (
     <ViewFrame>
-      <ShellIntro eyebrow={heading.eyebrow} title={heading.title} body={heading.body} />
-      {activeView === "proof" ? <ProofCandidateSummary count={agentProofCount} /> : null}
-      {activeView === "scanner" ? <ScannerFocusNote /> : null}
-      {activeView === "mission" ? <MissionFocusNote /> : null}
-      <div className="overflow-hidden rounded-[1.5rem] border border-cream/10 bg-black/20">
+      <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+        <ShellIntro
+          eyebrow="Workspace"
+          title="Scanner Workspace"
+          body="One compact operating space for discovery, workflow readiness, and saved contribution proof."
+        />
+        <ProofCandidateSummary count={agentProofCount} />
+      </div>
+      <div className="rounded-[1.5rem] border border-cream/10 bg-black/24 p-2">
+        <div className="grid gap-2 md:grid-cols-3">
+          {workspaceTabs.map((tab) => (
+            <button
+              key={`workspace-tab-${tab.id}`}
+              type="button"
+              onClick={() => selectTab(tab.id)}
+              className={`rounded-[1.1rem] border px-4 py-3 text-left transition ${
+                activeTab === tab.id
+                  ? "border-cyan-200/30 bg-cyan-200/[0.07] text-white"
+                  : "border-transparent bg-white/[0.025] text-slate-400 hover:border-cyan-200/20 hover:text-white"
+              }`}
+            >
+              <span className="block text-sm font-black">{tab.label}</span>
+              <span className="mt-1 block text-xs leading-5 text-slate-500">{tab.detail}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <WorkspaceFocusNotes activeTab={activeTab} />
+      <div className="max-w-full overflow-hidden rounded-[1.5rem] border border-cream/10 bg-black/20">
         <MissionControlDashboard />
       </div>
     </ViewFrame>
@@ -242,24 +265,54 @@ function HermesSkillView() {
 }
 
 function AboutView() {
+  const capabilities = [
+    ["Live GitHub scan", "Finds current open-source projects when GitHub access is configured, with honest sample fallback otherwise."],
+    ["Ranking + filters", "Scores Role Opportunity fit and lets builders narrow by issue signals, docs gaps, source, and presets."],
+    ["Agent run workflow", "Turns a business goal into a selected opportunity, business rationale, and next contribution path."],
+    ["Contribution brief", "Builds a repo-specific Markdown plan before the builder starts work."],
+    ["PR readiness kit", "Creates duplicate guards, branch naming, PR copy, validation notes, and maintainer-safe language."],
+    ["Proof Vault", "Prepares and saves local proof candidates without accounts, auth, or a database."],
+    ["Stripe provisioning", "Offers an optional real test-mode checkout step when Stripe is configured, never a fake payment."],
+    ["Hermes skill layer", "Includes a Hermes-compatible package that calls the Agent API and formats operational reports."],
+    ["Judge package", "Exports a concise demo narrative, integration status, Hermes command, and judge-ready summary."],
+  ];
+
   return (
     <ViewFrame>
       <ShellIntro
         eyebrow="About"
         title="Open-source growth operations for AI teams"
-        body="A focused agent workspace for turning open-source growth goals into PR-ready contribution workflows."
+        body="ContribScout helps small AI, Web3, and developer-tooling teams turn open-source discovery into a concrete contribution workflow."
       />
-      <div className="rounded-[1.5rem] border border-cream/10 bg-black/24 p-5 text-sm leading-7 text-slate-300">
-        ContribScout scans GitHub opportunities, selects a high-leverage contribution path, prepares a PR-ready plan,
-        keeps proof artifacts local, exposes an optional Stripe provisioning step, and ships a Hermes-compatible skill layer
-        for agent-assisted reports.
+      <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="rounded-[1.5rem] border border-cream/10 bg-black/24 p-5 text-sm leading-7 text-slate-300">
+          <p>
+            It is for builders and lean teams who want useful public contribution paths without turning repo discovery
+            into a vague issue hunt. The agent scans opportunities, ranks them, selects a high-leverage target, and
+            produces a PR-ready plan that can become public proof.
+          </p>
+          <p className="mt-4">
+            The workflow stays honest and local-first: live GitHub data is preferred when configured, fallback data is
+            labeled, proof data stays in the browser, and Stripe/Hermes are optional integration layers rather than a
+            hidden backend.
+          </p>
+        </div>
+        <div className="rounded-[1.5rem] border border-cyan-100/10 bg-cyan-100/[0.035] p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100/70">Workflow</p>
+          <div className="mt-4 grid gap-2 text-sm text-slate-300">
+            {["Set growth goal", "Run live/source-aware scan", "Select contribution target", "Generate brief + PR kit", "Save proof or export judge package"].map((step, index) => (
+              <div key={`about-workflow-${step}`} className="flex items-center gap-3 rounded-2xl bg-black/24 px-3 py-2">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-mint/30 bg-mint/10 text-xs font-black text-mint">
+                  {index + 1}
+                </span>
+                <span>{step}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-3">
-        {[
-          ["GitHub scan", "Live results when configured, honest sample fallback when not."],
-          ["PR-ready plan", "Brief, duplicate guard, PR copy, and validation notes."],
-          ["Proof + provisioning", "Local Proof Vault plus a real Stripe test-mode checkout path."],
-        ].map(([title, body]) => (
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {capabilities.map(([title, body]) => (
           <article key={`about-${title}`} className="rounded-[1.5rem] border border-cream/10 bg-white/[0.025] p-5">
             <h3 className="font-black text-white">{title}</h3>
             <p className="mt-2 text-sm leading-6 text-slate-400">{body}</p>
@@ -281,35 +334,27 @@ function ShellIntro({ eyebrow, title, body }: { eyebrow: string; title: string; 
 }
 
 function ViewFrame({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto max-w-6xl space-y-5">{children}</div>;
+  return <div className="mx-auto w-full max-w-6xl space-y-5 overflow-x-clip">{children}</div>;
 }
 
-function ScannerFocusNote() {
-  return (
-    <div className="rounded-[1.25rem] border border-cyan-100/10 bg-cyan-100/[0.035] px-4 py-3 text-sm text-slate-300">
-      Tip: this view scrolls to ranked opportunities after loading while preserving the scanner&apos;s existing filters and actions.
-    </div>
-  );
-}
+function WorkspaceFocusNotes({ activeTab }: { activeTab: WorkspaceTab }) {
+  const note =
+    activeTab === "scanner"
+      ? "Scanner mode focuses the existing dashboard on ranked GitHub opportunities, filters, and repo actions."
+      : activeTab === "proof"
+        ? "Proof mode keeps saved contribution evidence close without turning the vault into a separate duplicate page."
+        : "Mission Control mode keeps the full operational overview available in the same workspace.";
 
-function MissionFocusNote() {
   return (
-    <div className="grid gap-3 sm:grid-cols-3">
-      {["Scanner health", "Watchlist pipeline", "Proof readiness"].map((item) => (
-        <div
-          key={`mission-focus-${item}`}
-          className="rounded-[1.25rem] border border-cream/10 bg-white/[0.025] px-4 py-3 text-sm font-semibold text-slate-300"
-        >
-          {item}
-        </div>
-      ))}
+    <div className="rounded-[1.25rem] border border-cyan-100/10 bg-cyan-100/[0.035] px-4 py-3 text-sm leading-6 text-slate-300">
+      {note}
     </div>
   );
 }
 
 function ProofCandidateSummary({ count }: { count: number }) {
   return (
-    <div className="rounded-[1.25rem] border border-cream/10 bg-black/24 px-4 py-3 text-sm text-slate-300">
+    <div className="rounded-[1.25rem] border border-cream/10 bg-black/24 px-4 py-3 text-sm text-slate-300 lg:min-w-72">
       {count > 0
         ? `${count} saved agent proof ${count === 1 ? "candidate" : "candidates"} found in local storage.`
         : "Run the agent and save a proof candidate to populate the vault."}

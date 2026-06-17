@@ -102,9 +102,9 @@ export function JudgeDemoPackage({
               />
             </div>
 
-            <div className="grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="grid gap-5">
               <Panel eyebrow="Hermes command" title="Run the skill layer">
-                <pre className="overflow-auto rounded-md border border-cream/10 bg-black/40 p-4 text-xs leading-5 text-slate-300">
+                <pre className="max-w-full overflow-auto rounded-md border border-cream/10 bg-black/40 p-4 text-xs leading-5 text-slate-300">
                   {HERMES_COMMAND}
                 </pre>
                 <div className="mt-3">
@@ -115,16 +115,14 @@ export function JudgeDemoPackage({
               </Panel>
 
               <Panel eyebrow="Demo flow timeline" title="Six-step run">
-                <ol className="space-y-3">
+                <ol className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
                   {buildTimeline(agentRun, provisioningResult, proofCandidateSaved).map((step, index) => (
-                    <li key={`judge-timeline-${index}-${step.title}`} className="flex gap-3 rounded-md border border-cream/10 bg-black/20 p-3">
-                      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-mint/40 bg-mint/10 text-xs font-black text-mint">
+                    <li key={`judge-timeline-${index}-${step.title}`} className="min-w-0 rounded-md border border-cream/10 bg-black/20 p-4">
+                      <span className="grid h-8 w-8 place-items-center rounded-full border border-mint/40 bg-mint/10 text-xs font-black text-mint">
                         {index + 1}
                       </span>
-                      <div>
-                        <p className="font-bold text-white">{step.title}</p>
-                        <p className="mt-1 text-sm leading-6 text-slate-400">{step.detail}</p>
-                      </div>
+                      <p className="mt-3 font-bold text-white">{step.title}</p>
+                      <p className="mt-1 text-sm leading-6 text-slate-400">{step.detail}</p>
                     </li>
                   ))}
                 </ol>
@@ -147,7 +145,7 @@ export function JudgeDemoPackage({
                   <summary className="cursor-pointer px-4 py-3 text-sm font-bold text-slate-200">
                     Preview judge summary
                   </summary>
-                  <pre className="max-h-96 overflow-auto border-t border-cream/10 p-4 text-xs leading-5 text-slate-300">
+                  <pre className="max-h-96 max-w-full overflow-auto border-t border-cream/10 p-4 text-xs leading-5 text-slate-300">
                     {judgeSummary}
                   </pre>
                 </details>
