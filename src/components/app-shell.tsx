@@ -114,15 +114,15 @@ function DesktopSidebar({
         <button
           type="button"
           onClick={() => onSelect("agent")}
-          className="flex h-11 items-center gap-3 rounded-2xl border border-mint/25 bg-mint/10 px-2.5 text-left text-mint"
+          className="flex h-11 items-center gap-3 rounded-2xl bg-mint/10 px-2 text-left text-mint transition hover:bg-mint/14"
         >
-          <span className="relative grid h-8 w-8 shrink-0 place-items-center overflow-hidden rounded-xl">
+          <span className="relative grid h-9 w-9 shrink-0 place-items-center overflow-hidden rounded-xl">
             <span className="text-[9px] text-mint/25">CS</span>
             <Image
               src="/brand/contribscout-logo.png"
               alt="ContribScout"
               fill
-              sizes="32px"
+              sizes="36px"
               className="object-contain"
               priority
             />
@@ -138,14 +138,14 @@ function DesktopSidebar({
                 key={`app-shell-nav-${item.id}`}
                 type="button"
                 onClick={() => onSelect(item.id)}
-                className={`flex h-11 items-center gap-3 rounded-2xl border px-2.5 text-left transition ${
+                className={`flex h-11 items-center gap-3 rounded-2xl px-2.5 text-left transition ${
                   active
-                    ? "border-mint/40 bg-mint/10 text-white"
-                    : "border-cream/10 bg-white/[0.03] text-slate-400 hover:border-mint/35 hover:text-white"
+                    ? "bg-mint/10 text-white"
+                    : "bg-white/[0.025] text-slate-400 hover:bg-mint/[0.07] hover:text-white"
                 }`}
                 title={item.label}
               >
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-xl border border-cream/10 text-xs font-black">
+                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-xl text-xs font-black">
                   {item.icon}
                 </span>
                 <span className="hidden min-w-0 group-hover:block">
