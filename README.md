@@ -4,6 +4,56 @@ ContribScout is a Hermes-ready contributor intelligence dashboard for discoverin
 
 It helps builders find projects where they can become useful before the obvious contribution paths are crowded. ContribScout is a Vercel-ready Next.js dashboard with a GitHub opportunity scanner, an original Role Opportunity Score, suggested contribution actions, a small local Proof Vault, and a Hermes-compatible skill package for daily report formatting.
 
+## Hackathon Demo
+
+ContribScout Agent turns an open-source growth goal into a PR-ready contribution workflow for AI, Web3, and developer-tooling teams.
+
+In the public demo, the flow is:
+
+1. Enter a growth goal in Agent Console.
+2. The browser UI calls `POST /api/agent/run`.
+3. The agent scans GitHub opportunities, or clearly uses sample fallback when live scanning is unavailable.
+4. The agent automatically chooses the strongest contribution target.
+5. ContribScout prepares a contribution brief, PR readiness kit, and Proof Vault candidate.
+6. Optional Stripe test-mode provisioning can create an OSS Growth Workspace checkout when configured.
+7. Judge Package exports integration status, demo narrative, Hermes command, and a judge-ready summary.
+8. The Hermes Skill Layer can run the same workflow separately through the included skill script.
+
+Short product pitch:
+
+> ContribScout Agent helps small AI teams turn open-source discovery into a concrete growth operation: find the right repo, prepare a useful first contribution, track proof, and package the run for review.
+
+Run locally:
+
+```bash
+npm install
+cp .env.example .env.local
+npm run dev
+```
+
+Useful environment variables:
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `GITHUB_TOKEN` | No | Recommended for stronger demos. Enables live GitHub scanning; without it, the app clearly shows sample fallback. |
+| `STRIPE_SECRET_KEY` | No | Optional Stripe test-mode secret key for creating real Checkout Sessions in the provisioning step. Missing keys show an honest not-configured state. |
+| `NEXT_PUBLIC_APP_NAME` | No | Public app name shown in metadata and UI. Defaults to `ContribScout`. |
+
+Agent API endpoints:
+
+- `POST /api/agent/run` turns a growth goal into a structured agent run.
+- `POST /api/ops/provision` creates a Stripe test-mode Checkout Session only when test-mode provisioning is configured.
+
+Hermes skill command:
+
+```bash
+python hermes/skills/contribscout-agent/scripts/run_contribscout_agent.py "Grow visibility for an AI agent tooling project through useful open-source contributions."
+```
+
+Sample 1-3 minute demo script:
+
+> ContribScout Agent starts with a growth goal, not a manual repo search. I enter a goal for an AI tooling team and run the agent. The browser calls the ContribScout Agent API, which scans GitHub when configured, labels fallback honestly when live data is unavailable, and automatically chooses the strongest contribution target. From there it prepares a contribution brief, PR readiness kit, local Proof Vault candidate, and optional Stripe test-mode provisioning step. Finally, Judge Package exports the integration status, Hermes command, and demo summary so the run is easy to evaluate.
+
 ## Why It Exists
 
 Generic `good first issue` lists are useful, but they usually answer only one question: "Where is there an open beginner issue?"
@@ -60,7 +110,6 @@ Each opportunity includes a short recommended action, such as:
 
 - write a beginner setup guide
 - help with a good first issue
-- create a Turkish onboarding note
 - review README clarity
 - open a docs improvement issue
 - contribute a small bugfix
@@ -100,6 +149,16 @@ In v1.0.3, Cinematic Scroll Motion adds Framer Motion-powered scroll depth, para
 
 In v1.0.4, Real Cinematic Landing Scroll adds a dedicated landing story before the dashboard: a full-screen hero, pinned scroll-driven workflow section, animated product cards, moving background gradients, and a clear handoff into Mission Control.
 
+Hackathon Phase 1 adds ContribScout Agent, a Hermes-compatible open-source growth operations workflow. The new `/api/agent/run` endpoint accepts a business goal, selects one opportunity from the current scanner results, and returns a structured agent run with business rationale, a contribution brief, a PR readiness kit, a Proof Vault candidate, an operations recommendation, and a Markdown summary. The Hermes skill package lives at `hermes/skills/contribscout-agent/` and calls this API; it is a skill layer for using ContribScout output in Hermes-style workflows, not a hosted Hermes runtime.
+
+Hackathon Phase 2 adds Agent Demo Mode UI. The site now includes a product-facing ContribScout Agent section that calls `/api/agent/run` directly and displays a Hermes-style action log, selected opportunity, business rationale, contribution brief, PR readiness kit, Proof Vault candidate, and copy/downloadable Markdown summary.
+
+Hackathon Phase 3 adds a real Stripe test-mode provisioning step to Agent Demo Mode. The `/api/ops/provision` endpoint creates a Stripe Checkout Session only when `STRIPE_SECRET_KEY` is configured with a test-mode key. If Stripe is missing or not configured for test mode, the UI shows setup guidance and does not create a fake checkout URL.
+
+Hackathon Phase 4 improves live GitHub agent quality. Agent runs now expose safe source metadata such as scanned count, considered count, selected reason, and whether `GITHUB_TOKEN` is configured. For the strongest demo, configure `GITHUB_TOKEN` so `/api/agent/run` can select from live GitHub scanner results. If live data is unavailable, ContribScout keeps the fallback honest by returning `source: sample`, preserving the notice, and never claiming sample data is live.
+
+Hackathon Phase 5 adds the Judge Demo Package. After an agent run, the site summarizes integration status cards, the exact Hermes skill command, a six-step demo timeline, a judge-facing Markdown summary export, and a concise 1-3 minute demo script. The package reflects real run state, including GitHub source, Stripe provisioning status, and Proof Vault save status.
+
 ## What Makes It Different
 
 ContribScout is not just a good-first-issue finder.
@@ -134,6 +193,7 @@ Optionally add a GitHub token:
 
 ```bash
 GITHUB_TOKEN=<your_github_token>
+STRIPE_SECRET_KEY=<your_stripe_test_secret_key>
 NEXT_PUBLIC_APP_NAME=ContribScout
 ```
 
@@ -161,6 +221,7 @@ npm run lint
 | Variable | Required | Description |
 | --- | --- | --- |
 | `GITHUB_TOKEN` | No | Optional GitHub token used by the server-side scanner. The app works without it by using sample fallback data. |
+| `STRIPE_SECRET_KEY` | No | Optional Stripe test-mode secret key used by `/api/ops/provision` to create real Checkout Sessions. If missing, Agent Demo Mode shows "Stripe not configured" and no fake checkout URL is created. |
 | `NEXT_PUBLIC_APP_NAME` | No | Public app name shown in metadata and UI. Defaults to `ContribScout`. |
 
 ## Vercel Deployment
@@ -170,9 +231,10 @@ npm run lint
 3. Keep the framework preset as Next.js.
 4. Add `GITHUB_TOKEN` in Vercel Project Settings if you want live GitHub scanning.
 5. Add `NEXT_PUBLIC_APP_NAME=ContribScout` if desired.
-6. Deploy.
+6. Add `STRIPE_SECRET_KEY` with a Stripe test-mode secret key if you want the Agent Demo Mode provisioning step to create real test Checkout Sessions.
+7. Deploy.
 
-The app is safe to deploy without `GITHUB_TOKEN`; it will use sample data.
+The app is safe to deploy without `GITHUB_TOKEN`; it will use sample data. For hackathon demos, `GITHUB_TOKEN` is recommended because Agent Demo Mode can then select from live GitHub scanner results when usable repositories are available.
 
 ## Hermes Skill Layer
 

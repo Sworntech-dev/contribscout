@@ -2,7 +2,7 @@
 
 ContribScout remains a standalone Vercel dashboard. The Hermes files in this folder provide a skill layer that consumes the ContribScout API and formats daily contribution reports. They do not host a Hermes runtime inside Vercel.
 
-The newer Hermes-compatible package lives at `hermes/skills/contribscout/`.
+The daily report skill package lives at `hermes/skills/contribscout/`. The Hackathon Phase 1 agent workflow package lives at `hermes/skills/contribscout-agent/`.
 
 ## What It Does
 
@@ -10,8 +10,15 @@ There are two integration sketches:
 
 - `contribscout_skill.py` is the original small Python sketch.
 - `skills/contribscout/` follows Hermes Agent skill conventions with `SKILL.md` and `scripts/daily_report.py`.
+- `skills/contribscout-agent/` calls `/api/agent/run` and formats a ContribScout Agent run for open-source growth operations.
 
 The skill package fetches top opportunities from `https://contribscout.vercel.app/api/opportunities` by default, then formats the top 5 opportunities into Markdown.
+
+The agent skill package posts a business goal to `https://contribscout.vercel.app/api/agent/run` by default. The API selects one opportunity from the current scanner results and returns a business rationale, contribution brief, PR readiness kit, Proof Vault candidate, operations recommendation, and Markdown summary.
+
+Hackathon Phase 3 adds an optional Stripe test-mode provisioning endpoint at `/api/ops/provision` for the dashboard Agent Demo Mode. It requires `STRIPE_SECRET_KEY`; when the variable is missing, ContribScout reports `Stripe not configured` and does not create a fake checkout URL. The Hermes skill script does not need Stripe credentials to run the agent report.
+
+Hackathon Phase 4 improves live GitHub agent quality. Agent responses now include safe source metadata, including scanned count, considered count, selected reason, and whether `GITHUB_TOKEN` is configured. Configure `GITHUB_TOKEN` for stronger live demo quality; if live GitHub data is unavailable, ContribScout returns sample fallback honestly instead of pretending it is live.
 
 Proof Vault export is separate from this Hermes skill package. Proof Vault reports are generated locally in the browser as Markdown or JSON and are not sent to Hermes automatically.
 
@@ -35,6 +42,12 @@ For local testing:
 
 ```bash
 python hermes/skills/contribscout/scripts/daily_report.py
+```
+
+For a ContribScout Agent run:
+
+```bash
+python hermes/skills/contribscout-agent/scripts/run_contribscout_agent.py "Find high-leverage OSS contribution opportunities for an AI agent tooling project"
 ```
 
 To use another ContribScout deployment, set `CONTRIBSCOUT_API_URL`.

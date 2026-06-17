@@ -2,7 +2,7 @@
 
 export function SiteHeader() {
   return (
-    <header className="relative z-20 mx-auto w-full max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
+    <header className="relative z-40 mx-auto w-full max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
       <nav className="flex items-center justify-between rounded-md border border-cream/10 bg-cream/[0.045] px-4 py-3 shadow-[0_20px_80px_rgba(0,0,0,0.22)] backdrop-blur">
         <div className="flex items-center gap-3">
           <div className="grid h-10 w-10 place-items-center rounded-md border border-moss/40 bg-moss/10 text-sm font-black text-cream shadow-[0_0_30px_rgba(157,191,154,0.18)]">

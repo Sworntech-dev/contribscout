@@ -3,5 +3,9 @@
 import { Dashboard } from "@/components/dashboard";
 
 export function MissionControlDashboard() {
-  return <Dashboard />;
+  return (
+    <section id="mission-control">
+      <Dashboard />
+    </section>
+  );
 }
