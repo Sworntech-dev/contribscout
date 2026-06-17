@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AgentDemoMode, type ProvisionResponse } from "@/components/agent-demo-mode";
 import { JudgeDemoPackage } from "@/components/judge-demo-package";
@@ -115,7 +116,17 @@ function DesktopSidebar({
           onClick={() => onSelect("agent")}
           className="flex h-11 items-center gap-3 rounded-2xl border border-mint/25 bg-mint/10 px-2.5 text-left text-mint"
         >
-          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-xl bg-mint/15 text-xs font-black">CS</span>
+          <span className="relative grid h-7 w-7 shrink-0 place-items-center overflow-hidden rounded-xl bg-mint/15 text-xs font-black">
+            <span className="text-[9px] text-mint/35">CS</span>
+            <Image
+              src="/brand/contribscout-logo.png"
+              alt="ContribScout"
+              fill
+              sizes="28px"
+              className="object-contain p-1"
+              priority
+            />
+          </span>
           <span className="hidden whitespace-nowrap text-sm font-black group-hover:inline">ContribScout Agent</span>
         </button>
         <div className="mt-3 grid gap-2">

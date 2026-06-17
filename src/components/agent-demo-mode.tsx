@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 import type { AgentRunResult, ProofVaultCandidate } from "@/lib/agent-run-types";
 
@@ -194,21 +195,23 @@ export function AgentDemoMode({
     <section id="agent-console-home" className="scroll-mt-24 space-y-6">
       <div className="relative overflow-hidden px-1 py-5 sm:px-6 lg:px-10">
         <div className="absolute left-1/2 top-6 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-cyan-300/10 blur-3xl" />
-        {/* Future hero visual slot: replace this abstract shell with the 3D hand/agent asset when available. */}
+        {/* Future hero visual slot: this branded helping hand can be replaced with a final 3D glass hand asset later. */}
         <div
           aria-hidden="true"
-          className="future-hero-visual pointer-events-none absolute right-2 top-4 hidden h-56 w-56 overflow-hidden rounded-[2.25rem] border border-cyan-200/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012))] shadow-[0_0_90px_rgba(94,234,212,0.12)] backdrop-blur xl:block"
+          className="future-hero-visual pointer-events-none absolute left-1/2 top-14 z-0 hidden h-[38rem] w-[50rem] -translate-x-[24%] overflow-hidden opacity-30 mix-blend-screen blur-[0.5px] md:block lg:top-4 lg:h-[42rem] lg:w-[56rem] xl:-translate-x-[18%]"
         >
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_60%_24%,rgba(94,234,212,0.25),transparent_28%),radial-gradient(circle_at_34%_76%,rgba(244,181,98,0.12),transparent_30%)]" />
-          <div className="absolute left-1/2 top-[48%] h-32 w-32 -translate-x-1/2 -translate-y-1/2 rounded-full border border-cyan-100/20 bg-black/20 shadow-[inset_0_0_48px_rgba(94,234,212,0.15)]" />
-          <div className="absolute left-[4.6rem] top-[4.6rem] h-20 w-11 rotate-[-18deg] rounded-full border border-cream/14 bg-cream/[0.052]" />
-          <div className="absolute left-[6.2rem] top-[3.6rem] h-24 w-8 rotate-[-6deg] rounded-full border border-cream/14 bg-cream/[0.06]" />
-          <div className="absolute left-[7.4rem] top-[3.8rem] h-24 w-8 rotate-[8deg] rounded-full border border-cream/14 bg-cream/[0.052]" />
-          <div className="absolute bottom-10 left-[4.8rem] h-14 w-28 rotate-[-18deg] rounded-full border border-cream/12 bg-cream/[0.052]" />
-          <div className="absolute bottom-8 right-8 h-14 w-14 rounded-2xl border border-cyan-100/15 bg-cyan-200/8 shadow-[0_0_34px_rgba(94,234,212,0.1)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_56%_44%,rgba(94,234,212,0.22),transparent_42%),radial-gradient(circle_at_34%_62%,rgba(244,181,98,0.12),transparent_34%)]" />
+          <Image
+            src="/brand/hero-helping-hand.png"
+            alt=""
+            fill
+            sizes="(min-width: 1280px) 56rem, (min-width: 768px) 50rem, 0px"
+            className="object-contain [mask-image:radial-gradient(ellipse_at_center,black_42%,rgba(0,0,0,0.72)_58%,transparent_78%)]"
+            priority
+          />
         </div>
 
-        <div className="mx-auto max-w-4xl text-center">
+        <div className="relative z-10 mx-auto max-w-4xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.36em] text-cyan-200/80">Open-source growth agent</p>
           <h2 className="mt-5 text-4xl font-black tracking-tight text-cream sm:text-6xl">
             Hey! What should ContribScout run?
@@ -218,7 +221,7 @@ export function AgentDemoMode({
           </p>
         </div>
 
-        <div className="mx-auto mt-7 grid max-w-3xl gap-2.5 md:grid-cols-3">
+        <div className="relative z-10 mx-auto mt-7 grid max-w-3xl gap-2.5 md:grid-cols-3">
           {GOAL_PRESETS.map((preset) => (
             <button
               key={`agent-preset-${preset.label}`}
@@ -242,7 +245,7 @@ export function AgentDemoMode({
           ))}
         </div>
 
-        <div className="mx-auto mt-5 max-w-3xl rounded-[1.75rem] border border-cyan-100/15 bg-[#06100e]/78 p-3 shadow-[0_24px_90px_rgba(0,0,0,0.24),0_0_58px_rgba(94,234,212,0.07)] backdrop-blur-xl">
+        <div className="relative z-10 mx-auto mt-5 max-w-3xl rounded-[1.75rem] border border-cyan-100/15 bg-[#06100e]/82 p-3 shadow-[0_24px_90px_rgba(0,0,0,0.24),0_0_58px_rgba(94,234,212,0.07)] backdrop-blur-xl">
           <div className="flex gap-3">
             <div className="hidden h-11 w-11 shrink-0 place-items-center rounded-2xl border border-cyan-100/15 bg-cyan-200/8 text-sm font-black text-cyan-100 sm:grid">
               AI
