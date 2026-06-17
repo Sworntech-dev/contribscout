@@ -575,7 +575,7 @@ function SelectedOpportunityPanel({ result }: { result: AgentRunResult }) {
             <Badge>{result.selectedOpportunity.category}</Badge>
             <Badge>{isSample ? "sample" : "github"}</Badge>
             {isSample ? <Badge tone="warm">Sample fallback</Badge> : null}
-            {result.tokenConfigured ? <Badge>Token configured</Badge> : <Badge tone="warm">No token</Badge>}
+            {result.tokenConfigured ? <Badge>GitHub token ready</Badge> : <Badge tone="warm">Sample fallback ready</Badge>}
           </div>
           <p>
             <span className="font-semibold text-white">Why selected:</span>{" "}
@@ -617,7 +617,7 @@ function AgentLoadingState() {
         <div className="h-12 w-12 animate-pulse rounded-md border border-mint/30 bg-mint/10" />
         <div className="space-y-2">
           <p className="font-bold text-white">Running ContribScout Agent...</p>
-          <p className="text-sm text-slate-400">Calling `/api/agent/run`, selecting an opportunity, and building workflow artifacts.</p>
+          <p className="text-sm text-slate-400">Calling `/api/agent/run`, automatically choosing a target, and building workflow artifacts.</p>
         </div>
       </div>
     </div>
@@ -789,8 +789,8 @@ function getSourceStatus(result: AgentRunResult) {
 
   if (!result.tokenConfigured) {
     return {
-      label: "GITHUB_TOKEN is not configured",
-      detail: "The agent is using sample fallback data. Add GITHUB_TOKEN for stronger live demo quality.",
+      label: "GitHub token is not configured",
+      detail: "The agent is using sample fallback data. Add a GitHub token for stronger live demo quality.",
     };
   }
 

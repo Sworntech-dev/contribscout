@@ -4,6 +4,56 @@ ContribScout is a Hermes-ready contributor intelligence dashboard for discoverin
 
 It helps builders find projects where they can become useful before the obvious contribution paths are crowded. ContribScout is a Vercel-ready Next.js dashboard with a GitHub opportunity scanner, an original Role Opportunity Score, suggested contribution actions, a small local Proof Vault, and a Hermes-compatible skill package for daily report formatting.
 
+## Hackathon Demo
+
+ContribScout Agent turns an open-source growth goal into a PR-ready contribution workflow for AI, Web3, and developer-tooling teams.
+
+In the public demo, the flow is:
+
+1. Enter a growth goal in Agent Console.
+2. The browser UI calls `POST /api/agent/run`.
+3. The agent scans GitHub opportunities, or clearly uses sample fallback when live scanning is unavailable.
+4. The agent automatically chooses the strongest contribution target.
+5. ContribScout prepares a contribution brief, PR readiness kit, and Proof Vault candidate.
+6. Optional Stripe test-mode provisioning can create an OSS Growth Workspace checkout when configured.
+7. Judge Package exports integration status, demo narrative, Hermes command, and a judge-ready summary.
+8. The Hermes Skill Layer can run the same workflow separately through the included skill script.
+
+Short product pitch:
+
+> ContribScout Agent helps small AI teams turn open-source discovery into a concrete growth operation: find the right repo, prepare a useful first contribution, track proof, and package the run for review.
+
+Run locally:
+
+```bash
+npm install
+cp .env.example .env.local
+npm run dev
+```
+
+Useful environment variables:
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `GITHUB_TOKEN` | No | Recommended for stronger demos. Enables live GitHub scanning; without it, the app clearly shows sample fallback. |
+| `STRIPE_SECRET_KEY` | No | Optional Stripe test-mode secret key for creating real Checkout Sessions in the provisioning step. Missing keys show an honest not-configured state. |
+| `NEXT_PUBLIC_APP_NAME` | No | Public app name shown in metadata and UI. Defaults to `ContribScout`. |
+
+Agent API endpoints:
+
+- `POST /api/agent/run` turns a growth goal into a structured agent run.
+- `POST /api/ops/provision` creates a Stripe test-mode Checkout Session only when test-mode provisioning is configured.
+
+Hermes skill command:
+
+```bash
+python hermes/skills/contribscout-agent/scripts/run_contribscout_agent.py "Grow visibility for an AI agent tooling project through useful open-source contributions."
+```
+
+Sample 1-3 minute demo script:
+
+> ContribScout Agent starts with a growth goal, not a manual repo search. I enter a goal for an AI tooling team and run the agent. The browser calls the ContribScout Agent API, which scans GitHub when configured, labels fallback honestly when live data is unavailable, and automatically chooses the strongest contribution target. From there it prepares a contribution brief, PR readiness kit, local Proof Vault candidate, and optional Stripe test-mode provisioning step. Finally, Judge Package exports the integration status, Hermes command, and demo summary so the run is easy to evaluate.
+
 ## Why It Exists
 
 Generic `good first issue` lists are useful, but they usually answer only one question: "Where is there an open beginner issue?"
@@ -60,7 +110,6 @@ Each opportunity includes a short recommended action, such as:
 
 - write a beginner setup guide
 - help with a good first issue
-- create a Turkish onboarding note
 - review README clarity
 - open a docs improvement issue
 - contribute a small bugfix

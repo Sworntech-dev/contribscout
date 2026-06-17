@@ -55,7 +55,7 @@ export function JudgeDemoPackage({
       <div className="space-y-6">
         {!compactHeader ? (
         <div className="max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-warm">Section D · Judge-ready packet</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.32em] text-warm">Section D: Judge-ready packet</p>
           <h2 className="mt-3 text-3xl font-black tracking-tight text-cream sm:text-4xl">
             Hackathon Demo Package
           </h2>
@@ -73,19 +73,27 @@ export function JudgeDemoPackage({
           <div className="premium-panel rounded-md p-6 text-center">
             <p className="text-lg font-bold text-white">Run the agent first</p>
             <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-              Use Agent Demo Mode above to call `/api/agent/run`. Once a real run exists, this package will fill in
-              with source status, selected opportunity, Stripe status, Proof Vault status, and exportable judge copy.
+              Run the agent first. Once a real run exists, this package shows source status, the automatically chosen
+              opportunity, provisioning status, local proof status, and exportable judge copy.
             </p>
           </div>
         ) : (
           <div className="space-y-6">
+            <Panel eyebrow="What judges should look at" title="Demo evaluation guide">
+              <p className="text-sm leading-7 text-slate-300">
+                This package shows the real agent run state: GitHub source status, the automatically chosen
+                contribution target, the generated brief and PR kit, local proof readiness, optional Stripe test-mode
+                provisioning, and the Hermes-compatible command that can run the same workflow through the skill layer.
+              </p>
+            </Panel>
+
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
               <StatusCard title="Hermes Skill" status="Available" detail="hermes/skills/contribscout-agent" tone="mint" />
               <StatusCard title="Agent API" status="Available" detail="/api/agent/run" tone="mint" />
               <StatusCard
                 title="GitHub Source"
                 status={agentRun.source === "github" ? "Live GitHub scan" : "Sample fallback"}
-                detail={`tokenConfigured: ${agentRun.tokenConfigured ? "true" : "false"}`}
+                detail={`GitHub token: ${agentRun.tokenConfigured ? "configured" : "not configured"}`}
                 tone={agentRun.source === "github" ? "mint" : "warm"}
               />
               <StatusCard
@@ -236,7 +244,7 @@ function buildTimeline(
       detail:
         agentRun.source === "github"
           ? `Live GitHub scan used. Scanned ${agentRun.scannedCount ?? "n/a"} opportunities.`
-          : `Sample fallback used. tokenConfigured: ${agentRun.tokenConfigured ? "true" : "false"}.`,
+          : `Sample fallback used. GitHub token ${agentRun.tokenConfigured ? "was configured" : "was not configured"}.`,
     },
     {
       title: "Highest-leverage contribution selected",
@@ -276,7 +284,7 @@ function buildJudgeSummary(
     "## Source Status",
     "",
     `- Source: ${agentRun.source === "github" ? "Live GitHub scan" : "Sample fallback"}`,
-    `- tokenConfigured: ${agentRun.tokenConfigured ? "true" : "false"}`,
+    `- GitHub token: ${agentRun.tokenConfigured ? "configured" : "not configured"}`,
     `- Notice: ${agentRun.notice || "n/a"}`,
     `- Scanned: ${agentRun.scannedCount ?? "n/a"}`,
     `- Considered: ${agentRun.consideredCount ?? "n/a"}`,
@@ -337,7 +345,7 @@ function buildDemoScript(
   const sourceLine =
     agentRun.source === "github"
       ? "This run is using live GitHub scanner data."
-      : `This run is clearly marked as sample fallback, with tokenConfigured set to ${agentRun.tokenConfigured ? "true" : "false"}.`;
+      : `This run is clearly marked as sample fallback, with the GitHub token ${agentRun.tokenConfigured ? "configured" : "not configured"}.`;
 
   return [
     "ContribScout Agent turns a business goal into a concrete open-source growth operation. I start by entering a goal for an AI or developer tooling team, then the app calls the real `/api/agent/run` endpoint.",

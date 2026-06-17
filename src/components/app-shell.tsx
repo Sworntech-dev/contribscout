@@ -271,7 +271,7 @@ function HermesSkillView() {
           <p className="mt-2 break-words text-sm font-bold text-white">hermes/skills/contribscout-agent</p>
           <div className="mt-5 space-y-3 text-sm leading-6 text-slate-300">
             <p><span className="text-slate-500">Endpoint:</span> /api/agent/run</p>
-            <p><span className="text-slate-500">Env:</span> CONTRIBSCOUT_API_URL optional</p>
+            <p><span className="text-slate-500">API URL:</span> defaults to the deployed ContribScout app and can be overridden for local testing.</p>
             <p><span className="text-slate-500">Stripe:</span> not required by the skill script</p>
           </div>
         </div>
@@ -294,7 +294,7 @@ function AboutView() {
     ["Contribution brief", "Builds a repo-specific Markdown plan before the builder starts work."],
     ["PR readiness kit", "Creates duplicate guards, branch naming, PR copy, validation notes, and maintainer-safe language."],
     ["Proof Vault", "Prepares and saves local proof candidates without accounts, auth, or a database."],
-    ["Stripe provisioning", "Offers an optional real test-mode checkout step when Stripe is configured, never a fake payment."],
+    ["Stripe provisioning", "Offers an optional real test-mode checkout step when test-mode provisioning is configured, never a fake payment."],
     ["Hermes skill layer", "Includes a Hermes-compatible package that calls the Agent API and formats operational reports."],
     ["Judge package", "Exports a concise demo narrative, integration status, Hermes command, and judge-ready summary."],
   ];
@@ -316,13 +316,14 @@ function AboutView() {
           <p className="mt-4">
             The workflow stays honest and local-first: live GitHub data is preferred when configured, fallback data is
             labeled, proof data stays in the browser, and Stripe/Hermes are optional integration layers rather than a
-            hidden backend.
+            hidden backend. This hackathon prototype demonstrates the agent workflow end to end without adding accounts
+            or a database.
           </p>
         </div>
         <div className="rounded-[1.5rem] border border-cyan-100/10 bg-cyan-100/[0.035] p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100/70">Workflow</p>
           <div className="mt-4 grid gap-2 text-sm text-slate-300">
-            {["Set growth goal", "Run live/source-aware scan", "Select contribution target", "Generate brief + PR kit", "Save proof or export judge package"].map((step, index) => (
+            {["Set growth goal", "Run live/source-aware scan", "Automatically choose contribution target", "Generate brief + PR kit", "Save proof or export judge package"].map((step, index) => (
               <div key={`about-workflow-${step}`} className="flex items-center gap-3 rounded-2xl bg-black/24 px-3 py-2">
                 <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-mint/30 bg-mint/10 text-xs font-black text-mint">
                   {index + 1}
@@ -398,7 +399,7 @@ function JudgeView({
       <ShellIntro
         eyebrow="Judge package"
         title="Judge Package"
-        body="Export the demo narrative, integration status, Hermes command, and submission summary."
+        body="Review what is live, what is local, what is test-mode, and export a concise hackathon submission package."
       />
       <JudgeDemoPackage
         agentRun={agentRun}
