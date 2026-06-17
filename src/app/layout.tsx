@@ -10,6 +10,10 @@ export const metadata: Metadata = {
   title: `${appName} | Contributor Intelligence`,
   description:
     "A Hermes-ready contributor intelligence dashboard for early Web3 and AI opportunities.",
+  icons: {
+    icon: "/icon.png",
+    apple: "/apple-icon.png",
+  },
 };
 
 export default function RootLayout({
