@@ -249,6 +249,7 @@ export function AgentDemoMode({
                 aria-label="Business goal"
                 value={businessGoal}
                 onChange={(event) => setBusinessGoal(event.target.value)}
+                placeholder="Describe your open-source growth goal..."
                 className="min-h-28 w-full resize-y rounded-2xl border border-transparent bg-transparent px-2 py-2 text-base leading-7 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/15"
               />
               <div className="mt-2 flex flex-col gap-2 border-t border-cream/[0.07] pt-3 sm:flex-row sm:items-center">
@@ -258,18 +259,17 @@ export function AgentDemoMode({
                   onChange={(event) => setTeamContext(event.target.value)}
                   className="min-w-0 flex-1 rounded-2xl border border-cream/[0.08] bg-black/20 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-100/25"
                 />
-              <button
-                type="button"
-                onClick={runAgent}
-                disabled={runState === "running"}
+                <button
+                  type="button"
+                  onClick={runAgent}
+                  disabled={runState === "running"}
                   className="rounded-2xl bg-warm px-6 py-3 text-sm font-black text-ink shadow-[0_0_34px_rgba(244,181,98,0.22)] transition hover:bg-cream disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {runState === "running" ? "Running agent..." : "Run Agent"}
-              </button>
+                >
+                  {runState === "running" ? "Running agent..." : "Run Agent"}
+                </button>
               </div>
               <p className="mt-3 text-xs leading-5 text-slate-400">
-                Calls `/api/agent/run`, keeps source status honest, prepares PR workflow artifacts, and leaves
-                provisioning separate until Stripe is configured.
+                Run Agent to scan GitHub, select an opportunity, and generate the contribution workflow.
               </p>
               {runState === "error" ? (
                 <p className="mt-3 rounded-2xl border border-rose/30 bg-rose/10 px-3 py-2 text-sm text-rose">{error}</p>
@@ -278,10 +278,10 @@ export function AgentDemoMode({
           </div>
         </div>
 
-        {runState === "running" ? <AgentLoadingState /> : null}
+        {runState === "running" ? <div className="mx-auto mt-8 max-w-3xl"><AgentLoadingState /></div> : null}
 
         {result ? (
-          <div className="grid gap-8">
+          <div className="mt-12 grid gap-8 border-t border-cream/[0.08] pt-10">
             <section id="agent-run-results" className="scroll-mt-24 space-y-4">
               <SectionHeading
                 eyebrow="Section A"
@@ -289,8 +289,8 @@ export function AgentDemoMode({
                 description="The live run log, selected opportunity, and source status stay together for a clean judge walkthrough."
               />
               <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
-              <ActionLog result={result} />
-              <SelectedOpportunityPanel result={result} />
+                <ActionLog result={result} />
+                <SelectedOpportunityPanel result={result} />
               </div>
             </section>
 
@@ -301,30 +301,30 @@ export function AgentDemoMode({
                 description="Business rationale, contribution brief, and PR readiness kit are grouped as one practical plan."
               />
               <div className="grid gap-5 xl:grid-cols-3">
-              <Panel eyebrow="Business rationale" title="Why this matters">
-                <div className="space-y-3 text-sm leading-6 text-slate-300">
-                  <p>{result.businessRationale.summary}</p>
-                  <p>
-                    <span className="font-semibold text-white">Growth angle:</span>{" "}
-                    {result.businessRationale.growthAngle}
-                  </p>
-                  <p>
-                    <span className="font-semibold text-white">Why now:</span> {result.businessRationale.whyNow}
-                  </p>
-                  <p>
-                    <span className="font-semibold text-white">High leverage:</span>{" "}
-                    {result.businessRationale.highLeverageReason}
-                  </p>
-                  <p>
-                    <span className="font-semibold text-white">Next action:</span>{" "}
-                    {result.businessRationale.immediateNextAction}
-                  </p>
-                  <p>
-                    <span className="font-semibold text-white">Risk to check:</span>{" "}
-                    {result.businessRationale.riskToCheck}
-                  </p>
-                </div>
-              </Panel>
+                <Panel eyebrow="Business rationale" title="Why this matters">
+                  <div className="space-y-3 text-sm leading-6 text-slate-300">
+                    <p>{result.businessRationale.summary}</p>
+                    <p>
+                      <span className="font-semibold text-white">Growth angle:</span>{" "}
+                      {result.businessRationale.growthAngle}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-white">Why now:</span> {result.businessRationale.whyNow}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-white">High leverage:</span>{" "}
+                      {result.businessRationale.highLeverageReason}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-white">Next action:</span>{" "}
+                      {result.businessRationale.immediateNextAction}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-white">Risk to check:</span>{" "}
+                      {result.businessRationale.riskToCheck}
+                    </p>
+                  </div>
+                </Panel>
 
               <Panel eyebrow="Contribution brief" title="Starting plan">
                 <div className="space-y-4">
@@ -468,14 +468,7 @@ export function AgentDemoMode({
               </Panel>
             </div>
           </div>
-        ) : (
-          <div className="premium-panel rounded-md p-6 text-center">
-            <p className="text-lg font-bold text-white">Ready to run a real agent workflow</p>
-            <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-slate-400">
-              Run Agent will call `/api/agent/run`, use the current ContribScout scanner result, and render the returned workflow here.
-            </p>
-          </div>
-        )}
+        ) : null}
       </div>
     </section>
   );
