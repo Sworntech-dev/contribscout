@@ -315,6 +315,10 @@ export function AgentDemoMode({
                   <p className="mt-1 text-xs leading-5 text-slate-500">
                     The web app calls `/api/agent/run`. The Hermes Skill Layer can run the same workflow through the included skill script.
                   </p>
+                  <p className="mt-2 text-xs leading-5 text-slate-500">
+                    ContribScout can make imperfect recommendations. Review the selected repository, issue context, and
+                    duplicate PR risk before opening a real PR.
+                  </p>
                 </div>
               </div>
 

@@ -298,6 +298,40 @@ function AboutView() {
     ["Hermes skill layer", "Includes a Hermes-compatible package that calls the Agent API and formats operational reports."],
     ["Judge package", "Exports a concise demo narrative, integration status, Hermes command, and judge-ready summary."],
   ];
+  const faq = [
+    [
+      "What is ContribScout?",
+      "ContribScout is an open-source growth operations agent that turns a growth goal into a GitHub contribution workflow.",
+    ],
+    [
+      "Is this a generic chatbot?",
+      "No. The Agent Console is a goal-driven workflow runner. It uses the growth goal to scan GitHub, choose a contribution target, and prepare PR-ready artifacts.",
+    ],
+    [
+      "How does the agent choose a repository?",
+      "It ranks available GitHub opportunities using source status, freshness, issue paths, docs/contribution signals, saturation, and goal fit.",
+    ],
+    [
+      "Does the browser UI run Hermes directly?",
+      "No. The browser UI calls the ContribScout Agent API. The included Hermes Skill Layer can run the same workflow separately through the skill script.",
+    ],
+    [
+      "What does Stripe provisioning mean?",
+      "Stripe is used in test mode to demonstrate how an agent workflow can move from recommendation to provisioning/payment for an OSS Growth Workspace.",
+    ],
+    [
+      "Is the payment real?",
+      "In this demo, Stripe runs in test mode. A real product would need live billing, delivery logic, and fulfillment around the workspace.",
+    ],
+    [
+      "Where is proof stored?",
+      "Proof candidates are saved locally in this browser for the prototype.",
+    ],
+    [
+      "Can ContribScout be wrong?",
+      "Yes. It uses GitHub signals and deterministic scoring, so users should review the repository, issue context, and duplicate PR risk before opening a real PR.",
+    ],
+  ];
 
   return (
     <ViewFrame>
@@ -341,6 +375,18 @@ function AboutView() {
             <p className="mt-2 text-sm leading-6 text-slate-400">{body}</p>
           </article>
         ))}
+      </div>
+      <div className="rounded-[1.5rem] border border-cream/10 bg-black/24 p-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100/70">FAQ</p>
+        <h2 className="mt-2 text-xl font-black text-white">Trust and demo boundaries</h2>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          {faq.map(([question, answer]) => (
+            <article key={`about-faq-${question}`} className="rounded-2xl border border-cream/[0.07] bg-white/[0.025] p-4">
+              <h3 className="text-sm font-black text-cream">{question}</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-400">{answer}</p>
+            </article>
+          ))}
+        </div>
       </div>
     </ViewFrame>
   );
