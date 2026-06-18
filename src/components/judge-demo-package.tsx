@@ -7,7 +7,7 @@ import type { ProvisionResponse } from "@/components/agent-demo-mode";
 const HERMES_COMMAND =
   'python hermes/skills/contribscout-agent/scripts/run_contribscout_agent.py "Grow visibility for an AI agent tooling project through useful open-source contributions."';
 const LIVE_APP_URL = "https://contribscout.vercel.app";
-const REPO_URL_PLACEHOLDER = "https://github.com/OWNER/REPO";
+const APP_REPOSITORY_URL = "https://github.com/Sworntech-dev/contribscout";
 
 type CopyState = "idle" | "copied" | "error";
 
@@ -104,8 +104,12 @@ export function JudgeDemoPackage({
               />
               <StatusCard
                 title="Proof Vault"
-                status={proofCandidateSaved ? "Saved" : "Ready to save"}
-                detail={proofCandidateSaved ? "Agent proof candidate saved locally." : "Proof candidate is prepared but not saved."}
+                status={proofCandidateSaved ? "Saved locally" : "Not saved yet"}
+                detail={
+                  proofCandidateSaved
+                    ? "Proof candidate saved locally in this browser."
+                    : "Proof candidate prepared, not saved yet."
+                }
                 tone={proofCandidateSaved ? "mint" : "warm"}
               />
             </div>
@@ -260,7 +264,9 @@ function buildTimeline(
     },
     {
       title: "Stripe provisioning / Proof Vault evidence prepared",
-      detail: `${labelForProvisionStatus(provisioningResult)}. Proof Vault: ${proofCandidateSaved ? "Saved" : "Ready to save"}.`,
+      detail: `${labelForProvisionStatus(provisioningResult)}. Proof Vault: ${
+        proofCandidateSaved ? "Proof candidate saved locally in this browser." : "Proof candidate prepared, not saved yet."
+      }`,
     },
   ];
 }
@@ -322,7 +328,7 @@ function buildJudgeSummary(
     "",
     "## Proof Vault Status",
     "",
-    proofCandidateSaved ? "Proof candidate saved locally." : "Proof candidate prepared and ready to save.",
+    proofCandidateSaved ? "Proof candidate saved locally in this browser." : "Proof candidate prepared, not saved yet.",
     "",
     "## Hermes Skill Command",
     "",
@@ -333,7 +339,7 @@ function buildJudgeSummary(
     "## Links",
     "",
     `- Live app: ${LIVE_APP_URL}`,
-    `- Repository: ${REPO_URL_PLACEHOLDER}`,
+    `- Repository: ${APP_REPOSITORY_URL}`,
   ].join("\n").trim();
 }
 
@@ -351,7 +357,11 @@ function buildDemoScript(
     "ContribScout Agent turns a business goal into a concrete open-source growth operation. I start by entering a goal for an AI or developer tooling team, then the app calls the real `/api/agent/run` endpoint.",
     `${sourceLine} The agent selects ${agentRun.selectedOpportunity.fullName} because ${agentRun.selectedReason || "it ranks highest across score, signals, and business fit."}`,
     `The output is not a generic issue list. It includes the business rationale, high-leverage reason, immediate next action, risk to check, a contribution brief, and a PR readiness kit with duplicate checks and submission copy.`,
-    `For operations, the demo also shows Stripe provisioning honestly: ${labelForProvisionStatus(provisioningResult)}. Proof Vault is ${proofCandidateSaved ? "saved locally" : "prepared and ready to save"}, so evidence can be tracked without auth or a database.`,
+    `For operations, the demo also shows Stripe provisioning honestly: ${labelForProvisionStatus(provisioningResult)}. ${
+      proofCandidateSaved
+        ? "The Proof Vault candidate is saved locally in this browser."
+        : "The Proof Vault candidate is prepared, not saved yet."
+    } Evidence can be tracked without auth or a database.`,
     "Finally, the Hermes-compatible command shows how this workflow can run from the skill layer. The judge summary packages the whole run for review without claiming fake live data or fake provisioning.",
   ].join("\n\n");
 }
