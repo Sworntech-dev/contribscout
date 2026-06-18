@@ -53,7 +53,7 @@ type RunAgentInput = {
   tokenConfigured?: boolean;
 };
 
-type GoalIntent = "ai-tooling" | "web3-devtools" | "devrel" | "general";
+type GoalIntent = "ai-tooling" | "web3-devtools" | "devrel" | "maintenance-security" | "general";
 
 type SelectionBreakdown = {
   baseScore: number;
@@ -75,7 +75,26 @@ type ScoredOpportunity = {
 const AI_TERMS = ["ai", "agent", "llm", "mcp", "model", "automation", "workflow", "developer workflow", "tooling", "sdk"];
 const WEB3_TERMS = ["web3", "wallet", "onchain", "crypto", "defi", "blockchain", "zk", "evm", "solidity", "typescript sdk", "sdk"];
 const DEVREL_TERMS = ["devrel", "docs", "documentation", "readme", "contributing", "examples", "beginner", "onboarding", "community", "proof"];
-const CLOSE_SCORE_DELTA = 10;
+const MAINTENANCE_TERMS = [
+  "maintenance",
+  "security",
+  "config",
+  "configuration",
+  "ci",
+  "github actions",
+  "dependency",
+  "dependencies",
+  "cleanup",
+  "bugfix",
+  "bug",
+  "test",
+  "tests",
+  "troubleshooting",
+  "setup",
+  "reliability",
+];
+const MIN_AGENT_CANDIDATES = 32;
+const CLOSE_SCORE_DELTA = 14;
 
 export function runContribScoutAgent({
   request,
@@ -93,7 +112,7 @@ export function runContribScoutAgent({
   const businessGoal = normalizeText(request.businessGoal, DEFAULT_BUSINESS_GOAL);
   const teamContext = normalizeText(request.teamContext, DEFAULT_TEAM_CONTEXT);
   const maxOpportunities = clampMaxOpportunities(request.maxOpportunities);
-  const considered = opportunities.slice(0, Math.min(opportunities.length, Math.max(maxOpportunities, 12)));
+  const considered = opportunities.slice(0, Math.min(opportunities.length, Math.max(maxOpportunities, MIN_AGENT_CANDIDATES)));
   const ranked = rankOpportunities(considered, businessGoal, teamContext);
   const selectedRank = ranked[0];
   const selected = selectedRank.opportunity;
@@ -199,6 +218,8 @@ function agentSelectionScore(opportunity: Opportunity, businessGoal: string, tea
   const opportunityText = buildOpportunitySearchText(opportunity);
   const intent = detectGoalIntent(goalText);
   const goalFit = goalIntentFit(intent, goalText, opportunity, opportunityText);
+  const intentMismatchPenalty =
+    intent !== "general" && goalFit.score < 18 ? 22 : intent === "maintenance-security" && goalFit.score < 35 ? 14 : 0;
   const baseScore = opportunity.roleOpportunityScore * 0.62;
   const issuePaths =
     Math.min(10, opportunity.openIssues * 0.75) +
@@ -222,7 +243,8 @@ function agentSelectionScore(opportunity: Opportunity, businessGoal: string, tea
     freshness +
     saturation -
     noPathPenalty -
-    issueQualityPenalty;
+    issueQualityPenalty -
+    intentMismatchPenalty;
 
   return {
     baseScore,
@@ -258,6 +280,24 @@ function detectGoalIntent(goalText: string): GoalIntent {
     return "web3-devtools";
   }
 
+  if (
+    [
+      "maintenance",
+      "security",
+      "config",
+      "configuration",
+      "ci",
+      "dependency",
+      "dependencies",
+      "cleanup",
+      "bugfix",
+      "troubleshooting",
+      "reliability",
+    ].some((term) => termInText(term, goalText))
+  ) {
+    return "maintenance-security";
+  }
+
   if (["ai", "agent", "llm", "mcp"].some((term) => termInText(term, goalText))) {
     return "ai-tooling";
   }
@@ -270,6 +310,7 @@ function detectGoalIntent(goalText: string): GoalIntent {
     { intent: "ai-tooling" as const, score: countTermMatches(goalText, AI_TERMS) },
     { intent: "web3-devtools" as const, score: countTermMatches(goalText, WEB3_TERMS) },
     { intent: "devrel" as const, score: countTermMatches(goalText, DEVREL_TERMS) },
+    { intent: "maintenance-security" as const, score: countTermMatches(goalText, MAINTENANCE_TERMS) },
   ].sort((a, b) => b.score - a.score);
 
   if (scores[0].score === 0) return "general";
@@ -309,6 +350,37 @@ function goalIntentFit(intent: GoalIntent, goalText: string, opportunity: Opport
     if (signals.helpWantedCount > 0) matchedTerms.push("help wanted");
 
     return { score: Math.min(86, termScore.score + docsFit), matchedTerms: uniqueTerms(matchedTerms) };
+  }
+  if (intent === "maintenance-security") {
+    const termScore = termFit(MAINTENANCE_TERMS, opportunityText, 10, 58);
+    const signals = opportunity.signals;
+    const maintenanceFit =
+      Math.min(16, opportunity.openIssues * 1.2) +
+      Math.min(14, signals.helpWantedCount * 5 + signals.goodFirstIssueCount * 4) +
+      (signals.hasContributing ? 6 : 0) +
+      (signals.hasDocsFolder ? 4 : 0) +
+      (signals.readmeQuality === "thin" || signals.readmeQuality === "basic" ? 8 : 0) +
+      (termInText("github actions", opportunityText) || termInText("ci", opportunityText) ? 12 : 0) +
+      (termInText("security", opportunityText) ? 12 : 0) +
+      (termInText("dependency", opportunityText) || termInText("dependencies", opportunityText) ? 10 : 0) +
+      (termInText("config", opportunityText) || termInText("configuration", opportunityText) ? 10 : 0) +
+      (termInText("test", opportunityText) || termInText("tests", opportunityText) ? 6 : 0);
+    const genericAiOnlyPenalty =
+      termScore.matchedTerms.length === 0 &&
+      ["ai", "agent", "llm"].some((term) => termInText(term, opportunityText))
+        ? 28
+        : 0;
+    const matchedTerms = [...termScore.matchedTerms];
+
+    if (opportunity.openIssues > 0) matchedTerms.push("open issues");
+    if (signals.helpWantedCount > 0) matchedTerms.push("help wanted");
+    if (signals.hasContributing) matchedTerms.push("contribution rules");
+    if (signals.readmeQuality === "thin" || signals.readmeQuality === "basic") matchedTerms.push("setup docs");
+
+    return {
+      score: Math.max(0, Math.min(82, termScore.score + maintenanceFit - genericAiOnlyPenalty)),
+      matchedTerms: uniqueTerms(matchedTerms),
+    };
   }
 
   return {
@@ -416,6 +488,9 @@ function buildGoalFitReason(scored: ScoredOpportunity, businessGoal: string, tea
   }
   if (breakdown.intent === "devrel") {
     return `It fits the DevRel pipeline goal because the repo has documentation, onboarding, issue, or beginner-friendly contribution angles.${matched}`;
+  }
+  if (breakdown.intent === "maintenance-security") {
+    return `It fits the maintenance/security workflow because the repo has setup, config, CI, dependency, issue, or reliability angles instead of only generic topic overlap.${matched}`;
   }
 
   return `It best matched the requested goal context: ${context}.`;
@@ -685,8 +760,8 @@ function buildMarkdownSummary({
 }
 
 function clampMaxOpportunities(value: number | undefined) {
-  if (typeof value !== "number" || Number.isNaN(value)) return 8;
-  return Math.min(12, Math.max(1, Math.round(value)));
+  if (typeof value !== "number" || Number.isNaN(value)) return MIN_AGENT_CANDIDATES;
+  return Math.min(40, Math.max(1, Math.round(value)));
 }
 
 function normalizeText(value: string | undefined, fallback: string) {

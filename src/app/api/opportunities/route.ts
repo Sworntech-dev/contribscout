@@ -9,6 +9,8 @@ export const revalidate = 0;
 const SEARCH_KEYWORDS = [
   "ai agent",
   "llm agent",
+  "mcp",
+  "automation tooling",
   "web3",
   "crypto",
   "onchain",
@@ -16,11 +18,20 @@ const SEARCH_KEYWORDS = [
   "wallet",
   "zk",
   "developer tools",
+  "developer workflow",
+  "documentation",
+  "devrel",
+  "github actions",
+  "ci",
+  "security",
+  "dependencies",
+  "config",
 ];
 
 const FINAL_RESULT_LIMIT = 12;
-const SEARCH_RESULTS_PER_QUERY = 8;
-const ENRICHMENT_LIMIT = 36;
+const AGENT_RESULT_LIMIT = 40;
+const SEARCH_RESULTS_PER_QUERY = 10;
+const ENRICHMENT_LIMIT = 72;
 const MIN_LIVE_RESULTS = 3;
 const GITHUB_CACHE_TTL_MS = 10 * 60 * 1000;
 const GITHUB_REQUEST_TIMEOUT_MS = 8000;
@@ -432,7 +443,7 @@ function normalizeRepository(item: GitHubSearchItem, signals: RepositorySignals)
   };
 }
 
-async function fetchLiveOpportunities(): Promise<{ opportunities: Opportunity[]; notice?: string }> {
+async function fetchLiveOpportunities(resultLimit = FINAL_RESULT_LIMIT): Promise<{ opportunities: Opportunity[]; notice?: string }> {
   if (!token) {
     throw new Error("GITHUB_TOKEN is not configured.");
   }
@@ -501,13 +512,13 @@ async function fetchLiveOpportunities(): Promise<{ opportunities: Opportunity[];
     .filter((repo) => isQualityLiveRepository(repo) && isRelevantRepository(repo))
     .map(scoreOpportunity)
     .sort((a, b) => liveRankingScore(b) - liveRankingScore(a))
-    .slice(0, FINAL_RESULT_LIMIT);
+    .slice(0, resultLimit);
 
   if (strictOpportunities.length >= MIN_LIVE_RESULTS) {
     return {
       opportunities: strictOpportunities,
       notice:
-        strictOpportunities.length < FINAL_RESULT_LIMIT
+        strictOpportunities.length < resultLimit
           ? "GitHub live scan returned limited matches."
           : undefined,
     };
@@ -517,7 +528,7 @@ async function fetchLiveOpportunities(): Promise<{ opportunities: Opportunity[];
     .filter((repo) => isUsableLiveRepository(repo) && (isQualityLiveRepository(repo) || isRelevantRepository(repo)))
     .map(scoreOpportunity)
     .sort((a, b) => liveRankingScore(b) - liveRankingScore(a))
-    .slice(0, FINAL_RESULT_LIMIT);
+    .slice(0, resultLimit);
 
   if (relaxedOpportunities.length >= MIN_LIVE_RESULTS) {
     return {
@@ -530,7 +541,7 @@ async function fetchLiveOpportunities(): Promise<{ opportunities: Opportunity[];
     .filter(isUsableLiveRepository)
     .map(scoreOpportunity)
     .sort((a, b) => liveRankingScore(b) - liveRankingScore(a))
-    .slice(0, FINAL_RESULT_LIMIT);
+    .slice(0, resultLimit);
 
   return {
     opportunities: minimalOpportunities,
@@ -555,18 +566,24 @@ function githubJsonResponse(payload: GitHubApiPayload) {
   });
 }
 
-function sampleJsonResponse(notice: string) {
+function samplePayload(notice: string) {
   const opportunities = sampleRepositories
     .map(scoreOpportunity)
     .sort((a, b) => b.roleOpportunityScore - a.roleOpportunityScore);
 
+  return {
+    source: "sample" as const,
+    updatedAt: new Date().toISOString(),
+    notice,
+    opportunities,
+  };
+}
+
+function sampleJsonResponse(notice: string) {
+  const payload = samplePayload(notice);
+
   return NextResponse.json(
-    {
-      source: "sample",
-      updatedAt: new Date().toISOString(),
-      notice,
-      opportunities,
-    },
+    payload,
     {
       headers: {
         "Cache-Control": "no-store, no-cache, must-revalidate",
@@ -575,17 +592,26 @@ function sampleJsonResponse(notice: string) {
   );
 }
 
-export async function GET() {
+export async function getOpportunityPayload({
+  resultLimit = FINAL_RESULT_LIMIT,
+}: {
+  resultLimit?: number;
+} = {}) {
+  const safeLimit = Math.min(AGENT_RESULT_LIMIT, Math.max(1, Math.round(resultLimit)));
+
   if (!token) {
-    return sampleJsonResponse("GITHUB_TOKEN is not configured.");
+    return samplePayload("GITHUB_TOKEN is not configured.");
   }
 
   if (isFreshGithubCache() && githubSuccessCache) {
-    return githubJsonResponse(githubSuccessCache);
+    return {
+      ...githubSuccessCache,
+      opportunities: githubSuccessCache.opportunities.slice(0, safeLimit),
+    };
   }
 
   try {
-    const { opportunities, notice } = await fetchLiveOpportunities();
+    const { opportunities, notice } = await fetchLiveOpportunities(AGENT_RESULT_LIMIT);
     const payload: GitHubApiPayload = {
       source: "github",
       updatedAt: new Date().toISOString(),
@@ -594,15 +620,30 @@ export async function GET() {
     };
 
     githubSuccessCache = payload;
-    return githubJsonResponse(payload);
+
+    return {
+      ...payload,
+      opportunities: payload.opportunities.slice(0, safeLimit),
+    };
   } catch (error) {
     if (githubSuccessCache) {
-      return githubJsonResponse({
+      return {
         ...githubSuccessCache,
         notice: "Showing cached GitHub results after a temporary GitHub API issue.",
-      });
+        opportunities: githubSuccessCache.opportunities.slice(0, safeLimit),
+      };
     }
 
-    return sampleJsonResponse(error instanceof Error ? error.message : "Using sample opportunities.");
+    return samplePayload(error instanceof Error ? error.message : "Using sample opportunities.");
   }
+}
+
+export async function GET() {
+  const payload = await getOpportunityPayload({ resultLimit: FINAL_RESULT_LIMIT });
+
+  if (payload.source === "sample") {
+    return sampleJsonResponse(payload.notice ?? "Using sample opportunities.");
+  }
+
+  return githubJsonResponse(payload);
 }

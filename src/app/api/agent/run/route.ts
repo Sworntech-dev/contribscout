@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { GET as getOpportunities } from "@/app/api/opportunities/route";
+import { getOpportunityPayload } from "@/app/api/opportunities/route";
 import type { AgentOpportunityPayload, AgentRunRequest } from "@/lib/agent-run-types";
 import { runContribScoutAgent } from "@/lib/contribscout-agent";
 
@@ -35,8 +35,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const opportunitiesResponse = await getOpportunities();
-    const payload = (await opportunitiesResponse.json()) as AgentOpportunityPayload;
+    const payload = (await getOpportunityPayload({ resultLimit: 40 })) as AgentOpportunityPayload;
 
     if (!payload.opportunities?.length) {
       return NextResponse.json(
@@ -97,6 +96,17 @@ function isMeaningfulGrowthGoal(goal: string) {
     "agent",
     "llm",
     "tooling",
+    "maintenance",
+    "security",
+    "config",
+    "configuration",
+    "ci",
+    "dependency",
+    "dependencies",
+    "cleanup",
+    "bugfix",
+    "troubleshooting",
+    "reliability",
     "onboarding",
     "proof",
     "workflow",

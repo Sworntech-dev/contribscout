@@ -611,13 +611,50 @@ function SelectedOpportunityPanel({ result }: { result: AgentRunResult }) {
 }
 
 function AgentLoadingState() {
+  const steps = [
+    "Scanning GitHub opportunities",
+    "Ranking candidates against your goal",
+    "Preparing contribution workflow",
+  ];
+
   return (
-    <div className="premium-panel rounded-md p-5">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="h-12 w-12 animate-pulse rounded-md border border-mint/30 bg-mint/10" />
-        <div className="space-y-2">
-          <p className="font-bold text-white">Running ContribScout Agent...</p>
-          <p className="text-sm text-slate-400">Calling `/api/agent/run`, automatically choosing a target, and building workflow artifacts.</p>
+    <div className="premium-panel overflow-hidden rounded-3xl border-cyan-100/15 p-5 shadow-[0_20px_70px_rgba(0,0,0,0.24),0_0_44px_rgba(94,234,212,0.08)]">
+      <div className="flex flex-col gap-5">
+        <div className="flex items-start gap-4">
+          <div className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-2xl border border-cyan-100/20 bg-cyan-200/10">
+            <div className="absolute inset-0 animate-pulse bg-cyan-100/10" />
+            <div className="relative h-4 w-4 rounded-full bg-cyan-100 shadow-[0_0_24px_rgba(103,232,249,0.75)]" />
+          </div>
+          <div className="min-w-0 space-y-2">
+            <p className="font-bold text-white">Running ContribScout Agent...</p>
+            <p className="text-sm leading-6 text-slate-400">
+              Calling `/api/agent/run`, scanning a broader candidate pool, and building deterministic workflow artifacts.
+            </p>
+          </div>
+        </div>
+
+        <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+          <div className="h-full w-2/3 animate-pulse rounded-full bg-gradient-to-r from-cyan-200/20 via-cyan-100 to-warm/80 shadow-[0_0_22px_rgba(103,232,249,0.35)]" />
+        </div>
+
+        <div className="grid gap-2.5 sm:grid-cols-3">
+          {steps.map((step, index) => (
+            <div key={`agent-loading-step-${index}-${step}`} className="rounded-2xl border border-cream/[0.07] bg-white/[0.025] p-3">
+              <div className="flex items-center gap-2">
+                <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-mint/25 bg-mint/10 text-[10px] font-black text-mint">
+                  {index + 1}
+                </span>
+                <p className="text-xs font-bold text-slate-200">{step}</p>
+              </div>
+              <div className="mt-3 h-1 overflow-hidden rounded-full bg-black/30">
+                <div
+                  className={`h-full rounded-full bg-cyan-100/60 ${
+                    index === 0 ? "w-4/5" : index === 1 ? "w-3/5" : "w-2/5"
+                  } animate-pulse`}
+                />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
