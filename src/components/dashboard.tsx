@@ -314,7 +314,21 @@ export function Dashboard() {
           ) : filteredOpportunities.length === 0 ? (
             <EmptyFilteredState onClear={clearFilters} />
           ) : (
-            <div className="grid min-w-0 gap-4 lg:grid-cols-2">
+            <>
+            <div className="grid min-w-0 gap-3 md:hidden">
+              {filteredOpportunities.map((opportunity) => (
+                <MobileOpportunityCard
+                  key={`mobile-opportunity-${opportunity.fullName}`}
+                  opportunity={opportunity}
+                  isSampleFallback={isSampleFallback}
+                  isInWatchlist={isInWatchlist(opportunity)}
+                  onSaveToWatchlist={saveToWatchlist}
+                  onCreateBrief={createBriefFromOpportunity}
+                  onCreatePrKit={createPrKitFromOpportunity}
+                />
+              ))}
+            </div>
+            <div className="hidden min-w-0 gap-4 md:grid lg:grid-cols-2">
               {filteredOpportunities.map((opportunity) => (
                 <div key={opportunity.fullName} className="min-w-0">
                   <OpportunityCard
@@ -328,6 +342,7 @@ export function Dashboard() {
                 </div>
               ))}
             </div>
+            </>
           )}
         </Reveal>
 
@@ -415,7 +430,12 @@ function SectionHeader({ kicker, title, body }: { kicker: string; title: string;
 
 function LoadingOpportunities() {
   return (
-    <div className="grid gap-4 lg:grid-cols-2">
+    <>
+    <div className="rounded-md border border-white/10 bg-panel/75 p-4 text-sm text-slate-300 md:hidden">
+      <p className="font-semibold text-white">Running live GitHub scan...</p>
+      <p className="mt-2 leading-6 text-slate-400">Loading ranked contribution targets.</p>
+    </div>
+    <div className="hidden gap-4 md:grid lg:grid-cols-2">
       {["scan-a", "scan-b", "scan-c", "scan-d"].map((item) => (
         <div key={item} className="rounded-md border border-white/10 bg-panel/75 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.16)]">
           <div className="flex items-center justify-between gap-4">
@@ -437,16 +457,17 @@ function LoadingOpportunities() {
         </div>
       ))}
     </div>
+    </>
   );
 }
 
 function EmptyOpportunitiesState() {
   return (
-    <div className="grid min-h-72 place-items-center rounded-md border border-cream/10 bg-cream/[0.045] p-5 text-center">
+    <div className="grid place-items-center rounded-md border border-cream/10 bg-cream/[0.045] p-5 text-center md:min-h-72">
       <div>
-        <p className="text-lg font-bold text-cream">No opportunities loaded yet</p>
+        <p className="text-lg font-bold text-cream">No opportunities available yet</p>
         <p className="mt-2 max-w-md text-sm leading-6 text-cream/58">
-          The scanner did not return projects for this view. If GitHub is temporarily unavailable, sample fallback will keep the cockpit usable.
+          Run a scan or adjust filters.
         </p>
       </div>
     </div>
@@ -455,7 +476,7 @@ function EmptyOpportunitiesState() {
 
 function EmptyFilteredState({ onClear }: { onClear: () => void }) {
   return (
-    <div className="grid min-h-72 place-items-center rounded-md border border-cream/10 bg-cream/[0.045] p-5 text-center">
+    <div className="grid place-items-center rounded-md border border-cream/10 bg-cream/[0.045] p-5 text-center md:min-h-72">
       <div>
         <p className="text-lg font-bold text-cream">No opportunities match these filters</p>
         <p className="mt-2 max-w-md text-sm leading-6 text-cream/58">
@@ -470,6 +491,108 @@ function EmptyFilteredState({ onClear }: { onClear: () => void }) {
         </button>
       </div>
     </div>
+  );
+}
+
+function MobileOpportunityCard({
+  opportunity,
+  isSampleFallback,
+  isInWatchlist,
+  onSaveToWatchlist,
+  onCreateBrief,
+  onCreatePrKit,
+}: {
+  opportunity: Opportunity;
+  isSampleFallback: boolean;
+  isInWatchlist: boolean;
+  onSaveToWatchlist: (opportunity: Opportunity) => void;
+  onCreateBrief: (opportunity: Opportunity) => void;
+  onCreatePrKit: (opportunity: Opportunity) => void;
+}) {
+  const showRepoLink = !isSampleFallback && isGithubRepoUrl(opportunity.url);
+  const signals = [
+    `${opportunity.openIssues.toLocaleString()} issues`,
+    opportunity.signals.goodFirstIssueCount > 0 ? `${opportunity.signals.goodFirstIssueCount} good first` : null,
+    opportunity.signals.helpWantedCount > 0 ? `${opportunity.signals.helpWantedCount} help wanted` : null,
+    opportunity.signals.hasContributing ? "CONTRIBUTING" : null,
+  ].filter(Boolean);
+
+  return (
+    <article className="w-full min-w-0 overflow-hidden rounded-2xl border border-cream/10 bg-cream/[0.045] p-4 shadow-[0_18px_50px_rgba(0,0,0,0.18)]">
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex min-w-0 flex-wrap gap-2">
+            <span className="max-w-full break-words rounded-md border border-moss/25 bg-moss/10 px-2 py-1 text-[11px] font-semibold capitalize text-moss">
+              {opportunity.category}
+            </span>
+            <span className="rounded-md border border-cream/10 bg-cream/[0.055] px-2 py-1 text-[11px] font-semibold text-cream/70">
+              {isSampleFallback ? "Sample" : "GitHub"}
+            </span>
+          </div>
+          <h3 className="mt-3 break-words text-lg font-black text-cream">{opportunity.name}</h3>
+          <p className="mt-2 line-clamp-2 text-sm leading-6 text-cream/62">{opportunity.description}</p>
+        </div>
+        <div className="shrink-0 rounded-xl border border-warm/35 bg-warm/10 px-3 py-2 text-center">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-warm">Score</p>
+          <p className="text-2xl font-black text-cream">{opportunity.roleOpportunityScore}</p>
+        </div>
+      </div>
+
+      <div className="mt-3 flex min-w-0 flex-wrap gap-2">
+        {signals.slice(0, 4).map((signal) => (
+          <span
+            key={`${opportunity.fullName}-mobile-signal-${signal}`}
+            className="max-w-full break-words rounded-md bg-black/18 px-2 py-1 text-xs text-cream/68"
+          >
+            {signal}
+          </span>
+        ))}
+      </div>
+
+      <div className="mt-4 border-t border-white/10 pt-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cream/42">Suggested action</p>
+        <p className="mt-2 line-clamp-2 text-sm leading-6 text-cream">{opportunity.suggestedAction}</p>
+      </div>
+
+      <div className="mt-4 flex min-w-0 flex-wrap gap-2">
+        {showRepoLink ? (
+          <a
+            href={opportunity.url}
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-md border border-cream/10 bg-cream/[0.07] px-3 py-2 text-sm font-semibold text-cream"
+          >
+            Open repo
+          </a>
+        ) : (
+          <span className="rounded-md border border-cream/10 bg-cream/[0.04] px-3 py-2 text-sm font-semibold text-cream/50">
+            Sample project
+          </span>
+        )}
+        <button
+          type="button"
+          onClick={() => onSaveToWatchlist(opportunity)}
+          disabled={isInWatchlist}
+          className="rounded-md border border-cream/10 bg-cream/[0.045] px-3 py-2 text-sm font-semibold text-cream/78 disabled:border-moss/25 disabled:bg-moss/10 disabled:text-moss"
+        >
+          {isInWatchlist ? "Saved" : "Save"}
+        </button>
+        <button
+          type="button"
+          onClick={() => onCreateBrief(opportunity)}
+          className="rounded-md border border-cream/10 bg-cream/[0.045] px-3 py-2 text-sm font-semibold text-cream/78"
+        >
+          Brief
+        </button>
+        <button
+          type="button"
+          onClick={() => onCreatePrKit(opportunity)}
+          className="rounded-md border border-warm/25 bg-warm/10 px-3 py-2 text-sm font-semibold text-cream"
+        >
+          PR Kit
+        </button>
+      </div>
+    </article>
   );
 }
 

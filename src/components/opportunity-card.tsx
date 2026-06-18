@@ -105,7 +105,7 @@ export function OpportunityCard({
                 href={opportunity.url}
                 target="_blank"
                 rel="noreferrer"
-              className="premium-action inline-flex max-w-full rounded-md border border-cream/10 bg-cream/[0.07] px-3 py-2 text-sm font-semibold text-cream transition hover:border-moss/50 hover:bg-moss/10"
+                className="premium-action inline-flex max-w-full rounded-md border border-cream/10 bg-cream/[0.07] px-3 py-2 text-sm font-semibold text-cream transition hover:border-moss/50 hover:bg-moss/10"
               >
                 Open repository
               </a>
