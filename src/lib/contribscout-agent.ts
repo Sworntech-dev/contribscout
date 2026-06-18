@@ -53,6 +53,29 @@ type RunAgentInput = {
   tokenConfigured?: boolean;
 };
 
+type GoalIntent = "ai-tooling" | "web3-devtools" | "devrel" | "general";
+
+type SelectionBreakdown = {
+  baseScore: number;
+  freshness: number;
+  issuePaths: number;
+  docsOpportunity: number;
+  saturation: number;
+  goalFit: number;
+  total: number;
+  intent: GoalIntent;
+  matchedTerms: string[];
+};
+
+type ScoredOpportunity = {
+  opportunity: Opportunity;
+  breakdown: SelectionBreakdown;
+};
+
+const AI_TERMS = ["ai", "agent", "llm", "mcp", "model", "automation", "workflow", "developer workflow", "tooling", "sdk"];
+const WEB3_TERMS = ["web3", "wallet", "onchain", "crypto", "defi", "blockchain", "zk", "evm", "solidity", "typescript sdk", "sdk"];
+const DEVREL_TERMS = ["devrel", "docs", "documentation", "readme", "contributing", "examples", "beginner", "onboarding", "community", "proof"];
+
 export function runContribScoutAgent({
   request,
   opportunities,
@@ -69,10 +92,11 @@ export function runContribScoutAgent({
   const businessGoal = normalizeText(request.businessGoal, DEFAULT_BUSINESS_GOAL);
   const teamContext = normalizeText(request.teamContext, DEFAULT_TEAM_CONTEXT);
   const maxOpportunities = clampMaxOpportunities(request.maxOpportunities);
-  const considered = opportunities.slice(0, Math.max(maxOpportunities, 1));
+  const considered = opportunities.slice(0, Math.min(opportunities.length, Math.max(maxOpportunities, 12)));
   const ranked = rankOpportunities(considered, businessGoal, teamContext);
-  const selected = ranked[0];
-  const selectedReason = buildSelectedReason(selected, businessGoal, teamContext);
+  const selectedRank = ranked[0];
+  const selected = selectedRank.opportunity;
+  const selectedReason = buildSelectedReason(selectedRank, businessGoal, teamContext);
   const target = toContributionBriefTarget(selected, source);
   const contributionBriefMarkdown = buildContributionBriefMarkdown(target);
   const prKitMarkdown = buildPrReadinessKitMarkdown(target);
@@ -80,7 +104,7 @@ export function runContribScoutAgent({
   const developerUpdateMessage = buildDeveloperUpdateMessage(target);
   const completedAt = new Date().toISOString();
   const selectedOpportunity = toSelectedOpportunity(selected);
-  const businessRationale = buildBusinessRationale(selected, businessGoal, teamContext);
+  const businessRationale = buildBusinessRationale(selected, businessGoal, teamContext, selectedRank);
   const proofVaultCandidate = buildProofVaultCandidate(selected, completedAt);
   const opsRecommendation = buildOpsRecommendation(selected, teamContext);
   const steps = buildSteps(selected, completedAt, source);
@@ -139,13 +163,19 @@ export function runContribScoutAgent({
 }
 
 function rankOpportunities(opportunities: Opportunity[], businessGoal: string, teamContext: string) {
-  return [...opportunities].sort((a, b) => {
-    const scoreDifference =
-      agentSelectionScore(b, businessGoal, teamContext) - agentSelectionScore(a, businessGoal, teamContext);
+  const scored = opportunities.map((opportunity) => ({
+    opportunity,
+    breakdown: agentSelectionScore(opportunity, businessGoal, teamContext),
+  }));
+
+  return scored.sort((a, b) => {
+    const scoreDifference = b.breakdown.total - a.breakdown.total;
 
     if (scoreDifference !== 0) return scoreDifference;
-    if (b.roleOpportunityScore !== a.roleOpportunityScore) return b.roleOpportunityScore - a.roleOpportunityScore;
-    return a.fullName.localeCompare(b.fullName);
+    if (b.opportunity.roleOpportunityScore !== a.opportunity.roleOpportunityScore) {
+      return b.opportunity.roleOpportunityScore - a.opportunity.roleOpportunityScore;
+    }
+    return a.opportunity.fullName.localeCompare(b.opportunity.fullName);
   });
 }
 
@@ -157,44 +187,116 @@ function agentSelectionScore(opportunity: Opportunity, businessGoal: string, tea
     signals.helpWantedCount > 0 ||
     signals.hasContributing;
   const goalText = `${businessGoal} ${teamContext}`.toLowerCase();
-  const opportunityText = [
+  const opportunityText = buildOpportunitySearchText(opportunity);
+  const intent = detectGoalIntent(goalText);
+  const goalFit = goalIntentFit(intent, goalText, opportunity, opportunityText);
+  const baseScore = opportunity.roleOpportunityScore * 0.62;
+  const issuePaths =
+    Math.min(10, opportunity.openIssues * 0.75) +
+    Math.min(18, signals.goodFirstIssueCount * 7) +
+    Math.min(14, signals.helpWantedCount * 5) +
+    (signals.hasContributing ? 4 : 0);
+  const docsOpportunity =
+    (signals.readmeQuality === "thin" ? 12 : signals.readmeQuality === "basic" ? 8 : 0) +
+    (!signals.hasDocsFolder ? 10 : signals.hasDocsFolder ? 2 : 0) +
+    (!signals.hasContributing ? 8 : 0);
+  const freshness = signals.isFresh ? 12 : 0;
+  const saturation = opportunity.stars < 250 ? 12 : opportunity.stars < 1000 ? 7 : opportunity.stars < 3000 ? 2 : -8;
+  const noPathPenalty = hasContributionPath ? 0 : 20;
+  const issueQualityPenalty =
+    opportunity.openIssues === 0 && signals.goodFirstIssueCount === 0 && signals.helpWantedCount === 0 ? 14 : 0;
+  const total =
+    baseScore +
+    goalFit.score +
+    issuePaths +
+    docsOpportunity +
+    freshness +
+    saturation -
+    noPathPenalty -
+    issueQualityPenalty;
+
+  return {
+    baseScore,
+    freshness,
+    issuePaths,
+    docsOpportunity,
+    saturation,
+    goalFit: goalFit.score,
+    total,
+    intent,
+    matchedTerms: goalFit.matchedTerms,
+  };
+}
+
+function buildOpportunitySearchText(opportunity: Opportunity) {
+  return [
     opportunity.name,
     opportunity.fullName,
     opportunity.description,
     opportunity.category,
     opportunity.language ?? "",
+    opportunity.suggestedAction,
+    opportunity.scoreReason,
+    ...opportunity.signalBadges,
     ...opportunity.topics,
   ]
     .join(" ")
     .toLowerCase();
-  const goalFit = goalKeywordScore(goalText, opportunityText);
-  const categoryFit = categoryMatchScore(goalText, opportunity);
-  const pathScore =
-    Math.min(12, opportunity.openIssues) +
-    Math.min(18, signals.goodFirstIssueCount * 6) +
-    Math.min(14, signals.helpWantedCount * 5) +
-    (signals.hasContributing ? 5 : 0);
-  const documentationScore =
-    (signals.readmeQuality === "thin" ? 10 : signals.readmeQuality === "basic" ? 7 : 0) +
-    (!signals.hasDocsFolder ? 8 : signals.hasDocsFolder ? 3 : 0) +
-    (!signals.hasContributing ? 7 : 0);
-  const freshnessScore = signals.isFresh ? 10 : 0;
-  const saturationScore = opportunity.stars < 250 ? 10 : opportunity.stars < 1000 ? 6 : opportunity.stars < 3000 ? 2 : -6;
-  const noPathPenalty = hasContributionPath ? 0 : 18;
-  const issueQualityPenalty =
-    opportunity.openIssues === 0 && signals.goodFirstIssueCount === 0 && signals.helpWantedCount === 0 ? 12 : 0;
+}
 
-  return (
-    opportunity.roleOpportunityScore +
-    goalFit +
-    categoryFit +
-    pathScore +
-    documentationScore +
-    freshnessScore +
-    saturationScore -
-    noPathPenalty -
-    issueQualityPenalty
-  );
+function detectGoalIntent(goalText: string): GoalIntent {
+  if (["web3", "onchain", "wallet", "crypto", "defi", "blockchain", "zk"].some((term) => termInText(term, goalText))) {
+    return "web3-devtools";
+  }
+
+  if (["ai", "agent", "llm", "mcp"].some((term) => termInText(term, goalText))) {
+    return "ai-tooling";
+  }
+
+  if (["devrel", "docs", "documentation", "examples", "readme", "community"].some((term) => termInText(term, goalText))) {
+    return "devrel";
+  }
+
+  const scores = [
+    { intent: "ai-tooling" as const, score: countTermMatches(goalText, AI_TERMS) },
+    { intent: "web3-devtools" as const, score: countTermMatches(goalText, WEB3_TERMS) },
+    { intent: "devrel" as const, score: countTermMatches(goalText, DEVREL_TERMS) },
+  ].sort((a, b) => b.score - a.score);
+
+  if (scores[0].score === 0) return "general";
+  return scores[0].intent;
+}
+
+function goalIntentFit(intent: GoalIntent, goalText: string, opportunity: Opportunity, opportunityText: string) {
+  if (intent === "ai-tooling") return termFit(AI_TERMS, opportunityText, 9, 54);
+  if (intent === "web3-devtools") {
+    const base = termFit(WEB3_TERMS, opportunityText, 9, 54);
+    const tsSdkBoost = termInText("typescript", opportunityText) || termInText("sdk", opportunityText) ? 6 : 0;
+    return { score: Math.min(60, base.score + tsSdkBoost), matchedTerms: base.matchedTerms };
+  }
+  if (intent === "devrel") {
+    const termScore = termFit(DEVREL_TERMS, opportunityText, 6, 28);
+    const signals = opportunity.signals;
+    const docsFit =
+      (signals.readmeQuality === "thin" ? 12 : signals.readmeQuality === "basic" ? 8 : 0) +
+      (!signals.hasDocsFolder ? 10 : 0) +
+      (!signals.hasContributing ? 10 : 0) +
+      Math.min(12, signals.goodFirstIssueCount * 5 + signals.helpWantedCount * 4) +
+      (opportunity.openIssues > 0 ? 5 : 0);
+    const matchedTerms = [...termScore.matchedTerms];
+
+    if (!signals.hasDocsFolder) matchedTerms.push("docs gap");
+    if (!signals.hasContributing) matchedTerms.push("contribution guide gap");
+    if (signals.goodFirstIssueCount > 0) matchedTerms.push("good first issues");
+    if (signals.helpWantedCount > 0) matchedTerms.push("help wanted");
+
+    return { score: Math.min(62, termScore.score + docsFit), matchedTerms: uniqueTerms(matchedTerms) };
+  }
+
+  return {
+    score: Math.min(30, goalKeywordScore(goalText, opportunityText) + categoryMatchScore(goalText, opportunity)),
+    matchedTerms: [],
+  };
 }
 
 function goalKeywordScore(goalText: string, opportunityText: string) {
@@ -217,8 +319,8 @@ function goalKeywordScore(goalText: string, opportunityText: string) {
   ];
 
   return goalTerms.reduce((score, term) => {
-    const goalHasTerm = goalText.includes(term);
-    const opportunityHasTerm = opportunityText.includes(term);
+    const goalHasTerm = termInText(term, goalText);
+    const opportunityHasTerm = termInText(term, opportunityText);
     return score + (goalHasTerm && opportunityHasTerm ? 5 : opportunityHasTerm ? 1 : 0);
   }, 0);
 }
@@ -233,13 +335,36 @@ function categoryMatchScore(goalText: string, opportunity: Opportunity) {
   ];
 
   return groups.reduce((score, group) => {
-    const goalHit = group.some((term) => goalText.includes(term));
-    const repoHit = group.some((term) => categoryText.includes(term));
+    const goalHit = group.some((term) => termInText(term, goalText));
+    const repoHit = group.some((term) => termInText(term, categoryText));
     return score + (goalHit && repoHit ? 8 : 0);
   }, 0);
 }
 
-function buildSelectedReason(opportunity: Opportunity, businessGoal: string, teamContext: string) {
+function termFit(terms: string[], text: string, pointsPerTerm: number, maxScore: number) {
+  const matchedTerms = terms.filter((term) => termInText(term, text));
+  return {
+    score: Math.min(maxScore, matchedTerms.length * pointsPerTerm),
+    matchedTerms,
+  };
+}
+
+function countTermMatches(text: string, terms: string[]) {
+  return terms.filter((term) => termInText(term, text)).length;
+}
+
+function termInText(term: string, text: string) {
+  if (term.includes(" ")) return text.includes(term);
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, "i").test(text);
+}
+
+function uniqueTerms(terms: string[]) {
+  return Array.from(new Set(terms)).slice(0, 6);
+}
+
+function buildSelectedReason(scored: ScoredOpportunity, businessGoal: string, teamContext: string) {
+  const opportunity = scored.opportunity;
   const signals = opportunity.signals;
   const reasons = [
     `${opportunity.roleOpportunityScore}/100 Role Opportunity Score`,
@@ -255,22 +380,34 @@ function buildSelectedReason(opportunity: Opportunity, businessGoal: string, tea
   if (!signals.hasContributing) reasons.push("missing CONTRIBUTING guide creates a clear onboarding gap");
   if (opportunity.stars < 1000) reasons.push("lower saturation gives a small team room to stand out");
 
-  const goalFit = goalKeywordScore(
-    `${businessGoal} ${teamContext}`.toLowerCase(),
-    [opportunity.name, opportunity.fullName, opportunity.description, opportunity.category, ...opportunity.topics]
-      .join(" ")
-      .toLowerCase(),
-  );
+  const goalReason = buildGoalFitReason(scored, businessGoal, teamContext);
 
-  if (goalFit >= 10) reasons.push("repo language/category aligns with the business goal");
+  return `Selected ${opportunity.fullName} because it combines ${joinHumanList(reasons.slice(0, 4))}. ${goalReason}`;
+}
 
-  return `Selected ${opportunity.fullName} because it combines ${joinHumanList(reasons.slice(0, 5))}.`;
+function buildGoalFitReason(scored: ScoredOpportunity, businessGoal: string, teamContext: string) {
+  const { breakdown } = scored;
+  const matched = breakdown.matchedTerms.length ? ` Signals matched: ${joinHumanList(breakdown.matchedTerms.slice(0, 4))}.` : "";
+  const context = `${businessGoal} ${teamContext}`;
+
+  if (breakdown.intent === "ai-tooling") {
+    return `It fits the AI/tooling growth goal by matching agent, LLM, automation, or developer-workflow intent.${matched}`;
+  }
+  if (breakdown.intent === "web3-devtools") {
+    return `It fits the Web3 developer-tools goal by matching onchain, wallet, crypto, SDK, or infrastructure intent.${matched}`;
+  }
+  if (breakdown.intent === "devrel") {
+    return `It fits the DevRel pipeline goal because the repo has documentation, onboarding, issue, or beginner-friendly contribution angles.${matched}`;
+  }
+
+  return `It best matched the requested goal context: ${context}.`;
 }
 
 function buildBusinessRationale(
   opportunity: Opportunity,
   businessGoal: string,
   teamContext: string,
+  scored: ScoredOpportunity,
 ): BusinessRationale {
   const evidence = [
     `${opportunity.fullName} has a Role Opportunity Score of ${opportunity.roleOpportunityScore}/100.`,
@@ -289,7 +426,7 @@ function buildBusinessRationale(
     whyNow: opportunity.signals.isFresh
       ? "The repository looks fresh enough that early, useful contribution signals can still stand out."
       : "The repository still has enough visible contribution surface to support a focused outreach or PR workflow.",
-    highLeverageReason: buildHighLeverageReason(opportunity),
+    highLeverageReason: `${buildHighLeverageReason(opportunity)} ${buildGoalFitReason(scored, businessGoal, teamContext)}`,
     immediateNextAction: opportunity.suggestedAction,
     riskToCheck: buildRiskToCheck(opportunity),
     evidence,
