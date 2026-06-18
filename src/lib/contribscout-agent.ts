@@ -75,6 +75,7 @@ type ScoredOpportunity = {
 const AI_TERMS = ["ai", "agent", "llm", "mcp", "model", "automation", "workflow", "developer workflow", "tooling", "sdk"];
 const WEB3_TERMS = ["web3", "wallet", "onchain", "crypto", "defi", "blockchain", "zk", "evm", "solidity", "typescript sdk", "sdk"];
 const DEVREL_TERMS = ["devrel", "docs", "documentation", "readme", "contributing", "examples", "beginner", "onboarding", "community", "proof"];
+const CLOSE_SCORE_DELTA = 10;
 
 export function runContribScoutAgent({
   request,
@@ -171,7 +172,15 @@ function rankOpportunities(opportunities: Opportunity[], businessGoal: string, t
   return scored.sort((a, b) => {
     const scoreDifference = b.breakdown.total - a.breakdown.total;
 
+    if (
+      Math.abs(scoreDifference) <= CLOSE_SCORE_DELTA &&
+      Math.abs(b.breakdown.goalFit - a.breakdown.goalFit) >= 6
+    ) {
+      return b.breakdown.goalFit - a.breakdown.goalFit;
+    }
+
     if (scoreDifference !== 0) return scoreDifference;
+    if (b.breakdown.goalFit !== a.breakdown.goalFit) return b.breakdown.goalFit - a.breakdown.goalFit;
     if (b.opportunity.roleOpportunityScore !== a.opportunity.roleOpportunityScore) {
       return b.opportunity.roleOpportunityScore - a.opportunity.roleOpportunityScore;
     }
@@ -268,21 +277,30 @@ function detectGoalIntent(goalText: string): GoalIntent {
 }
 
 function goalIntentFit(intent: GoalIntent, goalText: string, opportunity: Opportunity, opportunityText: string) {
-  if (intent === "ai-tooling") return termFit(AI_TERMS, opportunityText, 9, 54);
+  if (intent === "ai-tooling") {
+    const base = termFit(AI_TERMS, opportunityText, 11, 64);
+    const exactBoost = ["ai", "agent", "llm", "mcp"].some((term) => termInText(term, opportunityText)) ? 10 : 0;
+    return { score: Math.min(74, base.score + exactBoost), matchedTerms: base.matchedTerms };
+  }
   if (intent === "web3-devtools") {
-    const base = termFit(WEB3_TERMS, opportunityText, 9, 54);
-    const tsSdkBoost = termInText("typescript", opportunityText) || termInText("sdk", opportunityText) ? 6 : 0;
-    return { score: Math.min(60, base.score + tsSdkBoost), matchedTerms: base.matchedTerms };
+    const base = termFit(WEB3_TERMS, opportunityText, 11, 66);
+    const exactBoost = ["web3", "wallet", "onchain", "crypto", "defi", "blockchain", "zk"].some((term) =>
+      termInText(term, opportunityText),
+    )
+      ? 12
+      : 0;
+    const tsSdkBoost = termInText("typescript", opportunityText) || termInText("sdk", opportunityText) ? 7 : 0;
+    return { score: Math.min(82, base.score + exactBoost + tsSdkBoost), matchedTerms: base.matchedTerms };
   }
   if (intent === "devrel") {
-    const termScore = termFit(DEVREL_TERMS, opportunityText, 6, 28);
+    const termScore = termFit(DEVREL_TERMS, opportunityText, 8, 40);
     const signals = opportunity.signals;
     const docsFit =
-      (signals.readmeQuality === "thin" ? 12 : signals.readmeQuality === "basic" ? 8 : 0) +
-      (!signals.hasDocsFolder ? 10 : 0) +
-      (!signals.hasContributing ? 10 : 0) +
-      Math.min(12, signals.goodFirstIssueCount * 5 + signals.helpWantedCount * 4) +
-      (opportunity.openIssues > 0 ? 5 : 0);
+      (signals.readmeQuality === "thin" ? 16 : signals.readmeQuality === "basic" ? 11 : 0) +
+      (!signals.hasDocsFolder ? 14 : 0) +
+      (!signals.hasContributing ? 14 : 0) +
+      Math.min(18, signals.goodFirstIssueCount * 6 + signals.helpWantedCount * 5) +
+      (opportunity.openIssues > 0 ? 7 : 0);
     const matchedTerms = [...termScore.matchedTerms];
 
     if (!signals.hasDocsFolder) matchedTerms.push("docs gap");
@@ -290,7 +308,7 @@ function goalIntentFit(intent: GoalIntent, goalText: string, opportunity: Opport
     if (signals.goodFirstIssueCount > 0) matchedTerms.push("good first issues");
     if (signals.helpWantedCount > 0) matchedTerms.push("help wanted");
 
-    return { score: Math.min(62, termScore.score + docsFit), matchedTerms: uniqueTerms(matchedTerms) };
+    return { score: Math.min(86, termScore.score + docsFit), matchedTerms: uniqueTerms(matchedTerms) };
   }
 
   return {

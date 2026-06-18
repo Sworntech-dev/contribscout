@@ -27,6 +27,13 @@ export async function POST(request: Request) {
     );
   }
 
+  if (!isMeaningfulGrowthGoal(businessGoal)) {
+    return NextResponse.json(
+      { error: "Enter a meaningful open-source growth goal before running the agent." },
+      { status: 400, headers: noStoreHeaders() },
+    );
+  }
+
   try {
     const opportunitiesResponse = await getOpportunities();
     const payload = (await opportunitiesResponse.json()) as AgentOpportunityPayload;
@@ -66,4 +73,40 @@ function noStoreHeaders() {
   return {
     "Cache-Control": "no-store, no-cache, must-revalidate",
   };
+}
+
+function isMeaningfulGrowthGoal(goal: string) {
+  const normalized = goal.toLowerCase().replace(/[^a-z0-9+#\-\s]/g, " ").replace(/\s+/g, " ").trim();
+  const words = normalized.match(/[a-z0-9+#-]+/g) ?? [];
+  const meaningfulWords = words.filter((word) => !["a", "an", "the", "to", "for", "and", "or", "of", "in", "on"].includes(word));
+  const domainTerms = [
+    "grow",
+    "growth",
+    "visibility",
+    "contribution",
+    "open-source",
+    "opensource",
+    "github",
+    "developer",
+    "docs",
+    "documentation",
+    "devrel",
+    "web3",
+    "wallet",
+    "ai",
+    "agent",
+    "llm",
+    "tooling",
+    "onboarding",
+    "proof",
+    "workflow",
+    "community",
+    "repo",
+    "pr",
+  ];
+  const hasDomainTerm = domainTerms.some((term) => normalized.includes(term));
+  const hasUsefulLength = normalized.length >= 35 || meaningfulWords.length >= 5;
+  const mostlyNoise = meaningfulWords.length <= 2 || /^[a-z]{1,5}$/.test(normalized) || /^\d+$/.test(normalized);
+
+  return hasDomainTerm && hasUsefulLength && !mostlyNoise;
 }
