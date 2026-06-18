@@ -371,20 +371,36 @@ export function Dashboard() {
         <Reveal className="mb-10 border-t border-white/10 pt-8">
           <SectionHeader
             kicker="Roadmap"
-            title="Small first, useful next"
-            body="ContribScout remains a standalone Vercel dashboard with a Hermes-compatible skill package. Future work can deepen templates, automation, and optional sync without changing the local-first core."
+            title="From MVP to operating layer"
+            body="ContribScout starts as a local-first agent console with a Hermes-compatible skill package. Next steps deepen reporting, issue analysis, scheduled runs, and workspace provisioning without changing the lightweight core."
           />
           <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {["Proof report templates", "Proof Vault import polish", "Hermes daily report automation", "Issue drill-down"].map(
-              (item, index) => (
+            {[
+              {
+                title: "Proof report templates",
+                body: "Export cleaner contribution reports for teams, demos, and review workflows.",
+              },
+              {
+                title: "Issue drill-down",
+                body: "Analyze selected repositories more deeply before preparing contribution briefs.",
+              },
+              {
+                title: "Scheduled Hermes runs",
+                body: "Use the Hermes skill layer for recurring open-source opportunity reports.",
+              },
+              {
+                title: "Workspace provisioning",
+                body: "Connect Stripe test-mode checkout to a clearer OSS Growth Workspace flow.",
+              },
+            ].map((item, index) => (
                 <div
-                  key={`roadmap-${index}-${item}`}
+                  key={`roadmap-${index}-${item.title}`}
                   className="rounded-md border border-white/10 bg-white/[0.035] p-4 text-sm text-slate-300"
                 >
-                  {item}
+                  <h3 className="font-black text-cream">{item.title}</h3>
+                  <p className="mt-2 leading-6 text-cream/58">{item.body}</p>
                 </div>
-              ),
-            )}
+              ))}
           </div>
         </Reveal>
       </section>
