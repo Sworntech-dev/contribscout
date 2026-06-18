@@ -6,6 +6,7 @@ import { AgentDemoMode, type ProvisionResponse } from "@/components/agent-demo-m
 import { JudgeDemoPackage } from "@/components/judge-demo-package";
 import { MissionControlDashboard } from "@/components/mission-control-dashboard";
 import type { AgentRunResult } from "@/lib/agent-run-types";
+import type { Opportunity } from "@/lib/types";
 
 type AppView = "agent" | "workspace" | "judge" | "hermes" | "about";
 type WorkspaceTab = "scanner" | "mission" | "proof";
@@ -250,10 +251,166 @@ function WorkspaceView({
         </div>
       </div>
       <WorkspaceFocusNotes activeTab={activeTab} />
-      <div className="max-w-full overflow-x-clip rounded-[1.25rem] border border-cream/10 bg-black/20 sm:rounded-[1.5rem]">
+      {activeTab === "scanner" ? (
+        <div className="block md:hidden">
+          <MobileOpportunityList />
+        </div>
+      ) : null}
+      <div
+        className={`max-w-full overflow-x-clip rounded-[1.25rem] border border-cream/10 bg-black/20 sm:rounded-[1.5rem] ${
+          activeTab === "scanner" ? "hidden md:block" : "block"
+        }`}
+      >
         <MissionControlDashboard />
       </div>
     </ViewFrame>
+  );
+}
+
+function MobileOpportunityList() {
+  const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [source, setSource] = useState<"github" | "sample" | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+
+    async function loadOpportunities() {
+      try {
+        const response = await fetch("/api/opportunities?limit=12", {
+          cache: "no-store",
+          headers: { "Cache-Control": "no-cache" },
+        });
+        const payload = (await response.json()) as {
+          source?: "github" | "sample";
+          opportunities?: Opportunity[];
+          notice?: string;
+        };
+
+        if (!alive) return;
+
+        if (!response.ok) {
+          setError(payload.notice || "Could not load opportunities right now.");
+          setOpportunities([]);
+          return;
+        }
+
+        setSource(payload.source ?? null);
+        setOpportunities(Array.isArray(payload.opportunities) ? payload.opportunities : []);
+        setError("");
+      } catch {
+        if (!alive) return;
+        setError("Could not load opportunities right now.");
+        setOpportunities([]);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    }
+
+    loadOpportunities();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  return (
+    <section id="top-opportunities" className="space-y-3 rounded-2xl border border-cream/10 bg-black/24 p-3">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-warm">Opportunities</p>
+        <h2 className="mt-2 text-xl font-black text-cream">Ranked contribution targets</h2>
+        <p className="mt-2 text-sm leading-6 text-cream/58">
+          Mobile scanner view with compact cards from the current opportunity API.
+        </p>
+      </div>
+
+      {loading ? (
+        <div className="rounded-2xl border border-cream/10 bg-cream/[0.045] p-4 text-sm text-slate-300">
+          Scanning opportunities...
+        </div>
+      ) : error ? (
+        <div className="rounded-2xl border border-warm/30 bg-warm/10 p-4 text-sm text-warm">
+          {error}
+        </div>
+      ) : opportunities.length === 0 ? (
+        <div className="rounded-2xl border border-cream/10 bg-cream/[0.045] p-4 text-sm text-slate-300">
+          No opportunities available yet.
+        </div>
+      ) : (
+        <div className="grid w-full min-w-0 gap-3">
+          {opportunities.map((opportunity) => (
+            <MobileOpportunityCard
+              key={`workspace-mobile-opportunity-${opportunity.fullName}`}
+              opportunity={opportunity}
+              source={source}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function MobileOpportunityCard({
+  opportunity,
+  source,
+}: {
+  opportunity: Opportunity;
+  source: "github" | "sample" | null;
+}) {
+  const signals = [
+    opportunity.openIssues > 0 ? `${opportunity.openIssues.toLocaleString()} open issues` : null,
+    opportunity.signals.goodFirstIssueCount > 0 ? `${opportunity.signals.goodFirstIssueCount} good first` : null,
+    opportunity.signals.helpWantedCount > 0 ? `${opportunity.signals.helpWantedCount} help wanted` : null,
+    opportunity.signals.hasContributing ? "CONTRIBUTING" : null,
+  ].filter(Boolean);
+
+  return (
+    <article className="w-full min-w-0 overflow-hidden rounded-2xl border border-cream/10 bg-cream/[0.045] p-4">
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="break-words text-base font-black text-cream">{opportunity.fullName || opportunity.name}</p>
+          <p className="mt-2 line-clamp-3 text-sm leading-6 text-cream/62">{opportunity.description}</p>
+        </div>
+        <div className="shrink-0 rounded-xl border border-warm/35 bg-warm/10 px-3 py-2 text-center">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-warm">Score</p>
+          <p className="text-2xl font-black text-cream">{opportunity.roleOpportunityScore ?? "n/a"}</p>
+        </div>
+      </div>
+
+      <div className="mt-3 flex min-w-0 flex-wrap gap-2">
+        <span className="max-w-full break-words rounded-md border border-moss/25 bg-moss/10 px-2 py-1 text-[11px] font-semibold capitalize text-moss">
+          {opportunity.category || "open source"}
+        </span>
+        <span className="rounded-md border border-cream/10 bg-cream/[0.055] px-2 py-1 text-[11px] font-semibold text-cream/70">
+          {source === "github" ? "GitHub live" : source === "sample" ? "Sample fallback" : "Scanner"}
+        </span>
+        {signals.slice(0, 3).map((signal) => (
+          <span
+            key={`${opportunity.fullName}-mobile-shell-signal-${signal}`}
+            className="max-w-full break-words rounded-md bg-black/18 px-2 py-1 text-xs text-cream/68"
+          >
+            {signal}
+          </span>
+        ))}
+      </div>
+
+      <p className="mt-4 border-t border-white/10 pt-4 text-sm leading-6 text-cream">
+        {opportunity.suggestedAction}
+      </p>
+
+      {opportunity.url ? (
+        <a
+          href={opportunity.url}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-4 inline-flex max-w-full rounded-md border border-cream/10 bg-cream/[0.07] px-3 py-2 text-sm font-semibold text-cream"
+        >
+          Open repository
+        </a>
+      ) : null}
+    </article>
   );
 }
 
