@@ -20,8 +20,8 @@ export function OpportunityCard({
   const saturationLabel = opportunity.stars < 500 ? "Low saturation" : "Moderate saturation";
 
   return (
-    <article className="premium-panel premium-lift flex h-full flex-col overflow-hidden rounded-md p-5">
-      <div className="flex min-h-40 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <article className="premium-panel premium-lift flex h-full w-full min-w-0 flex-col overflow-hidden rounded-md p-4 sm:p-5">
+      <div className="flex flex-col gap-4 sm:min-h-40 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap gap-2">
             <span className="rounded-md border border-moss/25 bg-moss/10 px-2.5 py-1 text-xs font-semibold capitalize text-moss">
@@ -34,17 +34,17 @@ export function OpportunityCard({
           <h3 className="mt-3 break-words text-2xl font-black text-cream">{opportunity.name}</h3>
           <p className="mt-2 line-clamp-3 text-sm leading-6 text-cream/58">{opportunity.description}</p>
         </div>
-        <div className="min-w-28 rounded-md border border-warm/35 bg-warm/10 p-3 text-center shadow-[0_0_34px_rgba(217,168,95,0.12)]">
+        <div className="w-full rounded-md border border-warm/35 bg-warm/10 p-3 text-center shadow-[0_0_34px_rgba(217,168,95,0.12)] sm:min-w-28 sm:w-auto">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-warm">Role Score</p>
           <p className="mt-1 text-4xl font-black text-cream">{opportunity.roleOpportunityScore}</p>
         </div>
       </div>
 
-      <div className="mt-5 flex flex-wrap gap-2">
+      <div className="mt-5 flex min-w-0 flex-wrap gap-2">
         {opportunity.signalBadges.map((badge) => (
           <span
             key={`${opportunity.fullName}-badge-${badge}`}
-            className="rounded-md border border-cream/10 bg-cream/[0.045] px-2.5 py-1 text-xs text-cream/68"
+            className="max-w-full break-words rounded-md border border-cream/10 bg-cream/[0.045] px-2.5 py-1 text-xs text-cream/68"
           >
             {badge}
           </span>
@@ -62,7 +62,7 @@ export function OpportunityCard({
         </div>
       </div>
 
-      <div className="mt-5 grid gap-3 border-t border-white/10 pt-5 text-sm text-slate-400 sm:grid-cols-4">
+      <div className="mt-5 grid grid-cols-2 gap-3 border-t border-white/10 pt-5 text-sm text-slate-400 sm:grid-cols-4">
         <Stat label="Stars" value={opportunity.stars.toLocaleString()} />
         <Stat label="Forks" value={opportunity.forks.toLocaleString()} />
         <Stat label="Issues" value={opportunity.openIssues.toLocaleString()} />
@@ -73,7 +73,7 @@ export function OpportunityCard({
         <summary className="cursor-pointer text-sm font-semibold text-cream marker:text-moss">
           Contribution Fit
         </summary>
-        <div className="mt-4 grid gap-2 text-sm sm:grid-cols-2">
+        <div className="mt-4 grid min-w-0 gap-2 text-sm sm:grid-cols-2">
           <FitItem label="Open issues" value={opportunity.openIssues.toLocaleString()} />
           <FitItem label="Good first" value={opportunity.signals.goodFirstIssueCount.toLocaleString()} />
           <FitItem label="Help wanted" value={opportunity.signals.helpWantedCount.toLocaleString()} />
@@ -95,7 +95,7 @@ export function OpportunityCard({
       <div className="mt-auto pt-5">
         <div className="rounded-md border border-cream/10 bg-black/15 p-3">
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-cream/42">Actions</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex min-w-0 flex-wrap gap-2">
             {isSampleFallback || !opportunity.url ? (
               <span className="inline-flex rounded-md border border-cream/10 bg-cream/[0.04] px-3 py-2 text-sm font-semibold text-cream/50">
                 Sample project
@@ -105,7 +105,7 @@ export function OpportunityCard({
                 href={opportunity.url}
                 target="_blank"
                 rel="noreferrer"
-                className="premium-action inline-flex rounded-md border border-cream/10 bg-cream/[0.07] px-3 py-2 text-sm font-semibold text-cream transition hover:border-moss/50 hover:bg-moss/10"
+              className="premium-action inline-flex max-w-full rounded-md border border-cream/10 bg-cream/[0.07] px-3 py-2 text-sm font-semibold text-cream transition hover:border-moss/50 hover:bg-moss/10"
               >
                 Open repository
               </a>
@@ -141,7 +141,7 @@ export function OpportunityCard({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md bg-cream/[0.04] p-3">
+    <div className="min-w-0 rounded-md bg-cream/[0.04] p-3">
       <p className="text-xs text-cream/38">{label}</p>
       <p className="mt-1 truncate font-semibold text-cream/82">{value}</p>
     </div>
@@ -150,7 +150,7 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 function FitItem({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-md bg-black/15 px-3 py-2">
+    <div className="min-w-0 items-start justify-between gap-3 rounded-md bg-black/15 px-3 py-2 sm:flex sm:items-center">
       <span className="truncate text-cream/42">{label}</span>
       <span className="shrink-0 font-semibold text-cream/78">{value}</span>
     </div>

@@ -277,9 +277,9 @@ export function Dashboard() {
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden">
+    <main className="relative overflow-x-clip">
       <MotionBackdrop />
-      <section className="relative mx-auto flex w-full max-w-7xl flex-col gap-7 px-4 pb-6 pt-2 sm:px-6 lg:px-8">
+      <section className="relative mx-auto flex w-full max-w-7xl flex-col gap-5 px-2 pb-5 pt-2 sm:gap-7 sm:px-6 sm:pb-6 lg:px-8">
         <StaggerGroup className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <StaggerItem><StatusCard label="Visible opportunities" value={filteredOpportunities.length.toString()} detail={`${opportunities.length} scanned`} /></StaggerItem>
           <StaggerItem><StatusCard label="Watchlist" value={watchlist.length.toString()} detail="local pipeline" /></StaggerItem>
@@ -301,7 +301,7 @@ export function Dashboard() {
           />
         </Reveal>
 
-        <Reveal id="top-opportunities" className="scroll-scene scene-opportunities space-y-4 rounded-md p-1">
+        <Reveal id="top-opportunities" className="scroll-scene scene-opportunities min-w-0 space-y-4 rounded-md p-0 sm:p-1">
           <SectionHeader
             kicker="Opportunities"
             title="Ranked contribution targets"
@@ -314,9 +314,9 @@ export function Dashboard() {
           ) : filteredOpportunities.length === 0 ? (
             <EmptyFilteredState onClear={clearFilters} />
           ) : (
-            <StaggerGroup className="grid gap-4 lg:grid-cols-2">
+            <div className="grid min-w-0 gap-4 lg:grid-cols-2">
               {filteredOpportunities.map((opportunity) => (
-                <StaggerItem key={opportunity.fullName}>
+                <div key={opportunity.fullName} className="min-w-0">
                   <OpportunityCard
                     opportunity={opportunity}
                     isSampleFallback={isSampleFallback}
@@ -325,9 +325,9 @@ export function Dashboard() {
                     onCreateBrief={createBriefFromOpportunity}
                     onCreatePrKit={createPrKitFromOpportunity}
                   />
-                </StaggerItem>
+                </div>
               ))}
-            </StaggerGroup>
+            </div>
           )}
         </Reveal>
 

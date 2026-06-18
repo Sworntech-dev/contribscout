@@ -250,7 +250,7 @@ function WorkspaceView({
         </div>
       </div>
       <WorkspaceFocusNotes activeTab={activeTab} />
-      <div className="max-w-full overflow-x-auto overflow-y-hidden rounded-[1.25rem] border border-cream/10 bg-black/20 sm:rounded-[1.5rem]">
+      <div className="max-w-full overflow-x-clip rounded-[1.25rem] border border-cream/10 bg-black/20 sm:rounded-[1.5rem]">
         <MissionControlDashboard />
       </div>
     </ViewFrame>
