@@ -55,11 +55,11 @@ export function AppShell() {
   return (
     <main
       id="agent-app-shell"
-      className="relative min-h-screen overflow-x-clip bg-[#030706] px-4 py-4 sm:px-6 lg:py-6 lg:pl-24 lg:pr-8"
+      className="relative min-h-screen overflow-x-clip bg-[#030706] px-3 py-3 sm:px-6 lg:py-6 lg:pl-24 lg:pr-8"
     >
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:46px_46px]" />
       <div className="absolute left-[18%] top-16 -z-10 h-[30rem] w-[30rem] rounded-full bg-mint/12 blur-3xl" />
-      <div className="absolute right-[-8rem] top-48 -z-10 h-[32rem] w-[32rem] rounded-full bg-warm/10 blur-3xl" />
+      <div className="absolute right-[-14rem] top-48 -z-10 h-[28rem] w-[28rem] rounded-full bg-warm/10 blur-3xl sm:right-[-8rem] sm:h-[32rem] sm:w-[32rem]" />
 
       <div className="relative z-10 mx-auto w-full max-w-7xl">
         <DesktopSidebar activeView={activeView} onSelect={setActiveView} />
@@ -70,7 +70,7 @@ export function AppShell() {
             className={
               activeView === "agent"
                 ? "min-h-[calc(100vh-8rem)]"
-                : "min-h-[calc(100vh-8rem)] overflow-x-clip rounded-[2rem] border border-cream/10 bg-black/35 p-3 shadow-2xl shadow-black/35 backdrop-blur sm:p-5"
+                : "overflow-x-clip rounded-3xl border border-cream/10 bg-black/35 p-2 shadow-2xl shadow-black/35 backdrop-blur sm:p-5 lg:min-h-[calc(100vh-8rem)] lg:rounded-[2rem]"
             }
           >
             {activeView === "agent" ? (
@@ -181,7 +181,7 @@ function MobileTabs({
   onSelect: (view: AppView) => void;
 }) {
   return (
-    <div className="mb-3 flex gap-2 overflow-x-auto rounded-2xl border border-cream/10 bg-black/45 p-2 lg:hidden">
+    <div className="mb-3 flex max-w-full gap-2 overflow-x-auto rounded-2xl border border-cream/10 bg-black/45 p-2 lg:hidden">
       {navItems.map((item) => (
         <button
           key={`app-shell-mobile-${item.id}`}
@@ -222,7 +222,7 @@ function WorkspaceView({
 
   return (
     <ViewFrame>
-      <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+      <div className="grid min-w-0 gap-3 sm:gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
         <ShellIntro
           eyebrow="Workspace"
           title="Scanner Workspace"
@@ -230,7 +230,7 @@ function WorkspaceView({
         />
         <ProofCandidateSummary count={agentProofCount} />
       </div>
-      <div className="rounded-[1.5rem] border border-cream/10 bg-black/24 p-2">
+      <div className="rounded-[1.25rem] border border-cream/10 bg-black/24 p-1.5 sm:rounded-[1.5rem] sm:p-2">
         <div className="grid gap-2 md:grid-cols-3">
           {workspaceTabs.map((tab) => (
             <button
@@ -250,7 +250,7 @@ function WorkspaceView({
         </div>
       </div>
       <WorkspaceFocusNotes activeTab={activeTab} />
-      <div className="max-w-full overflow-hidden rounded-[1.5rem] border border-cream/10 bg-black/20">
+      <div className="max-w-full overflow-x-auto overflow-y-hidden rounded-[1.25rem] border border-cream/10 bg-black/20 sm:rounded-[1.5rem]">
         <MissionControlDashboard />
       </div>
     </ViewFrame>
@@ -275,9 +275,9 @@ function HermesSkillView() {
             <p><span className="text-slate-500">Stripe:</span> not required by the skill script</p>
           </div>
         </div>
-        <div className="min-w-0 rounded-[1.5rem] border border-cream/10 bg-black/28 p-5">
+        <div className="min-w-0 rounded-[1.5rem] border border-cream/10 bg-black/28 p-4 sm:p-5">
           <p className="text-sm font-bold text-white">Command</p>
-          <pre className="mt-3 max-w-full overflow-x-auto rounded-2xl border border-cream/10 bg-black/45 p-4 text-xs leading-6 text-slate-300">
+          <pre className="mt-3 max-w-full overflow-x-auto whitespace-pre rounded-2xl border border-cream/10 bg-black/45 p-3 text-xs leading-6 text-slate-300 sm:p-4">
             {`python hermes/skills/contribscout-agent/scripts/run_contribscout_agent.py "Grow visibility for an AI agent tooling project through useful open-source contributions."`}
           </pre>
         </div>
@@ -340,7 +340,7 @@ function AboutView() {
         title="Open-source growth operations for AI teams"
         body="ContribScout helps small AI, Web3, and developer-tooling teams turn open-source discovery into a concrete contribution workflow."
       />
-      <div className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="rounded-[1.5rem] border border-cream/10 bg-black/24 p-5 text-sm leading-7 text-slate-300">
           <p>
             It is for builders and lean teams who want useful public contribution paths without turning repo discovery
@@ -368,7 +368,7 @@ function AboutView() {
           </div>
         </div>
       </div>
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid min-w-0 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {capabilities.map(([title, body]) => (
           <article key={`about-${title}`} className="rounded-[1.5rem] border border-cream/10 bg-white/[0.025] p-5">
             <h3 className="font-black text-white">{title}</h3>
@@ -376,7 +376,7 @@ function AboutView() {
           </article>
         ))}
       </div>
-      <div className="rounded-[1.5rem] border border-cream/10 bg-black/24 p-5">
+      <div className="rounded-[1.5rem] border border-cream/10 bg-black/24 p-4 sm:p-5">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-100/70">FAQ</p>
         <h2 className="mt-2 text-xl font-black text-white">Trust and demo boundaries</h2>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -403,7 +403,7 @@ function ShellIntro({ eyebrow, title, body }: { eyebrow: string; title: string; 
 }
 
 function ViewFrame({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto w-full max-w-6xl space-y-5 overflow-x-clip">{children}</div>;
+  return <div className="mx-auto w-full max-w-6xl space-y-4 overflow-x-clip sm:space-y-5">{children}</div>;
 }
 
 function WorkspaceFocusNotes({ activeTab }: { activeTab: WorkspaceTab }) {
@@ -423,7 +423,7 @@ function WorkspaceFocusNotes({ activeTab }: { activeTab: WorkspaceTab }) {
 
 function ProofCandidateSummary({ count }: { count: number }) {
   return (
-    <div className="rounded-[1.25rem] border border-cream/10 bg-black/24 px-4 py-3 text-sm text-slate-300 lg:min-w-72">
+    <div className="min-w-0 rounded-[1.25rem] border border-cream/10 bg-black/24 px-4 py-3 text-sm text-slate-300 lg:min-w-72">
       {count > 0
         ? `${count} saved agent proof ${count === 1 ? "candidate" : "candidates"} found in local storage.`
         : "Run the agent and save a proof candidate to populate the vault."}

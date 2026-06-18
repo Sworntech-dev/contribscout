@@ -200,8 +200,8 @@ export function AgentDemoMode({
   }
 
   return (
-    <section id="agent-console-home" className="scroll-mt-24 space-y-6">
-      <div className="relative overflow-hidden px-1 py-5 sm:px-6 lg:px-10">
+    <section id="agent-console-home" className="scroll-mt-24 space-y-5 overflow-x-clip sm:space-y-6">
+      <div className="relative overflow-hidden px-0 py-4 sm:px-6 sm:py-5 lg:px-10">
         <div className="absolute left-1/2 top-6 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-cyan-300/10 blur-3xl" />
         {/* Future hero visual slot: this branded helping hand can be replaced with a final 3D glass hand asset later. */}
         <div
@@ -221,7 +221,7 @@ export function AgentDemoMode({
 
         <div className="relative z-10 mx-auto max-w-4xl text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.36em] text-cyan-200/80">Open-source growth agent</p>
-          <h2 className="mt-5 text-4xl font-black tracking-tight text-cream sm:text-6xl">
+          <h2 className="mt-5 text-3xl font-black tracking-tight text-cream sm:text-6xl">
             Hey! What should ContribScout run?
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-200 sm:text-base">
@@ -229,7 +229,7 @@ export function AgentDemoMode({
           </p>
         </div>
 
-        <div className="relative z-10 mx-auto mt-7 grid max-w-3xl gap-2.5 md:grid-cols-3">
+        <div className="relative z-10 mx-auto mt-6 grid max-w-3xl gap-2.5 md:mt-7 md:grid-cols-3">
           {GOAL_PRESETS.map((preset) => (
             <button
               key={`agent-preset-${preset.label}`}
@@ -253,9 +253,9 @@ export function AgentDemoMode({
           ))}
         </div>
 
-        <div className="relative z-10 mx-auto mt-5 max-w-3xl overflow-hidden rounded-[1.9rem] border border-cyan-100/15 bg-[#06100e]/86 shadow-[0_24px_90px_rgba(0,0,0,0.28),0_0_68px_rgba(94,234,212,0.09)] backdrop-blur-xl">
+        <div className="relative z-10 mx-auto mt-5 max-w-3xl overflow-hidden rounded-[1.45rem] border border-cyan-100/15 bg-[#06100e]/86 shadow-[0_24px_90px_rgba(0,0,0,0.28),0_0_68px_rgba(94,234,212,0.09)] backdrop-blur-xl sm:rounded-[1.9rem]">
           <div className="absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-100/35 to-transparent" />
-          <div className="flex gap-3 p-3.5 sm:p-4">
+          <div className="flex min-w-0 gap-3 p-3 sm:p-4">
             <div className="hidden h-11 w-11 shrink-0 place-items-center rounded-2xl bg-cyan-200/10 text-sm font-black text-cyan-100 shadow-[inset_0_0_24px_rgba(94,234,212,0.08)] sm:grid">
               AI
             </div>
@@ -332,14 +332,14 @@ export function AgentDemoMode({
         {runState === "running" ? <div className="mx-auto mt-8 max-w-3xl"><AgentLoadingState /></div> : null}
 
         {result ? (
-          <div className="mt-12 grid gap-8 border-t border-cream/[0.08] pt-10">
+          <div className="mt-10 grid min-w-0 gap-6 border-t border-cream/[0.08] pt-8 sm:mt-12 sm:gap-8 sm:pt-10">
             <section id="agent-run-results" className="scroll-mt-24 space-y-4">
               <SectionHeading
                 eyebrow="Section A"
                 title="Agent Run"
                 description="The live run log shows how the agent scanned GitHub, automatically chose a target, and kept source status honest."
               />
-              <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+              <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
                 <ActionLog result={result} />
                 <SelectedOpportunityPanel result={result} />
               </div>
@@ -351,7 +351,7 @@ export function AgentDemoMode({
                 title="Contribution Plan"
                 description="Business rationale, contribution brief, and PR readiness kit are grouped as one practical plan."
               />
-              <div className="grid gap-5 xl:grid-cols-3">
+              <div className="grid min-w-0 gap-5 xl:grid-cols-3">
                 <Panel eyebrow="Business rationale" title="Why this matters">
                   <div className="space-y-3 text-sm leading-6 text-slate-300">
                     <p>{result.businessRationale.summary}</p>
@@ -425,7 +425,7 @@ export function AgentDemoMode({
                 title="Operations"
                 description="Stripe and Proof Vault are operational steps, separated from the agent decision and kept honest."
               />
-              <div className="grid gap-5 lg:grid-cols-2">
+              <div className="grid min-w-0 gap-5 lg:grid-cols-2">
                 <Panel eyebrow="Proof Vault candidate" title="Evidence plan">
                   <div className="space-y-3 text-sm leading-6 text-slate-300">
                     <KeyValue label="Project" value={result.proofVaultCandidate.projectName} />
@@ -512,7 +512,7 @@ export function AgentDemoMode({
                   <summary className="cursor-pointer px-4 py-3 text-sm font-bold text-slate-200">
                     Preview Markdown summary
                   </summary>
-                  <pre className="max-h-80 overflow-auto border-t border-cream/10 p-4 text-xs leading-5 text-slate-300">
+                  <pre className="max-h-80 max-w-full overflow-auto whitespace-pre border-t border-cream/10 p-3 text-xs leading-5 text-slate-300 sm:p-4">
                     {result.markdownSummary}
                   </pre>
                 </details>
@@ -530,12 +530,12 @@ function ActionLog({ result }: { result: AgentRunResult }) {
     <Panel eyebrow="Hermes-style action log" title="Agent run steps">
       <div className="space-y-3">
         {result.steps.map((step, index) => (
-          <article key={`${step.id}-${step.completedAt}-${index}`} className="rounded-md border border-cream/10 bg-black/20 p-3">
+          <article key={`${step.id}-${step.completedAt}-${index}`} className="min-w-0 rounded-md border border-cream/10 bg-black/20 p-3">
             <div className="flex items-start gap-3">
               <span className="mt-1 grid h-6 w-6 shrink-0 place-items-center rounded-full border border-mint/40 bg-mint/10 text-xs font-black text-mint">
                 {index + 1}
               </span>
-              <div>
+              <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-bold text-white">{step.label}</h3>
                   <span className="rounded-full border border-mint/30 bg-mint/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.16em] text-mint">
@@ -558,14 +558,14 @@ function SelectedOpportunityPanel({ result }: { result: AgentRunResult }) {
 
   return (
     <Panel eyebrow="Selected opportunity" title={result.selectedOpportunity.fullName}>
-      <div className="grid gap-4 sm:grid-cols-[auto_1fr]">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-[auto_minmax(0,1fr)]">
         <div className="grid h-28 w-28 place-items-center rounded-md border border-mint/30 bg-mint/10 text-center">
           <div>
             <p className="text-4xl font-black text-mint">{result.selectedOpportunity.roleOpportunityScore}</p>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">Role score</p>
           </div>
         </div>
-        <div className="space-y-3 text-sm leading-6 text-slate-300">
+        <div className="min-w-0 space-y-3 break-words text-sm leading-6 text-slate-300">
           <p>{result.selectedOpportunity.description}</p>
           <div
             className={`rounded-md border px-3 py-2 text-xs leading-5 ${
@@ -622,7 +622,7 @@ function AgentLoadingState() {
   ];
 
   return (
-    <div className="premium-panel overflow-hidden rounded-3xl border-cyan-100/15 p-5 shadow-[0_20px_70px_rgba(0,0,0,0.24),0_0_44px_rgba(94,234,212,0.08)]">
+    <div className="premium-panel overflow-hidden rounded-3xl border-cyan-100/15 p-4 shadow-[0_20px_70px_rgba(0,0,0,0.24),0_0_44px_rgba(94,234,212,0.08)] sm:p-5">
       <div className="flex flex-col gap-5">
         <div className="flex items-start gap-4">
           <div className="relative grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-2xl border border-cyan-100/20 bg-cyan-200/10">
@@ -675,9 +675,9 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <article className="premium-panel rounded-md p-5">
+    <article className="premium-panel min-w-0 overflow-hidden rounded-md p-4 sm:p-5">
       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-mint">{eyebrow}</p>
-      <h3 className="mt-2 text-xl font-black text-white">{title}</h3>
+      <h3 className="mt-2 break-words text-xl font-black text-white">{title}</h3>
       <div className="mt-4">{children}</div>
     </article>
   );
@@ -715,9 +715,9 @@ function KeyValue({ label, value, code = false }: { label: string; value: string
     <div>
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{label}</p>
       {code ? (
-        <code className="mt-1 block rounded-md border border-cream/10 bg-black/30 px-3 py-2 text-xs text-mint">{value}</code>
+        <code className="mt-1 block max-w-full overflow-x-auto rounded-md border border-cream/10 bg-black/30 px-3 py-2 text-xs text-mint">{value}</code>
       ) : (
-        <p className="mt-1 text-sm leading-6 text-slate-300">{value}</p>
+        <p className="mt-1 break-words text-sm leading-6 text-slate-300">{value}</p>
       )}
     </div>
   );

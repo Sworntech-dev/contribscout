@@ -51,8 +51,8 @@ export function JudgeDemoPackage({
   }
 
   return (
-    <section id="judge-demo-package" className="scroll-mt-24 space-y-6">
-      <div className="space-y-6">
+    <section id="judge-demo-package" className="scroll-mt-24 space-y-5 overflow-x-clip sm:space-y-6">
+      <div className="min-w-0 space-y-5 sm:space-y-6">
         {!compactHeader ? (
         <div className="max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-[0.32em] text-warm">Section D: Judge-ready packet</p>
@@ -70,7 +70,7 @@ export function JudgeDemoPackage({
         ) : null}
 
         {!agentRun ? (
-          <div className="premium-panel rounded-md p-6 text-center">
+          <div className="premium-panel rounded-md p-4 text-center sm:p-6">
             <p className="text-lg font-bold text-white">Run the agent first</p>
             <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-slate-400">
               Run the agent first. Once a real run exists, this package shows source status, the automatically chosen
@@ -78,7 +78,7 @@ export function JudgeDemoPackage({
             </p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="min-w-0 space-y-5 sm:space-y-6">
             <Panel eyebrow="What judges should look at" title="Demo evaluation guide">
               <p className="text-sm leading-7 text-slate-300">
                 This package shows the real agent run state: GitHub source status, the automatically chosen
@@ -87,7 +87,7 @@ export function JudgeDemoPackage({
               </p>
             </Panel>
 
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+            <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-5">
               <StatusCard title="Hermes Skill" status="Available" detail="hermes/skills/contribscout-agent" tone="mint" />
               <StatusCard title="Agent API" status="Available" detail="/api/agent/run" tone="mint" />
               <StatusCard
@@ -116,7 +116,7 @@ export function JudgeDemoPackage({
 
             <div className="grid gap-5">
               <Panel eyebrow="Hermes command" title="Run the skill layer">
-                <pre className="max-w-full overflow-auto rounded-md border border-cream/10 bg-black/40 p-4 text-xs leading-5 text-slate-300">
+                <pre className="max-w-full overflow-x-auto whitespace-pre rounded-md border border-cream/10 bg-black/40 p-3 text-xs leading-5 text-slate-300 sm:p-4">
                   {HERMES_COMMAND}
                 </pre>
                 <div className="mt-3">
@@ -127,7 +127,7 @@ export function JudgeDemoPackage({
               </Panel>
 
               <Panel eyebrow="Demo flow timeline" title="Six-step run">
-                <ol className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                <ol className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                   {buildTimeline(agentRun, provisioningResult, proofCandidateSaved).map((step, index) => (
                     <li key={`judge-timeline-${index}-${step.title}`} className="min-w-0 rounded-md border border-cream/10 bg-black/20 p-4">
                       <span className="grid h-8 w-8 place-items-center rounded-full border border-mint/40 bg-mint/10 text-xs font-black text-mint">
@@ -141,7 +141,7 @@ export function JudgeDemoPackage({
               </Panel>
             </div>
 
-            <div className="grid gap-5 lg:grid-cols-2">
+            <div className="grid min-w-0 gap-5 lg:grid-cols-2">
               <Panel eyebrow="Submission summary" title="Judge markdown">
                 <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                   <SecondaryButton onClick={() => copyText(judgeSummary, setSummaryCopyState)}>
@@ -157,7 +157,7 @@ export function JudgeDemoPackage({
                   <summary className="cursor-pointer px-4 py-3 text-sm font-bold text-slate-200">
                     Preview judge summary
                   </summary>
-                  <pre className="max-h-96 max-w-full overflow-auto border-t border-cream/10 p-4 text-xs leading-5 text-slate-300">
+                  <pre className="max-h-96 max-w-full overflow-auto whitespace-pre border-t border-cream/10 p-3 text-xs leading-5 text-slate-300 sm:p-4">
                     {judgeSummary}
                   </pre>
                 </details>
@@ -167,7 +167,7 @@ export function JudgeDemoPackage({
                 <SecondaryButton onClick={() => copyText(demoScript, setScriptCopyState)}>
                   {scriptCopyState === "copied" ? "Copied" : scriptCopyState === "error" ? "Copy failed" : "Copy Demo Script"}
                 </SecondaryButton>
-                <div className="mt-4 rounded-md border border-cream/10 bg-black/30 p-4 text-sm leading-7 text-slate-300">
+                <div className="mt-4 rounded-md border border-cream/10 bg-black/30 p-3 text-sm leading-7 text-slate-300 sm:p-4">
                   {demoScript.split("\n\n").map((paragraph, index) => (
                     <p key={`demo-script-${index}-${paragraph.slice(0, 18)}`} className={index > 0 ? "mt-3" : ""}>
                       {paragraph}
@@ -195,9 +195,9 @@ function StatusCard({
   tone: "mint" | "warm";
 }) {
   return (
-    <article className="premium-panel rounded-md p-4">
+    <article className="premium-panel min-w-0 overflow-hidden rounded-md p-4">
       <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">{title}</p>
-      <p className={`mt-2 text-lg font-black ${tone === "mint" ? "text-mint" : "text-warm"}`}>{status}</p>
+      <p className={`mt-2 break-words text-lg font-black ${tone === "mint" ? "text-mint" : "text-warm"}`}>{status}</p>
       <p className="mt-2 break-words text-xs leading-5 text-slate-400">{detail}</p>
     </article>
   );
@@ -213,9 +213,9 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <article className="premium-panel rounded-md p-5">
+    <article className="premium-panel min-w-0 overflow-hidden rounded-md p-4 sm:p-5">
       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-mint">{eyebrow}</p>
-      <h3 className="mt-2 text-xl font-black text-white">{title}</h3>
+      <h3 className="mt-2 break-words text-xl font-black text-white">{title}</h3>
       <div className="mt-4">{children}</div>
     </article>
   );
